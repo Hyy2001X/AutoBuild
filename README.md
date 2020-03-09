@@ -7,7 +7,7 @@
 		2.安装git[如果已经安装请忽略这一步]，输入sudo apt install git
 		5.克隆此项目到主目录,依次输入以下内容:
 		cd ~
-		git clone https://github.com/Hyy2001X/AutoMAKE.git Openwrt
+		git clone https://github.com/Hyy2001X/AutoBuild.git Openwrt
 		6.进入Openwrt文件夹
 		cd ~/Openwrt
 		7.为脚本设置权限,依次输入以下内容:
