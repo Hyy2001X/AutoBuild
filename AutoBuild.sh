@@ -4,7 +4,7 @@
 # WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.09
-Main_Version=BETA-V1.0-RC1
+Main_Version=BETA-V1.0-RC2
 
 function Second_Menu() {
 while :
@@ -70,24 +70,28 @@ function Update() {
 function Compile_Firmware() {
 while :
 do
+	cd ~Openwrt
+	if [ ! -d ./TEMP ];then
+		mkdir TEMP
+	else
+		:
+	fi
 	cd ~/Openwrt/$Project
 	if [ -f ".config" ];then
 		clear
-		cp ~/Openwrt/$Project/.config ~/Openwrt/temp/$Project.temp
-		cd ~/Openwrt/temp
-		GET_BOARD=$(awk '/CONFIG_TARGET_BOARD=/{print}' $Project.temp);
-		GET_SUBTARGET=$(awk '/CONFIG_TARGET_SUBTARGET=/{print}' $Project.temp);
-		GET_PROFILE=$(awk '/CONFIG_TARGET_PROFILE=/{print}' $Project.temp);
+		cp ~/Openwrt/$Project/.config ~/Openwrt/TEMP/$Project.TEMP
+		cd ~/Openwrt/TEMP
+		GET_BOARD=$(awk '/CONFIG_TARGET_BOARD=/{print}' $Project.TEMP);
+		GET_SUBTARGET=$(awk '/CONFIG_TARGET_SUBTARGET=/{print}' $Project.TEMP);
+		GET_PROFILE=$(awk '/CONFIG_TARGET_PROFILE=/{print}' $Project.TEMP);
 
-		echo $GET_BOARD > $Project.temp2
-		echo $GET_SUBTARGET >> $Project.temp2
-		echo $GET_PROFILE >> $Project.temp2
-
-		sed -i 's/\"//g' $Project.temp2
-
-		PROCESSED_BOARD=`(awk 'NR==1' $Project.temp2)`
-		PROCESSED_SUBTARGET=`(awk 'NR==2' $Project.temp2)`
-		PROCESSED_PROFILE=`(awk 'NR==3' $Project.temp2)`
+		echo $GET_BOARD > $Project.TEMP2
+		echo $GET_SUBTARGET >> $Project.TEMP2
+		echo $GET_PROFILE >> $Project.TEMP2
+		sed -i 's/\"//g' $Project.TEMP2
+		PROCESSED_BOARD=`(awk 'NR==1' $Project.TEMP2)`
+		PROCESSED_SUBTARGET=`(awk 'NR==2' $Project.TEMP2)`
+		PROCESSED_PROFILE=`(awk 'NR==3' $Project.TEMP2)`
 		NEW_BOARD=${PROCESSED_BOARD:20}
 		NEW_SUBTARGET=${PROCESSED_SUBTARGET:24}	
 		if [ ! $NEW_BOARD == x86 ];then
@@ -111,6 +115,10 @@ do
 	echo "2.make V=s"
 	echo "3.make -j4"
 	echo "4.make -j4 V=s"
+	echo "5.make -j8"
+	echo "6.make -j8 V=s"	
+	Say="7.make -j16" && Color_R
+	Say="8.make -j16 V=s" && Color_R
 	echo "q.返回"
 	echo " "
 	read -p '请从上方选择一个编译方式:' Choose
@@ -119,18 +127,46 @@ do
 		break
 	;;
 	1)
-		Thread='make'
+		j=1
+		LOG=0
 	;;
 	2)
-		Thread='make V=s'
+		j=1
+		LOG=1
 	;;
 	3)
-		Thread='make -j4'
+		j=4
+		LOG=0
 	;;
 	4)
-		Thread='make -j4 V=s'
+		j=4
+		LOG=1
+	;;
+	5)
+		j=8
+		LOG=0
+	;;
+	6)
+		j=8
+		LOG=1
+	;;
+	7)
+		j=16
+		LOG=0
+	;;
+	8)
+		j=16
+		LOG=1
 	;;
 	esac
+	if [ LOG == 0 ];then
+		Thread="make -j$j"
+		Compile_Say="当前选择:使用$j线程编译,不在屏幕上输出日志[快]"
+	else
+		Thread="make -j$j V=s"
+		Compile_Say="当前选择:使用$j线程编译,并在屏幕上输出日志[慢]"
+	fi
+	echo -e "\e[33m$Compile_Say\e[0m"
 	Firmware_Name=openwrt-$NEW_BOARD-$NEW_SUBTARGET-$NEW_PROFILE-squashfs-sysupgrade.bin
 	read -p '请输入附加信息:' Extra
 	NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
@@ -140,7 +176,10 @@ do
 		read -p '附加信息重复!请重新添加:' Extra
 		NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
 	done
+	cd ~/Openwrt
+	rm -rf ./TEMP
 	clear
+	echo -e "\e[33m$Compile_Say\e[0m"
 	Say="开始编译$Project..." && Color_Y
 	Compile_START=`date +'%Y-%m-%d %H:%M:%S'`
 	cd ~/Openwrt/$Project
@@ -169,7 +208,10 @@ do
 			End_Seconds=$(date --date="$Compile_END" +%s);
 			echo -ne "\e[34m$Compile_START --> $Compile_END "
 			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
-			Say="设备不受AutoBuild支持,请自行前往'主目录/Openwrt/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果." && Color_R
+			Say="编译失败!" && Color_R
+			Say="可能原因如下:"
+			Say="	1.编译可能成功了,但是设备可能不受AutoBuild支持,请自行前往'主目录/Openwrt/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果." && Color_R
+			Say="	2.编译出错,请使用日志输出编译以进行分析" && Color_R
 		fi
 	else
 		echo "本次编译为X86架构，请自行前往'主目录/Openwrt/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果."
