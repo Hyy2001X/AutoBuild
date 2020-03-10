@@ -15,7 +15,6 @@
 		chmod +x AutoBuild.sh
 		8.启动脚本
 		~/Openwrt/AutoBuild.sh
-	注：如需更新脚本，输入git pull即可
 
 
 注：	
