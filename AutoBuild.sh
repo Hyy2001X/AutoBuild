@@ -4,7 +4,7 @@
 # WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.10
-Main_Version=BETA-V1.0-RC3
+Main_Version=BETA-V1.0-RC4
 
 function Second_Menu() {
 while :
@@ -158,7 +158,7 @@ do
 		LOG=1
 	;;
 	esac
-	if [ LOG == 0 ];then
+	if [ $LOG == 0 ];then
 		Thread="make -j$j"
 		Compile_Say="当前选择:使用$j线程编译,不在屏幕上输出日志[快]"
 	else
