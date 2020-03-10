@@ -3,8 +3,8 @@
 # Device Support:ALL Device [TEST]
 # WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.09
-Main_Version=BETA-V1.0-RC2
+Update=2020.03.10
+Main_Version=BETA-V1.0-RC3
 
 function Second_Menu() {
 while :
@@ -84,7 +84,6 @@ do
 		GET_BOARD=$(awk '/CONFIG_TARGET_BOARD=/{print}' $Project.TEMP);
 		GET_SUBTARGET=$(awk '/CONFIG_TARGET_SUBTARGET=/{print}' $Project.TEMP);
 		GET_PROFILE=$(awk '/CONFIG_TARGET_PROFILE=/{print}' $Project.TEMP);
-
 		echo $GET_BOARD > $Project.TEMP2
 		echo $GET_SUBTARGET >> $Project.TEMP2
 		echo $GET_PROFILE >> $Project.TEMP2
@@ -233,6 +232,7 @@ do
 	echo "3.加载第三方主题"
 	Say="4.磁盘清理" && Color_R
 	echo "5.删除配置文件"
+	echo "6.添加第三方软件包"
 	echo "q.返回"
 	echo " " && read -p '请从上方选择一个操作:' Choose
 	case $Choose in
@@ -286,11 +286,11 @@ do
 		if [ $Project == 'Lede' ];then
 			cd ~/Openwrt/Lede/package/lean
 			rm -rf luci-theme-argon
-			Say="已删除'Lede/package/lean/luci-theme-argon'" & Color_Y
+			Say="已删除'Lede/package/lean/luci-theme-argon'" && Color_Y
 			git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
 			cd ~/Openwrt/Lede/package/themes
 			rm -rf luci-theme-rosy
-			Say="已删除'$Project/package/themes/luci-theme-rosy'" & Color_Y
+			Say="已删除'$Project/package/themes/luci-theme-rosy'" && Color_Y
 			git clone https://github.com/rosywrt/luci-theme-rosy luci-theme-rosy
 			cd ~/Openwrt/Lede
 			grep "darkmatter" feeds.conf.default > /dev/null
@@ -378,8 +378,109 @@ do
 		cd ~/Openwrt/$Project
 		rm .config
 		rm .config.old
+	;;
+	6)
+	while :
+	do
+		cd ~/Openwrt/$Project/package
+		if [ ! -d ./custom ];then
+			mkdir custom
+		else
+			:
+		fi
+		clear
+		Say="手动添加软件包" && Color_B
+		echo " "
+		echo "1.SmartDNS"
+		echo "2.AdGuardHome"
+		echo "x.自定义链接"
+		echo "q.返回"
+		cd ~/Openwrt/$Project/package/custom
+		echo " " && read -p '请从上方选择一个操作:' Choose
+		case $Choose in
+		q)
+			break	
+		;;
+		1)
+			clear
+			if [ ! -d ./SmartDNS ];then
+				:
+			else
+				rm -rf SmartDNS
+				Say="已删除软件包 luci-app-smartdns" && Color_Y
+				Say="已删除软件包 smartdns" && Color_Y
+			fi
+			git clone https://github.com/Hyy2001X/SmartDNS.git
+			echo " "
+			if [ -f ./SmartDNS/luci-app-smartdns/Makefile ];then
+				Say="已成功添加软件包 luci-app-smartdns" && Color_Y
+			else
+				Say="未成功添加软件包 luci-app-smartdns,请重试!" && Color_R
+			fi
+			if [ -f ./SmartDNS/smartdns/Makefile ];then
+				Say="已成功添加软件包 smartdns" && Color_Y
+			else
+				Say="未成功添加软件包 smartdns,请重试!" && Color_R
+			fi
+			Enter
+		;;
+		2)
+			clear
+			if [ ! -d ./AdGuardHome ];then
+				:
+			else
+				rm -rf AdGuardHome
+				Say="已删除软件包 luci-app-adguardhome" && Color_Y
+				Say="已删除软件包 adguardhome" && Color_Y
+			fi
+			git clone https://github.com/Hyy2001X/AdGuardHome.git
+			echo " "
+			if [ -f ./AdGuardHome/luci-app-adguardhome/Makefile ];then
+				Say="已成功添加软件包 luci-app-adguardhome" && Color_Y
+			else
+				Say="未成功添加软件包 luci-app-adguardhome,请重试!" && Color_R
+			fi
+			if [ -f ./AdGuardHome/adguardhome/Makefile ];then
+				Say="已成功添加软件包 adguardhome" && Color_Y
+			else
+				Say="未成功添加软件包 adguardhome,请重试!" && Color_R
+			fi
+			Enter
+		;;
+		x)
+			echo "开发中,暂不支持..."
+			sleep 3
+		;;
+		esac
+	done
+	;;	
 	esac
 done
+}
+
+function Start_Dir_Check() {
+	cd ~/Openwrt
+	if [ ! -d ./TEMP ];then
+		mkdir TEMP
+	else
+		:
+	fi
+	if [ ! -d ./Packages ];then
+		mkdir Packages
+	else
+		:
+	fi
+	if [ ! -d ./Backups ];then
+		mkdir Backups
+	else
+		:
+	fi
+	
+#	if [ ! -d ./Config ];then
+#		mkdir Config
+#	else
+#		:
+#	fi
 }
 
 function Backup_Recovery() {
@@ -520,20 +621,11 @@ echo -e "\e[31m$Say\e[0m"
 function Color_B() {
 echo -e "\e[34m$Say\e[0m"
 }
-
+################################################################MainBuild
+################################################################MainBuild
 while :
 do
-cd ~/Openwrt
-if [ ! -d ./Packages ];then
-	mkdir Packages
-else
-	:
-fi
-if [ ! -d ./Backups ];then
-	mkdir Backups
-else
-	:
-fi
+Start_Dir_Check
 clear
 Say="AutoBuild AIO $Main_Version by Hyy2001" && Color_B
 echo ""
