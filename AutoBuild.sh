@@ -344,17 +344,17 @@ do
 			if [ -d ./package/lean/luci-theme-argon ];then
 				Say="已更新主题包 luci-theme-argon" && Color_Y
 			else
-				Say="主题包 luci-theme-argon 添加失败!" && Color_N
+				Say="主题包 luci-theme-argon 添加失败!" && Color_R
 			fi
 			if [ -d ./package/themes/luci-theme-rosy ];then
 				Say="已添加主题包 luci-theme-rosy" && Color_Y
 			else
-				Say="主题包 luci-theme-rosy 添加失败!" && Color_N
+				Say="主题包 luci-theme-rosy 添加失败!" && Color_R
 			fi
 			if [ -d ./feeds/darkmatter ];then
 				Say="已添加主题包 luci-theme-darkmatter" && Color_Y
 			else
-				Say="主题包 luci-theme-darkmatter 添加失败!" && Color_N
+				Say="主题包 luci-theme-darkmatter 添加失败!" && Color_R
 			fi	
 		else
 			cd ~/Openwrt/$Project/package/themes
