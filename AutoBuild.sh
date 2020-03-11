@@ -3,19 +3,57 @@
 # Device Support:ALL Device [TEST]
 # WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.10
-Main_Version=BETA-V1.0-RC4
+Update=2020.03.11
+Main_Version=BETA-V1.0-RC6
 
 function Second_Menu() {
 while :
 do
 	clear
 	cd ~/Openwrt
+	Dir_Check
 	if [ -f "./$Project/feeds.conf.default" ];then
-		Say="源码文件:正常,当前项目:$Project" && Color_Y
+		Say="源码文件:已检测到,当前项目:$Project" && Color_Y
+		cd ~/Openwrt/
+		if [ $Project == Lede ];then
+			if [ -f ./$Project/package/lean/default-settings/files/zzz-default-settings ];then
+				cp ./$Project/package/lean/default-settings/files/zzz-default-settings ./TEMP/default.TEMP
+				cd ~/Openwrt/TEMP
+				Version=$(awk '/DISTRIB_REVISION=/{print}' default.TEMP);
+				echo "$Version" > default.TEMP2
+				sed -i 's/\"//g' default.TEMP2
+				Version=`(awk 'NR==1' default.TEMP2)`
+				cd .. && rm -rf TEMP
+				Version=${Version:22}
+				Version=${Version%>>*}
+				Say="版本号:$Version" && Color_Y
+			else
+				echo "版本号:未知"
+			fi
+		elif [ $Project == Openwrt ];then
+			rm -rf TEMP
+		elif [ $Project == Lienol ];then
+			if [ -f ./$Project/package/default-settings/files/zzz-default-settings ];then
+				cp ./$Project/package/default-settings/files/zzz-default-settings ./TEMP/default.TEMP
+				cd ~/Openwrt/TEMP
+				Version=$(awk '/DISTRIB_REVISION=/{print}' default.TEMP);
+				echo "$Version" > default.TEMP2
+				sed -i 's/\"//g' default.TEMP2
+				Version=`(awk 'NR==1' default.TEMP2)`
+				cd .. && rm -rf TEMP
+				Version=${Version:22}
+				Version=${Version%>>*}
+				Say="版本号:$Version" && Color_Y
+			else
+				echo "版本号:未知"
+			fi
+		else
+			:
+		fi
 		Sources_ERROR=0
 	else
 		Say="源码文件:错误,请前往[高级选项]下载!" && Color_R
+		rm -rf TEMP
 		Sources_ERROR=1
 	fi
 	echo " "
@@ -100,13 +138,13 @@ do
 			NEW_PROFILE=${PROCESSED_PROFILE:22}
 			X86SET=1
 		fi
-		echo 指令集:$NEW_BOARD
-		echo CPU架构:$NEW_SUBTARGET
+		echo CPU架构:$NEW_BOARD
+		echo 处理器型号:$NEW_SUBTARGET
 		echo 设备名称:$NEW_PROFILE
 	else
 		echo " "
 		Say="未检测到配置文件,无法进行编译!" && Color_R
-		Enter
+		sleep 3
 		break
 	fi
 	echo " "
@@ -175,7 +213,6 @@ do
 		read -p '附加信息重复!请重新添加:' Extra
 		NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
 	done
-	cd ~/Openwrt
 	rm -rf ./TEMP
 	clear
 	echo -e "\e[33m$Compile_Say\e[0m"
@@ -208,9 +245,10 @@ do
 			echo -ne "\e[34m$Compile_START --> $Compile_END "
 			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
 			Say="编译失败!" && Color_R
-			Say="可能原因如下:"
-			Say="	1.编译可能成功了,但是设备可能不受AutoBuild支持,请自行前往'主目录/Openwrt/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果." && Color_R
+			Say="可能原因如下:" && Color_R
+			Say="	1.编译可能成功了,但是设备可能不受AutoBuild支持,请自行前往'主目录/Openwrt/$Project/bin/'查看." && Color_R
 			Say="	2.编译出错,请使用日志输出编译以进行分析" && Color_R
+			Say="	3.网络原因导致依赖包下载失败,使用梯子进行编译"
 		fi
 	else
 		echo "本次编译为X86架构，请自行前往'主目录/Openwrt/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果."
@@ -348,17 +386,20 @@ do
 		1)
 			cd ~/Openwrt/$Project
 			make clean
-			Enter
+			sleep 3
+			break
 		;;
 		2)
 			cd ~/Openwrt/$Project
 			make dirclean
-			Enter
+			sleep 3
+			break
 		;;
 		3)
 			cd ~/Openwrt/$Project
 			make distclean
-			Enter
+			sleep 3
+			break
 		;;
 		4)
 			cd ~/Openwrt
@@ -370,7 +411,8 @@ do
 			else 
 				Say="删除失败,请重试!" && Color_R
 			fi
-			Enter
+			sleep 3
+			break
 		esac
 	done
 	;;
@@ -378,6 +420,8 @@ do
 		cd ~/Openwrt/$Project
 		rm .config
 		rm .config.old
+		Say="删除成功!" && Color_Y
+		sleep 3
 	;;
 	6)
 	while :
@@ -458,7 +502,7 @@ do
 done
 }
 
-function Start_Dir_Check() {
+function Dir_Check() {
 	cd ~/Openwrt
 	if [ ! -d ./TEMP ];then
 		mkdir TEMP
@@ -625,7 +669,7 @@ echo -e "\e[34m$Say\e[0m"
 ################################################################MainBuild
 while :
 do
-Start_Dir_Check
+Dir_Check
 clear
 Say="AutoBuild AIO $Main_Version by Hyy2001" && Color_B
 echo ""
@@ -638,6 +682,7 @@ echo " "
 read -p '请从上方选择一个操作:' Choose
 case $Choose in
 q)
+	rm -rf ~/Openwrt/TEMP
 	clear
 	break
 ;;
@@ -727,12 +772,11 @@ do
 	echo "1.更新系统软件包"
 	echo "2.安装编译所需的依赖包"
 	echo "3.SSH访问路由器"
-	echo "4.重置SSH密钥"
-	echo "5.同步系统时间"
-	echo "6.清理DNS缓存"
-	echo "7.为AutoBuild添加快捷启动"
-	echo "8.查看磁盘空间大小"
-	echo "9.查看项目空间占用情况"
+	echo "4.同步系统时间"
+	echo "5.清理DNS缓存"
+	echo "6.为AutoBuild添加快捷启动"
+	echo "7.查看磁盘空间大小"
+	echo "8.查看项目空间占用情况"
 	echo "q.返回"
 	echo ""
 	read -p '请从上方选择一个操作:' Choose
@@ -750,42 +794,39 @@ do
 	2)
 		clear
 		sudo apt-get update
-		sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf AutoBuild libtool autopoint device-tree-compiler ntpdate
+		sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler ntpdate
 		echo " "
 		Enter
 	;;
 	3)
+		ssh-keygen -R 192.168.1.1
 		clear
 		echo "路由器默认地址为192.168.1.1"
 		ssh root@192.168.1.1
 	;;
 	4)
-		ssh-keygen -R 192.168.1.1
-		Enter
-	;;
-	5)
 		sudo ntpdate cn.pool.ntp.org
 		sudo hwclock --systohc
 	;;
-	6)
+	5)
 		sudo systemctl restart systemd-resolved.service
 		sudo systemd-resolve --flush-caches
 	;;
-	7)
+	6)
 		echo " "
 		read -p '请创建一个快捷启动的名称:' FastOpen		
 		echo "alias $FastOpen='~/Openwrt/AutoBuild.sh'" >> ~/.bashrc
 		source ~/.bashrc
-		Say="创建完成!下次在终端输入 $FastOpen 即可启动AutoBuild[需重启终端]." && Color_Y
+		Say="创建完成!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
 		Enter
 	;;
-	8)
+	7)
 		clear
 		df -h
 		echo " "
 		Enter
 	;;
-	9)
+	8)
 		clear
 		Say="Project_Storage Space Statistics Tool" && Color_B
 		echo " "
