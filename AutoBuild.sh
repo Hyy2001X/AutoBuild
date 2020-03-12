@@ -3,8 +3,8 @@
 # Device Support:ALL Device [TEST]
 # WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.11
-Main_Version=BETA-V1.0-RC6
+Update=2020.03.12
+Main_Version=BETA-V1.0-RC7
 
 function Second_Menu() {
 while :
@@ -336,7 +336,7 @@ do
 				:
 			else
 				echo "src-git darkmatter https://github.com/Lienol/luci-theme-darkmatter;luci-18.06" >> feeds.conf.default
-				echo "已添加luci-theme-darkmatter到feeds.conf.default"
+				Say="已添加luci-theme-darkmatter到feeds.conf.default" && Color_Y
 			fi
 			scripts/feeds update darkmatter
 			scripts/feeds install luci-theme-darkmatter
@@ -437,7 +437,7 @@ do
 		echo " "
 		echo "1.SmartDNS"
 		echo "2.AdGuardHome"
-		echo "x.自定义链接"
+		echo "3.Lienol软件源"
 		echo "q.返回"
 		cd ~/Openwrt/$Project/package/custom
 		echo " " && read -p '请从上方选择一个操作:' Choose
@@ -491,8 +491,22 @@ do
 			fi
 			Enter
 		;;
-		x)
-			echo "开发中,暂不支持..."
+		3)
+			cd ~/Openwrt/$Project
+			grep "lienol" feeds.conf.default > /dev/null
+			if [ $? -eq 0 ]; then
+				echo " "
+				Say="已检测到Lienol软件源,无需添加!" && Color_Y
+			else
+				echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
+				echo " "
+				grep "lienol" feeds.conf.default > /dev/null
+				if [ $? -eq 0 ]; then
+					Say="已添加Lienol软件源到feeds.conf.default" && Color_Y
+				else
+					Say="添加失败!" && Color_R
+				fi
+			fi
 			sleep 3
 		;;
 		esac
