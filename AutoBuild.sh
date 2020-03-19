@@ -4,7 +4,7 @@
 # AutoBuild WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.19
-Main_Version=BETA-V1.1-RC1
+Main_Version=BETA-V1.1-RC2
 
 function Second_Menu() {
 while :
@@ -63,10 +63,10 @@ do
 	echo "4.执行编译"
 	echo "5.高级选项"
 	echo "q.返回"
-	echo " "
 	if [ $Sources_ERROR == 0 ];then
-		read -p '请从上方选择一个操作:' Choose
+		GET_Choose
 	elif [ $Sources_ERROR == 1 ];then
+		echo " "
 		read -p '请从上方选择一个操作[部分功能不可用]:' Choose
 	else
 		:
@@ -157,8 +157,7 @@ do
 	Say="7.make -j16" && Color_R
 	Say="8.make -j16 V=s" && Color_R
 	echo "q.返回"
-	echo " "
-	read -p '请从上方选择一个编译方式:' Choose
+	GET_Choose
 	case $Choose in
 	q)
 		break
@@ -272,7 +271,7 @@ do
 	echo "5.删除配置文件"
 	echo "6.添加第三方软件包"
 	echo "q.返回"
-	echo " " && read -p '请从上方选择一个操作:' Choose
+	GET_Choose
 	case $Choose in
 	q)
 		break
@@ -433,8 +432,7 @@ do
 		echo "3.make distclean"
 		echo "4.删除$Project项目"
 		echo "q.返回"
-		echo " "
-		read -p '请从上方选择一个操作:' Choose
+		GET_Choose
 		case $Choose in
 		q)
 			break
@@ -496,7 +494,7 @@ do
 		echo "3.Lienol软件源"
 		echo "q.返回"
 		cd ~/Openwrt/$Project/package/custom
-		echo " " && read -p '请从上方选择一个操作:' Choose
+		GET_Choose
 		case $Choose in
 		q)
 			break	
@@ -608,7 +606,7 @@ echo "2.恢复[.config]"
 echo "3.备份[dl]文件夹"
 echo "4.恢复[dl]文件夹"
 echo "q.返回"
-echo " " && read -p '请从上方选择一个操作:' Choose
+GET_Choose
 case $Choose in
 q)
 	break
@@ -621,7 +619,7 @@ do
 	echo "1.标准名称/文件格式:[$Project-当前日期_时间]"
 	echo "2.自定义文件名称"
 	echo "q.返回"
-	echo " " && read -p '请从上方选择一个操作:' Choose
+	GET_Choose
 	echo " "
 	case $Choose in
 	q)
@@ -746,7 +744,10 @@ fi
 	Enter
 }
 
-
+function GET_Choose() {
+echo " "
+read -p '请从上方选择一个操作:' Choose
+}
 
 ################################################################MainBuild
 ################################################################MainBuild
@@ -759,10 +760,8 @@ echo ""
 echo "1.Choose a Project"
 echo "2.检查网络连通性"
 echo "3.高级选项"
-echo "4.杂项"
 echo "q.退出"
-echo " "
-read -p '请从上方选择一个操作:' Choose
+GET_Choose
 case $Choose in
 q)
 	rm -rf ~/Openwrt/TEMP
@@ -792,8 +791,7 @@ do
 		echo -e "3.Lienol	\e[31m[未检测到]\e[0m"
 	fi
 	echo "q.返回"
-	echo
-	read -p '请从上方选择一个项目:' Choose
+	GET_Choose
 	if [ $Choose == 1 ]; then
 		Project=Lede
 	elif [ $Choose == 2 ]; then
@@ -860,8 +858,7 @@ do
 	echo "6.为AutoBuild添加快捷启动"
 	echo "7.查看磁盘空间大小"
 	echo "q.返回"
-	echo ""
-	read -p '请从上方选择一个操作:' Choose
+	GET_Choose
 	case $Choose in
 	q)
 		break
@@ -907,31 +904,6 @@ do
 		df -h
 		echo " "
 		Enter
-	;;
-	esac
-done
-;;
-4)
-while :
-do
-	clear
-	Say="杂项" && Color_B
-	echo " "
-	echo "1.打开固件存放目录"
-	echo "2.打开配置备份目录"
-	echo "q.返回"
-	echo " "
-	read -p '请从上方选择一个操作:' Choose
-	clear
-	case $Choose in
-	q)
-		break
-	;;
-	1)
-		nautilus ~/Openwrt/Packages
-	;;
-	2)
-		nautilus ~/Openwrt/Backups
 	;;
 	esac
 done
