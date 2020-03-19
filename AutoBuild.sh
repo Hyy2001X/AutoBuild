@@ -1,10 +1,10 @@
 #!/bin/bash
-# AutoBuild AIO Script by Hyy2001
+# AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
-# WorkFolder:[home/username/Openwrt]、[~/Openwrt]
+# AutoBuild WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.12
-Main_Version=BETA-V1.0-RC7
+Update=2020.03.19
+Main_Version=BETA-V1.1-RC1
 
 function Second_Menu() {
 while :
@@ -28,7 +28,7 @@ do
 				Version=${Version%>>*}
 				Say="版本号:$Version" && Color_Y
 			else
-				echo "版本号:未知"
+				Say="版本号:未知" && Color_R
 			fi
 		elif [ $Project == Openwrt ];then
 			rm -rf TEMP
@@ -45,7 +45,7 @@ do
 				Version=${Version%>>*}
 				Say="版本号:$Version" && Color_Y
 			else
-				echo "版本号:未知"
+				Say="版本号:未知" && Color_R
 			fi
 		else
 			:
@@ -287,20 +287,76 @@ do
 			clear
 			if  [ $Project == 'Lede' ];then
 				git clone https://github.com/coolsnowwolf/lede $Project
+				Sources_Download_Check
 			elif [ $Project == 'Openwrt' ];then
-				git clone https://github.com/openwrt/openwrt $Project
-			elif [ $Project == 'Lienol' ];then
-				git clone -b dev-19.07 https://github.com/Lienol/openwrt $Project
+			while :
+			do
+				clear
+				Say="$Project分支选择" && Color_B && echo " "
+				Branch_1=master
+				Branch_2=lede-17.01
+				Branch_3=openwrt-18.06
+				Branch_4=openwrt-19.07
+				echo "1.$Branch_1[Default]" && echo "2.$Branch_2"
+				echo "3.$Branch_3" && echo "4.$Branch_4"
+				echo "q.返回"
+				echo ""
+				read -p '请从上方选择一个分支:' Branch
+				clear
+				case $Branch in
+				q)
+					break
+				;;
+				1)
+					git clone https://github.com/openwrt/openwrt $Project
+				;;
+				2)
+					git clone -b $Branch_2 https://github.com/openwrt/openwrt $Project
+				;;
+				3)
+					git clone -b $Branch_3 https://github.com/openwrt/openwrt $Project
+				;;
+				4)
+					git clone -b $Branch_4 https://github.com/openwrt/openwrt $Project
+				;;
+				esac
+					Sources_Download_Check
+				break
+			done
+			elif [ $Project == 'Lienol' ];then			
+			while :
+			do
+				clear
+				Say="$Project分支选择" && Color_B && echo " "
+				Branch_1=dev-19.07
+				Branch_2=dev-lean-lede
+				Branch_3=dev-master
+				echo "1.$Branch_1[Default]" && echo "2.$Branch_2"
+				echo "3.$Branch_3"
+				echo "q.返回"
+				echo ""
+				read -p '请从上方选择一个分支:' Branch
+				clear
+				case $Branch in
+				q)
+					break
+				;;
+				1)
+					git clone -b $Branch_1 https://github.com/Lienol/openwrt $Project
+				;;
+				2)
+					git clone -b $Branch_2 https://github.com/Lienol/openwrt $Project
+				;;
+				3)
+					git clone -b $Branch_3 https://github.com/Lienol/openwrt $Project
+				;;
+				esac
+					Sources_Download_Check
+				break
+			done
 			else 
 					:
 			fi
-			echo " "
-			if [ -f "./$Project/LICENSE" ];then
-				Say="$Project源代码下载完成!" && Color_Y
-			else
-				Say="下载失败,请检查网络后重试!" && Color_R
-			fi
-			Enter
 		fi
 	;;
 	2)
@@ -679,6 +735,19 @@ echo -e "\e[31m$Say\e[0m"
 function Color_B() {
 echo -e "\e[34m$Say\e[0m"
 }
+
+function Sources_Download_Check() {
+echo " "
+if [ -f "./$Project/feeds.conf.default" ];then
+	Say="$Project源代码下载完成!" && Color_Y	
+else
+	Say="下载失败,请检查网络后重试!" && Color_R
+fi
+	Enter
+}
+
+
+
 ################################################################MainBuild
 ################################################################MainBuild
 while :
@@ -790,7 +859,6 @@ do
 	echo "5.清理DNS缓存"
 	echo "6.为AutoBuild添加快捷启动"
 	echo "7.查看磁盘空间大小"
-	echo "8.查看项目空间占用情况"
 	echo "q.返回"
 	echo ""
 	read -p '请从上方选择一个操作:' Choose
@@ -808,7 +876,7 @@ do
 	2)
 		clear
 		sudo apt-get update
-		sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler ntpdate
+		sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler ntpdate httping
 		echo " "
 		Enter
 	;;
@@ -837,126 +905,6 @@ do
 	7)
 		clear
 		df -h
-		echo " "
-		Enter
-	;;
-	8)
-		clear
-		Say="Project_Storage Space Statistics Tool" && Color_B
-		echo " "
-		Say="Loading Configuration..." && Color_Y
-		cd ~/Openwrt
-		if [ -d ./Lede ];then
-			Lede_Size=$((`du -s Lede |awk '{print $1}'`))
-			Lede_Size_ERROR=0
-		else
-			Lede_Size_ERROR=1
-			mkdir Lede
-		fi
-
-		if [ -d ./Openwrt ];then
-			Openwrt_Size=$((`du -s Openwrt |awk '{print $1}'`))
-			Openwrt_Size_ERROR=0
-		else
-			Openwrt_Size_ERROR=1
-			mkdir Openwrt
-		fi
-
-		if [ -d ./Lienol ];then
-			Lienol_Size=$((`du -s Lienol |awk '{print $1}'`))	
-			Lienol_Size_ERROR=0
-		else
-			Lienol_Size_ERROR=1
-			mkdir Lienol
-		fi
-
-		if [ -d ./Backups ];then
-			Backups_Size=$((`du -s Backups |awk '{print $1}'`))
-			Backups_Size_ERROR=0
-		else
-			Backups_Size_ERROR=1
-			mkdir Backups
-		fi
-
-		if [ -d ./Packages ];then
-			Packages_Size=$((`du -s Packages |awk '{print $1}'`))
-			Packages_Size_ERROR=0
-		else
-			mkdir Packages
-			Packages_Size_ERROR=1
-		fi
-
-		if [ -d ./Backups/dl ];then
-			dl_Size=$((`du -s ./Backups/dl |awk '{print $1}'`))
-			dl_Size_ERROR=0
-		else
-			mkdir Backups/dl
-			dl_Size_ERROR=1
-		fi
-
-		clear
-		Say="Project_Storage Space Statistics Tool" && Color_B
-		echo " "
-		echo "项目名称	位置				存储占用"
-		echo " "
-		if [ $Lede_Size_ERROR == 0 ];then
-			echo -ne "\e[33m"
-			awk 'BEGIN{printf "Lede		主目录/Openwrt/Lede		%.2fGB\n",'$((Lede_Size))'/1048576}'
-			echo -ne "\e[0m"
-		else
-			echo -e "\e[31mLede		未检测到			0KB\e[0m"
-			rm -rf Lede
-			
-		fi
-
-		if [ $Openwrt_Size_ERROR == 0 ];then
-			echo -ne "\e[33m"
-			awk 'BEGIN{printf "Openwrt		主目录/Openwrt/Openwrt		%.2fGB\n",'$((Openwrt_Size))'/1048576}'
-			echo -ne "\e[0m"
-		else
-			echo -e "\e[31mOpenwrt		未检测到			0KB\e[0m"
-			rm -rf Openwrt
-		fi
-
-		if [ $Lienol_Size_ERROR == 0 ];then
-			echo -ne "\e[33m"
-			awk 'BEGIN{printf "Lienol		主目录/Openwrt/Lienol		%.2fGB\n",'$((Lienol_Size))'/1048576}'
-			echo -ne "\e[0m"
-		else
-			echo -e "\e[31mLienol		未检测到			0KB\e[0m"
-			rm -rf Lienol
-		fi
-
-		echo " "
-		echo "其他		位置				存储占用"
-		echo " "
-
-		if [ $Backups_Size_ERROR == 0 ];then
-			echo -ne "\e[33m"
-			awk 'BEGIN{printf "Backups		主目录/Openwrt/Backups		%.2fMB\n",'$((Backups_Size))'/1024}'
-			echo -ne "\e[0m"
-		else
-			echo -e "\e[31mBackups		未检测到			0KB\e[0m"
-			rm -rf Backups
-		fi
-
-		if [ $dl_Size_ERROR == 0 ];then
-			echo -ne "\e[33m"
-			awk 'BEGIN{printf "Backups/dl	主目录/Openwrt/Backups/dl	%.2fMB\n",'$((dl_Size))'/1024}'
-			echo -ne "\e[0m"
-		else
-			echo -e "\e[31mBackups/dl	未检测到			0KB\e[0m"
-			rm -rf Backups/dl
-		fi
-
-		if [ $Packages_Size_ERROR == 0 ];then
-			echo -ne "\e[33m"
-			awk 'BEGIN{printf "Packages	主目录/Openwrt/Packages		%.2fMB\n",'$((Packages_Size))'/1024}'
-			echo -ne "\e[0m"
-		else
-			echo -e "\e[31mPackages	未检测到			0KB\e[0m"
-			rm -rf Packages
-		fi
 		echo " "
 		Enter
 	;;
