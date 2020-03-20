@@ -3,8 +3,8 @@
 # Device Support:ALL Device [TEST]
 # AutoBuild WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.19
-Main_Version=BETA-V1.1-RC2
+Update=2020.03.20
+Main_Version=BETA-V1.1-RC3
 
 function Second_Menu() {
 while :
