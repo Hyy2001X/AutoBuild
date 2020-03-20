@@ -14,7 +14,8 @@ do
 	Dir_Check
 	if [ -f "./$Project/feeds.conf.default" ];then
 		Say="源码文件:已检测到,当前项目:$Project" && Color_Y
-		cd ~/Openwrt/
+		Say="项目位置:'主目录/Openwrt/$Project'" && Color_Y
+		GET_Branch=`(awk 'NR==1' ./Config/$Project.branch)`
 		if [ $Project == Lede ];then
 			if [ -f ./$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cp ./$Project/package/lean/default-settings/files/zzz-default-settings ./TEMP/default.TEMP
@@ -51,8 +52,9 @@ do
 			:
 		fi
 		Sources_ERROR=0
+		Say="当前分支:$GET_Branch" && Color_Y
 	else
-		Say="源码文件:错误,请前往[高级选项]下载!" && Color_R
+		Say="源码文件:为检测到,请前往[高级选项]下载!" && Color_R
 		rm -rf TEMP
 		Sources_ERROR=1
 	fi
@@ -286,6 +288,7 @@ do
 			clear
 			if  [ $Project == 'Lede' ];then
 				git clone https://github.com/coolsnowwolf/lede $Project
+				Branch=master
 				Sources_Download_Check
 			elif [ $Project == 'Openwrt' ];then
 			while :
@@ -308,15 +311,19 @@ do
 				;;
 				1)
 					git clone https://github.com/openwrt/openwrt $Project
+					Branch=master
 				;;
 				2)
 					git clone -b $Branch_2 https://github.com/openwrt/openwrt $Project
+					Branch=$Branch_2
 				;;
 				3)
 					git clone -b $Branch_3 https://github.com/openwrt/openwrt $Project
+					Branch=$Branch_3
 				;;
 				4)
 					git clone -b $Branch_4 https://github.com/openwrt/openwrt $Project
+					Branch=$Branch_4
 				;;
 				esac
 					Sources_Download_Check
@@ -342,12 +349,15 @@ do
 				;;
 				1)
 					git clone -b $Branch_1 https://github.com/Lienol/openwrt $Project
+					Branch=$Branch_1
 				;;
 				2)
 					git clone -b $Branch_2 https://github.com/Lienol/openwrt $Project
+					Branch=$Branch_2
 				;;
 				3)
 					git clone -b $Branch_3 https://github.com/Lienol/openwrt $Project
+					Branch=$Branch_3
 				;;
 				esac
 					Sources_Download_Check
@@ -491,7 +501,7 @@ do
 		echo " "
 		echo "1.SmartDNS"
 		echo "2.AdGuardHome"
-		echo "3.Lienol软件源"
+		echo "3.Lienol-LUCI Sources"
 		echo "q.返回"
 		cd ~/Openwrt/$Project/package/custom
 		GET_Choose
@@ -587,12 +597,11 @@ function Dir_Check() {
 	else
 		:
 	fi
-	
-#	if [ ! -d ./Config ];then
-#		mkdir Config
-#	else
-#		:
-#	fi
+	if [ ! -d ./Config ];then
+		mkdir Config
+	else
+		:
+	fi
 }
 
 function Backup_Recovery() {
@@ -737,7 +746,9 @@ echo -e "\e[34m$Say\e[0m"
 function Sources_Download_Check() {
 echo " "
 if [ -f "./$Project/feeds.conf.default" ];then
-	Say="$Project源代码下载完成!" && Color_Y	
+	Say="$Project源代码下载完成!" && Color_Y
+	cd ~/Openwrt/Config
+	echo "$Branch" > $Project.branch
 else
 	Say="下载失败,请检查网络后重试!" && Color_R
 fi
@@ -776,19 +787,19 @@ do
 	Say="AutoBuild AIO $Main_Version by Hyy2001" && Color_B
 	echo " "
 	if [ -f ./Lede/feeds.conf.default ];then
-		echo -e "1.Lede		\e[33m[已检测到]\e[0m"
+		echo -e "1.Lede			\e[33m[已检测到]\e[0m"
 	else
-		echo -e "1.Lede		\e[31m[未检测到]\e[0m"
+		echo -e "1.Lede			\e[31m[未检测到]\e[0m"
 	fi
 	if [ -f ./Openwrt/feeds.conf.default ];then
-		echo -e "2.Openwrt	\e[33m[已检测到]\e[0m"
+		echo -e "2.Openwrt_Offical	\e[33m[已检测到]\e[0m"
 	else
-		echo -e "2.Openwrt	\e[31m[未检测到]\e[0m"
+		echo -e "2.Openwrt_Offical	\e[31m[未检测到]\e[0m"
 	fi
 	if [ -f ./Lienol/feeds.conf.default ];then
-		echo -e "3.Lienol	\e[33m[已检测到]\e[0m"
+		echo -e "3.Lienol		\e[33m[已检测到]\e[0m"
 	else
-		echo -e "3.Lienol	\e[31m[未检测到]\e[0m"
+		echo -e "3.Lienol		\e[31m[未检测到]\e[0m"
 	fi
 	echo "q.返回"
 	GET_Choose
@@ -825,21 +836,21 @@ done
 	Network_ERROR="\e[31m连接错误\e[0m"
 	httping -c 1 www.baidu.com > /dev/null 2>&1
 	if [ $? -eq 0 ];then
-		echo -e "Baidu       $Network_OK" 
+		echo -e "百度		$Network_OK" 
 	else
-		echo -e "Baidu       $Network_ERROR"
+		echo -e "百度		$Network_ERROR"
 	fi
 	httping -c 1 www.github.com > /dev/null 2>&1
 	if [ $? -eq 0 ];then
-		echo -e "Github      $Network_OK" 
+		echo -e "Github		$Network_OK" 
 	else
-		echo -e "Github      $Network_ERROR"
+		echo -e "Github		$Network_ERROR"
 	fi
 	httping -c 1 www.google.com > /dev/null 2>&1
 	if [ $? -eq 0 ];then
-		echo -e "Google      $Network_OK" 
+		echo -e "Google		$Network_OK" 
 	else
-		echo -e "Google      $Network_ERROR"
+		echo -e "Google		$Network_ERROR"
 	fi
 	echo ""
 	Enter	
