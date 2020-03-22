@@ -3,8 +3,8 @@
 # Device Support:ALL Device [TEST]
 # AutoBuild WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.20
-Main_Version=BETA-V1.1-RC3
+Update=2020.03.21
+Main_Version=BETA-V1.1-RC4
 
 function Second_Menu() {
 while :
@@ -12,19 +12,18 @@ do
 	clear
 	cd ~/Openwrt
 	Dir_Check
-	if [ -f "./$Project/feeds.conf.default" ];then
+	if [ -f "./Projects/$Project/feeds.conf.default" ];then
 		Say="源码文件:已检测到,当前项目:$Project" && Color_Y
-		Say="项目位置:'主目录/Openwrt/$Project'" && Color_Y
+		Say="项目位置:'主目录/Openwrt/Projects/$Project'" && Color_Y
 		GET_Branch=`(awk 'NR==1' ./Config/$Project.branch)`
 		if [ $Project == Lede ];then
-			if [ -f ./$Project/package/lean/default-settings/files/zzz-default-settings ];then
-				cp ./$Project/package/lean/default-settings/files/zzz-default-settings ./TEMP/default.TEMP
+			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
+				cp ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ./TEMP/default.TEMP
 				cd ~/Openwrt/TEMP
 				Version=$(awk '/DISTRIB_REVISION=/{print}' default.TEMP);
 				echo "$Version" > default.TEMP2
 				sed -i 's/\"//g' default.TEMP2
 				Version=`(awk 'NR==1' default.TEMP2)`
-				cd .. && rm -rf TEMP
 				Version=${Version:22}
 				Version=${Version%>>*}
 				Say="版本号:$Version" && Color_Y
@@ -34,8 +33,8 @@ do
 		elif [ $Project == Openwrt ];then
 			rm -rf TEMP
 		elif [ $Project == Lienol ];then
-			if [ -f ./$Project/package/default-settings/files/zzz-default-settings ];then
-				cp ./$Project/package/default-settings/files/zzz-default-settings ./TEMP/default.TEMP
+			if [ -f ./Projects/$Project/package/default-settings/files/zzz-default-settings ];then
+				cp ./Projects/$Project/package/default-settings/files/zzz-default-settings ./TEMP/default.TEMP
 				cd ~/Openwrt/TEMP
 				Version=$(awk '/DISTRIB_REVISION=/{print}' default.TEMP);
 				echo "$Version" > default.TEMP2
@@ -54,7 +53,7 @@ do
 		Sources_ERROR=0
 		Say="当前分支:$GET_Branch" && Color_Y
 	else
-		Say="源码文件:为检测到,请前往[高级选项]下载!" && Color_R
+		Say="源码文件:未检测到,请前往[高级选项]下载!" && Color_R
 		rm -rf TEMP
 		Sources_ERROR=1
 	fi
@@ -98,7 +97,7 @@ done
 
 function Update() {
 	clear
-	cd ~/Openwrt/$Project
+	cd ~/Openwrt/Projects/$Project
 	git pull
 	./scripts/feeds update -a
 	./scripts/feeds install -a
@@ -110,16 +109,10 @@ function Update() {
 function Compile_Firmware() {
 while :
 do
-	cd ~Openwrt
-	if [ ! -d ./TEMP ];then
-		mkdir TEMP
-	else
-		:
-	fi
-	cd ~/Openwrt/$Project
+	cd ~/Openwrt/Projects/$Project
 	if [ -f ".config" ];then
 		clear
-		cp ~/Openwrt/$Project/.config ~/Openwrt/TEMP/$Project.TEMP
+		cp .config ~/Openwrt/TEMP/$Project.TEMP
 		cd ~/Openwrt/TEMP
 		GET_BOARD=$(awk '/CONFIG_TARGET_BOARD=/{print}' $Project.TEMP);
 		GET_SUBTARGET=$(awk '/CONFIG_TARGET_SUBTARGET=/{print}' $Project.TEMP);
@@ -219,7 +212,7 @@ do
 	echo -e "\e[33m$Compile_Say\e[0m"
 	Say="开始编译$Project..." && Color_Y
 	Compile_START=`date +'%Y-%m-%d %H:%M:%S'`
-	cd ~/Openwrt/$Project
+	cd ~/Openwrt/Projects/$Project
 	$Thread
 	echo " "
 	if [ $X86SET == 0 ];then
@@ -247,12 +240,12 @@ do
 			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
 			Say="编译失败!" && Color_R
 			Say="可能原因如下:" && Color_R
-			Say="	1.编译可能成功了,但是设备可能不受AutoBuild支持,请自行前往'主目录/Openwrt/$Project/bin/'查看." && Color_R
+			Say="	1.编译可能成功了,但是设备可能不受AutoBuild支持,请自行前往'主目录/Openwrt/Projects/$Project/bin/'查看." && Color_R
 			Say="	2.编译出错,请使用日志输出编译以进行分析" && Color_R
 			Say="	3.网络原因导致依赖包下载失败,使用梯子进行编译"
 		fi
 	else
-		echo "本次编译为X86架构，请自行前往'主目录/Openwrt/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果."
+		echo "本次编译为X86架构，请自行前往'主目录/Openwrt/Projects/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果."
 	fi
 	echo " "
 	Enter
@@ -260,7 +253,7 @@ do
 done
 }
 function Adv_Option() {
-cd ~/Openwrt/$Project
+cd ~/Openwrt/Projects/$Project
 while :
 do
 	clear
@@ -279,7 +272,7 @@ do
 		break
 	;;
 	1)
-		cd ~/Openwrt
+		cd ~/Openwrt/Projects
 		if [ -f "./$Project/LICENSE" ];then
 			echo " "
 			Say="已检测到$Project项目,无需下载!" && Color_R
@@ -369,7 +362,7 @@ do
 		fi
 	;;
 	2)
-		cd ~/Openwrt/$Project
+		cd ~/Openwrt/Projects/$Project
 		clear
 		git fetch --all
 		git reset --hard origin/master
@@ -378,24 +371,24 @@ do
 	;;
 	3)
 		clear
-		cd ~/Openwrt
+		cd ~/Openwrt/Projects
 		if [ -d ./$Project/package/themes ];then
 			:
 		else
-			cd ~/Openwrt/$Project/package
+			cd ./$Project/package
 			mkdir themes
 		fi
 		clear
 		if [ $Project == 'Lede' ];then
-			cd ~/Openwrt/Lede/package/lean
+			cd ~/Openwrt/Projects/$Project/package/lean
 			rm -rf luci-theme-argon
-			Say="已删除'Lede/package/lean/luci-theme-argon'" && Color_Y
+			Say="已删除'./package/lean/luci-theme-argon'" && Color_Y
 			git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
-			cd ~/Openwrt/Lede/package/themes
+			cd ~/Openwrt/Projects/$Project/package/themes
 			rm -rf luci-theme-rosy
-			Say="已删除'$Project/package/themes/luci-theme-rosy'" && Color_Y
+			Say="已删除'./package/themes/luci-theme-rosy'" && Color_Y
 			git clone https://github.com/rosywrt/luci-theme-rosy luci-theme-rosy
-			cd ~/Openwrt/Lede
+			cd ~/Openwrt/Projects/$Project
 			grep "darkmatter" feeds.conf.default > /dev/null
 			if [ $? -eq 0 ]; then
 				:
@@ -422,7 +415,7 @@ do
 				Say="主题包 luci-theme-darkmatter 添加失败!" && Color_R
 			fi	
 		else
-			cd ~/Openwrt/$Project/package/themes
+			cd ~/Openwrt/Projects/$Project/package/themes
 			rm -rf luci-theme-argon
 			Say="已删除'$Project/package/themes/luci-theme-argon'" && Color_Y
 			git clone https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
@@ -443,30 +436,28 @@ do
 		echo "4.删除$Project项目"
 		echo "q.返回"
 		GET_Choose
+		cd ~/Openwrt/Projects/$Project
 		case $Choose in
 		q)
 			break
 		;;
-		1)
-			cd ~/Openwrt/$Project
+		1)	
 			make clean
 			sleep 3
 			break
 		;;
 		2)
-			cd ~/Openwrt/$Project
 			make dirclean
 			sleep 3
 			break
 		;;
 		3)
-			cd ~/Openwrt/$Project
 			make distclean
 			sleep 3
 			break
 		;;
 		4)
-			cd ~/Openwrt
+			cd ~/Openwrt/Projects
 			echo " "
 			Say="正在删除$Project,请耐心等待..." && Color_B
 			rm -rf $Project
@@ -481,16 +472,16 @@ do
 	done
 	;;
 	5)
-		cd ~/Openwrt/$Project
+		cd ~/Openwrt/Projects/$Project
 		rm .config
 		rm .config.old
-		Say="删除成功!" && Color_Y
+		Say="配置文件删除成功!" && Color_Y
 		sleep 3
 	;;
 	6)
 	while :
 	do
-		cd ~/Openwrt/$Project/package
+		cd ~/Openwrt/Projects/$Project/package
 		if [ ! -d ./custom ];then
 			mkdir custom
 		else
@@ -503,7 +494,7 @@ do
 		echo "2.AdGuardHome"
 		echo "3.Lienol-LUCI Sources"
 		echo "q.返回"
-		cd ~/Openwrt/$Project/package/custom
+		cd ./custom
 		GET_Choose
 		case $Choose in
 		q)
@@ -556,19 +547,19 @@ do
 			Enter
 		;;
 		3)
-			cd ~/Openwrt/$Project
+			cd ~/Openwrt/Projects/$Project
 			grep "lienol" feeds.conf.default > /dev/null
 			if [ $? -eq 0 ]; then
 				echo " "
-				Say="已检测到Lienol软件源,无需添加!" && Color_Y
+				Say="已检测到Lienol-LUCI Sources,无需添加!" && Color_Y
 			else
 				echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
 				echo " "
 				grep "lienol" feeds.conf.default > /dev/null
 				if [ $? -eq 0 ]; then
-					Say="已添加Lienol软件源到feeds.conf.default" && Color_Y
+					Say="已添加Lienol-LUCI Sources到feeds.conf.default" && Color_Y
 				else
-					Say="添加失败!" && Color_R
+					Say="Lienol-LUCI Sources添加失败!" && Color_R
 				fi
 			fi
 			sleep 3
@@ -635,13 +626,13 @@ do
 		break
 	;;
 	1)
-		cp ~/Openwrt/$Project/.config ~/Openwrt/Backups/$Project-`(date +%m%d_%H:%M)`
+		cp ~/Openwrt/Project/$Project/.config ~/Openwrt/Backups/$Project-`(date +%m%d_%H:%M)`
 		Say="备份完成!备份文件存放于:主目录/Openwrt/Backups/$Project-`(date +%m%d_%H:%M)`" && Color_Y
 	;;
 	2)
 		read -p '请输入你想要的文件名[名称不能为'q']:' Config_Backup
 		echo " "
-		cp ~/Openwrt/$Project/.config ~/Openwrt/Backups/$Config_Backup
+		cp ~/Openwrt/Project/$Project/.config ~/Openwrt/Backups/$Config_Backup
 		Say="备份完成!备份文件存放于:主目录/Openwrt/Backups/$Config_Backup" && Color_Y
 	;;	
 	esac
@@ -665,25 +656,25 @@ do
 		break
 	fi
 	if [ -f ./$Config_Recovery ];then
-		cp ~/Openwrt/Backups/$Config_Recovery ~/Openwrt/$Project/.config
+		cp ~/Openwrt/Backups/$Config_Recovery ~/Openwrt/Project/$Project/.config
 		Say="恢复完成!" && Color_Y
 		Enter
 		break
 	else
-		Say="未找到'$Config_Recovery',请确认是否输入正确!按下[回车]键重试" && Color_R
+		Say="未找到'$Config_Recovery',请确认是否输入正确!按下[回车]键重试." && Color_R
 		read -p "" Key
 	fi
 done
 ;;
 3)
 	echo " "
-	cd ~/Openwrt/
+	cd ~/Openwrt/Project
 	if [ ! -d ./$Project/dl ];then
 		Say="没有找到'主目录/Openwrt/$Project/dl'文件夹,无法进行备份!" && Color_R
 		Say="您似乎还没有下载$Project源代码或编译." && Color_R
 	else
 		Say="备份中,请耐心等待!" && Color_B
-		cp -a ~/Openwrt/$Project/dl ~/Openwrt/Backups/
+		cp -a ~/Openwrt/Project/$Project/dl ~/Openwrt/Backups/
 		Say="完成![dl]文件夹已备份到:'主目录/Openwrt/Backups/dl'" && Color_Y
 		cd ~/Openwrt/Backups
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
@@ -700,9 +691,9 @@ done
 		Say="您似乎还没有进行过备份." && Color_R
 	else
 		Say="恢复中,请耐心等待!" && Color_B
-		cp -a ~/Openwrt/Backups/dl ~/Openwrt/$Project
-		Say="完成![dl]文件夹已恢复到:'主目录/Openwrt/$Project/dl'" && Color_Y
-		cd ~/Openwrt/$Project
+		cp -a ~/Openwrt/Backups/dl ~/Openwrt/Project/$Project
+		Say="完成![dl]文件夹已恢复到:'主目录/Openwrt/Project/$Project/dl'" && Color_Y
+		cd ~/Openwrt/Project/$Project
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
 		
@@ -716,15 +707,10 @@ done
 
 function Edit_Menuconfig() {
 clear
-cd ~/Openwrt/$Project
+cd ~/Openwrt/Project/$Project
 Say="Loading $Project Configuration..." && Color_B
 make menuconfig
 Enter
-}
-
-function Danger_Enter() {
-read -p "危险动作!请按下[回车]键以继续操作!" Key
-read -p "请再次按下[回车]键以确认操作!" Key
 }
 
 function Enter() {
@@ -744,8 +730,9 @@ echo -e "\e[34m$Say\e[0m"
 }
 
 function Sources_Download_Check() {
+cd ~/Openwrt
 echo " "
-if [ -f "./$Project/feeds.conf.default" ];then
+if [ -f "./Project/$Project/feeds.conf.default" ];then
 	Say="$Project源代码下载完成!" && Color_Y
 	cd ~/Openwrt/Config
 	echo "$Branch" > $Project.branch
@@ -786,21 +773,26 @@ do
 	cd ~/Openwrt
 	Say="AutoBuild AIO $Main_Version by Hyy2001" && Color_B
 	echo " "
-	if [ -f ./Lede/feeds.conf.default ];then
+	if [ -f ./Projects/Lede/feeds.conf.default ];then
 		echo -e "1.Lede			\e[33m[已检测到]\e[0m"
 	else
 		echo -e "1.Lede			\e[31m[未检测到]\e[0m"
 	fi
-	if [ -f ./Openwrt/feeds.conf.default ];then
+	if [ -f ./Projects/Openwrt/feeds.conf.default ];then
 		echo -e "2.Openwrt_Offical	\e[33m[已检测到]\e[0m"
 	else
 		echo -e "2.Openwrt_Offical	\e[31m[未检测到]\e[0m"
 	fi
-	if [ -f ./Lienol/feeds.conf.default ];then
+	if [ -f ./Projects/Lienol/feeds.conf.default ];then
 		echo -e "3.Lienol		\e[33m[已检测到]\e[0m"
 	else
 		echo -e "3.Lienol		\e[31m[未检测到]\e[0m"
 	fi
+#	if [ -f ./Projects/Custom/feeds.conf.default ];then
+#		echo -e "3.Custom_Sources	\e[33m[已检测到]\e[0m"
+#	else
+#		echo -e "3.Custom_Sources	\e[31m[未检测到]\e[0m"
+#	fi
 	echo "q.返回"
 	GET_Choose
 	if [ $Choose == 1 ]; then
@@ -809,6 +801,8 @@ do
 		Project=Openwrt
 	elif [ $Choose == 3 ]; then
 		Project=Lienol
+#	elif [ $Choose == 4 ]; then
+#		Project=Custom
 	else
 		:
 	fi
