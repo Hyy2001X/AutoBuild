@@ -3,8 +3,8 @@
 # Device Support:ALL Device [TEST]
 # AutoBuild WorkFolder:[home/username/Openwrt]、[~/Openwrt]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.21
-Main_Version=BETA-V1.1-RC4
+Update=2020.03.23
+Main_Version=BETA-V1.1-RC5
 
 function Second_Menu() {
 while :
@@ -18,40 +18,14 @@ do
 		GET_Branch=`(awk 'NR==1' ./Config/$Project.branch)`
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
-				cp ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ./TEMP/default.TEMP
-				cd ~/Openwrt/TEMP
-				Version=$(awk '/DISTRIB_REVISION=/{print}' default.TEMP);
-				echo "$Version" > default.TEMP2
-				sed -i 's/\"//g' default.TEMP2
-				Version=`(awk 'NR==1' default.TEMP2)`
-				Version=${Version:22}
-				Version=${Version%>>*}
+				cd ./Projects/$Project/package/lean/default-settings/files
+				Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" zzz-default-settings`
 				Say="版本号:$Version" && Color_Y
 			else
 				Say="版本号:未知" && Color_R
 			fi
-		elif [ $Project == Openwrt ];then
-			rm -rf TEMP
-		elif [ $Project == Lienol ];then
-			if [ -f ./Projects/$Project/package/default-settings/files/zzz-default-settings ];then
-				cp ./Projects/$Project/package/default-settings/files/zzz-default-settings ./TEMP/default.TEMP
-				cd ~/Openwrt/TEMP
-				Version=$(awk '/DISTRIB_REVISION=/{print}' default.TEMP);
-				echo "$Version" > default.TEMP2
-				sed -i 's/\"//g' default.TEMP2
-				Version=`(awk 'NR==1' default.TEMP2)`
-				cd .. && rm -rf TEMP
-				Version=${Version:22}
-				Version=${Version%>>*}
-				Say="版本号:$Version" && Color_Y
-			else
-				Say="版本号:未知" && Color_R
-			fi
-		else
-			:
 		fi
 		Sources_ERROR=0
-		Say="当前分支:$GET_Branch" && Color_Y
 	else
 		Say="源码文件:未检测到,请前往[高级选项]下载!" && Color_R
 		rm -rf TEMP
@@ -200,16 +174,18 @@ do
 	echo -e "\e[33m$Compile_Say\e[0m"
 	Firmware_Name=openwrt-$NEW_BOARD-$NEW_SUBTARGET-$NEW_PROFILE-squashfs-sysupgrade.bin
 	read -p '请输入附加信息:' Extra
-	NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
+	NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
 	cd ~/Openwrt
 	while [ -f "./Packages/$NEW_Firmware_Name" ]
 	do
-		read -p '附加信息重复!请重新添加:' Extra
-		NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
+		read -p '包含该附加信息的名称已存在!请重新添加:' Extra
+		NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
 	done
 	rm -rf ./TEMP
 	clear
 	echo -e "\e[33m$Compile_Say\e[0m"
+	Say="预期名称:$NEW_Firmware_Name" && Color_Y
+	echo " "
 	Say="开始编译$Project..." && Color_Y
 	Compile_START=`date +'%Y-%m-%d %H:%M:%S'`
 	cd ~/Openwrt/Projects/$Project
@@ -275,7 +251,7 @@ do
 		cd ~/Openwrt/Projects
 		if [ -f "./$Project/LICENSE" ];then
 			echo " "
-			Say="已检测到$Project项目,无需下载!" && Color_R
+			Say="已检测到$Project源码,当前分支:$GET_Branch" && Color_Y
 			sleep 3
 		else
 			clear
@@ -616,7 +592,7 @@ while :
 do
 	clear
 	Say="当前操作:备份[.config]" && Color_B && echo " "
-	echo "1.标准名称/文件格式:[$Project-当前日期_时间]"
+	echo "1.标准名称/文件格式:[$Project-版本号-日期_时间]"
 	echo "2.自定义文件名称"
 	echo "q.返回"
 	GET_Choose
@@ -626,17 +602,18 @@ do
 		break
 	;;
 	1)
-		cp ~/Openwrt/Project/$Project/.config ~/Openwrt/Backups/$Project-`(date +%m%d_%H:%M)`
-		Say="备份完成!备份文件存放于:主目录/Openwrt/Backups/$Project-`(date +%m%d_%H:%M)`" && Color_Y
+		Config_Name=$Project-$Version-`(date +%m%d_%H:%M)`
+		cp ~/Openwrt/Projects/$Project/.config ~/Openwrt/Backups/$Config_Name
 	;;
 	2)
-		read -p '请输入你想要的文件名[名称不能为'q']:' Config_Backup
+		read -p '请输入你想要的文件名:' Config_Name
 		echo " "
-		cp ~/Openwrt/Project/$Project/.config ~/Openwrt/Backups/$Config_Backup
-		Say="备份完成!备份文件存放于:主目录/Openwrt/Backups/$Config_Backup" && Color_Y
+		cp ~/Openwrt/Projects/$Project/.config ~/Openwrt/Backups/$Config_Name
 	;;	
 	esac
-	Enter
+	Say="备份完成!备份文件存放于:主目录/Openwrt/Backups" && Color_Y
+	Say="文件名称:$Config_Name" && Color_Y
+	sleep 3
 done
 ;;
 2)
@@ -656,7 +633,7 @@ do
 		break
 	fi
 	if [ -f ./$Config_Recovery ];then
-		cp ~/Openwrt/Backups/$Config_Recovery ~/Openwrt/Project/$Project/.config
+		cp ~/Openwrt/Backups/$Config_Recovery ~/Openwrt/Projects/$Project/.config
 		Say="恢复完成!" && Color_Y
 		Enter
 		break
@@ -668,13 +645,13 @@ done
 ;;
 3)
 	echo " "
-	cd ~/Openwrt/Project
+	cd ~/Openwrt/Projects
 	if [ ! -d ./$Project/dl ];then
 		Say="没有找到'主目录/Openwrt/$Project/dl'文件夹,无法进行备份!" && Color_R
 		Say="您似乎还没有下载$Project源代码或编译." && Color_R
 	else
 		Say="备份中,请耐心等待!" && Color_B
-		cp -a ~/Openwrt/Project/$Project/dl ~/Openwrt/Backups/
+		cp -a ~/Openwrt/Projects/$Project/dl ~/Openwrt/Backups/
 		Say="完成![dl]文件夹已备份到:'主目录/Openwrt/Backups/dl'" && Color_Y
 		cd ~/Openwrt/Backups
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
@@ -691,9 +668,9 @@ done
 		Say="您似乎还没有进行过备份." && Color_R
 	else
 		Say="恢复中,请耐心等待!" && Color_B
-		cp -a ~/Openwrt/Backups/dl ~/Openwrt/Project/$Project
-		Say="完成![dl]文件夹已恢复到:'主目录/Openwrt/Project/$Project/dl'" && Color_Y
-		cd ~/Openwrt/Project/$Project
+		cp -a ~/Openwrt/Backups/dl ~/Openwrt/Projects/$Project
+		Say="完成![dl]文件夹已恢复到:'主目录/Openwrt/Projects/$Project/dl'" && Color_Y
+		cd ~/Openwrt/Projects/$Project
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
 		
@@ -707,7 +684,7 @@ done
 
 function Edit_Menuconfig() {
 clear
-cd ~/Openwrt/Project/$Project
+cd ~/Openwrt/Projects/$Project
 Say="Loading $Project Configuration..." && Color_B
 make menuconfig
 Enter
@@ -732,7 +709,7 @@ echo -e "\e[34m$Say\e[0m"
 function Sources_Download_Check() {
 cd ~/Openwrt
 echo " "
-if [ -f "./Project/$Project/feeds.conf.default" ];then
+if [ -f "./Projects/$Project/feeds.conf.default" ];then
 	Say="$Project源代码下载完成!" && Color_Y
 	cd ~/Openwrt/Config
 	echo "$Branch" > $Project.branch
