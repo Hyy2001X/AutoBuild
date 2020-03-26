@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.25
-Main_Version=BETA-V2.0.0
+Main_Version=BETA-V2.1.0
 
 function Second_Menu() {
 while :
@@ -204,7 +204,7 @@ do
 			echo -ne "\e[0m"
 			mv ./bin/targets/$NEW_BOARD/$NEW_SUBTARGET/$Firmware_Name $Home/Packages/$NEW_Firmware_Name
 			cd $Home/Packages
-			Firmware_Size=`ls -l $NEW_Firmware_Name | awk '{print $5}'`	
+			Firmware_Size=`ls -l $NEW_Firmware_Name | awk '{print $5}'`
 			echo -e "\e[33m编译完成!固件已自动移动到'$Home/Packages' "
 			echo "固件名称:$NEW_Firmware_Name"
 			awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'
@@ -654,13 +654,20 @@ do
 		break
 	fi
 	if [ -f ./$Config_Recovery ];then
-		cp $Home/Backups/$Config_Recovery $Home/Projects/$Project/.config
-		Say="恢复完成!" && Color_Y
-		Enter
+		cd $Home
+		Config_PATH_NAME=./Projects/$Project/.config
+		rm $Config_PATH_NAME
+		cp ./Backups/$Config_Recovery $Config_PATH_NAME
+		if [ -f $Config_PATH_NAME ];then
+			Say="恢复完成!" && Color_Y
+		else
+			Say="恢复失败!" && Color_R
+		fi
+		sleep 3
 		break
 	else
-		Say="未找到'$Config_Recovery',请确认是否输入正确!按下[回车]键重试." && Color_R
-		read -p "" Key
+		Say="未找到'$Config_Recovery',请检查是否输入正确!" && Color_R
+		sleep 3
 	fi
 done
 ;;
@@ -694,7 +701,6 @@ done
 		cd $Home/Projects/$Project
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
-		
 	fi
 	echo " "
 	Enter
@@ -866,6 +872,7 @@ do
 	echo "5.清理DNS缓存"
 	echo "6.为AutoBuild添加快捷启动"
 	echo "7.查看磁盘空间大小"
+	echo "8.定时关机"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -913,6 +920,43 @@ do
 		df -h
 		echo " "
 		Enter
+	;;
+	8)
+	while :
+	do
+		clear
+		Say="定时关机" && Color_B
+		echo " "
+		echo "1.立刻关机"
+		echo "2.X分钟后关机"
+		echo "3.立刻重启"
+		echo "4.终止关机/重启任务"
+		echo "q.返回"
+		GET_Choose
+		case $Choose in
+		q)
+			break
+		;;
+		1)
+			shutdown -h now
+		;;
+		2)
+			read -p '请输入时间X[X分钟后关机]:' Time_wait
+			echo " "
+			shutdown -h $Time_wait
+			Say="已设置$Time_wait分钟后自动关机." && Color_Y
+		;;
+		3)
+			shutdown -r now
+		;;
+		4)
+			shutdown -c
+			echo " "
+			Say="已取消关机/重启任务." && Color_Y
+		;;
+		esac
+		sleep 3
+	done
 	;;
 	esac
 done
