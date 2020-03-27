@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.25
-Main_Version=BETA-V2.1.0
+Update=2020.03.27
+Main_Version=BETA-V2.2.0
 
 function Second_Menu() {
 while :
@@ -109,9 +109,12 @@ do
 			NEW_PROFILE=${PROCESSED_PROFILE:22}
 			X86SET=1
 		fi
+		Say="配置文件解析" && Color_B
 		echo CPU架构:$NEW_BOARD
 		echo 处理器型号:$NEW_SUBTARGET
 		echo 设备名称:$NEW_PROFILE
+		echo ""
+		echo -e "处理器状态:$Yellow$CPU_Cores核$CPU_Threads线程$White"
 	else
 		echo " "
 		Say="未检测到配置文件,无法进行编译!" && Color_R
@@ -119,14 +122,13 @@ do
 		break
 	fi
 	echo " "
-	echo "1.make"
-	echo "2.make V=s"
+	Say="选择编译参数" && Color_B
+	echo "1.make -j1"
+	echo "2.make -j1 V=s"
 	echo "3.make -j4"
 	echo "4.make -j4 V=s"
-	echo "5.make -j8"
-	echo "6.make -j8 V=s"	
-	Say="7.make -j16" && Color_R
-	Say="8.make -j16 V=s" && Color_R
+	Say="5.自动选择" && Color_Y
+	Say="6.手动输入参数" && Color_Y
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -134,46 +136,43 @@ do
 		break
 	;;
 	1)
-		j=1
-		LOG=0
+		Threads=1
+		Print_CompileLog=0
 	;;
 	2)
-		j=1
-		LOG=1
+		Threads=1
+		Print_CompileLog=1
 	;;
 	3)
-		j=4
-		LOG=0
+		Threads=4
+		Print_CompileLog=0
 	;;
 	4)
-		j=4
-		LOG=1
+		Threads=4
+		Print_CompileLog=1
 	;;
 	5)
-		j=8
-		LOG=0
+		Threads=$CPU_Threads
 	;;
 	6)
-		j=8
-		LOG=1
-	;;
-	7)
-		j=16
-		LOG=0
-	;;
-	8)
-		j=16
-		LOG=1
-	;;
+		read -p '请输入编译参数:' Threads
 	esac
-	if [ $LOG == 0 ];then
-		Thread="make -j$j"
-		Compile_Say="当前选择:使用$j线程编译,不在屏幕上输出日志[快]"
+	if [ ! $Choose == 6 ];then
+		if [ ! $Choose == 5 ];then
+			if [ $Print_CompileLog == 0 ];then
+				Thread="make -j$Threads"
+				Compile_Say="当前选择:使用$Threads线程编译,不在屏幕上输出日志[快]"
+			else
+				Thread="make -j$Threads V=s"
+				Compile_Say="当前选择:使用$Threads线程编译,并在屏幕上输出日志[慢]"
+			fi
+		else
+			Compile_Say="自动选择:使用$Threads线程编译"
+			Thread="make -j$Threads"
+		fi
 	else
-		Thread="make -j$j V=s"
-		Compile_Say="当前选择:使用$j线程编译,并在屏幕上输出日志[慢]"
+		Thread=$Threads
 	fi
-	echo -e "\e[33m$Compile_Say\e[0m"
 	Firmware_Name=openwrt-$NEW_BOARD-$NEW_SUBTARGET-$NEW_PROFILE-squashfs-sysupgrade.bin
 	read -p '请输入附加信息:' Extra
 	NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
@@ -185,7 +184,11 @@ do
 	done
 	rm -rf ./TEMP
 	clear
-	echo -e "\e[33m$Compile_Say\e[0m"
+	if [ ! $Choose == 6 ];then
+		echo -e "\e[33m$Compile_Say\e[0m"
+	else
+		:
+	fi
 	Say="预期名称:$NEW_Firmware_Name" && Color_Y
 	echo " "
 	Say="开始编译$Project..." && Color_Y
@@ -239,10 +242,11 @@ do
 	echo " "
 	echo "1.从Github拉取$Project源代码"
 	echo "2.强制更新源代码且合并到本地"
-	echo "3.加载第三方主题"
+	echo "3.添加第三方主题包"
 	Say="4.磁盘清理" && Color_R
 	echo "5.删除配置文件"
 	echo "6.添加第三方软件包"
+	echo "7.下载[dl]库"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -271,7 +275,7 @@ do
 				Branch_2=lede-17.01
 				Branch_3=openwrt-18.06
 				Branch_4=openwrt-19.07
-				echo "1.$Branch_1[Default]" && echo "2.$Branch_2"
+				echo "1.$Branch_1[默认]" && echo "2.$Branch_2"
 				echo "3.$Branch_3" && echo "4.$Branch_4"
 				echo "q.返回"
 				echo ""
@@ -309,7 +313,7 @@ do
 				Branch_1=dev-19.07
 				Branch_2=dev-lean-lede
 				Branch_3=dev-master
-				echo "1.$Branch_1[Default]" && echo "2.$Branch_2"
+				echo "1.$Branch_1[默认]" && echo "2.$Branch_2"
 				echo "3.$Branch_3"
 				echo "q.返回"
 				echo ""
@@ -468,15 +472,16 @@ do
 		else
 			:
 		fi
+		cd ./custom
 		clear
 		Say="手动添加软件包" && Color_B
 		echo " "
 		echo "1.SmartDNS"
 		echo "2.AdGuardHome"
-		echo "3.Lienol-LUCI Sources"
-		echo "4.Clash"
+		echo "3.Clash"
+		Say="4.[特殊]Lienol's Package Sources" && Color_Y
+		Say="5.[特殊]Lean's Package Sources" && Color_Y
 		echo "q.返回"
-		cd ./custom
 		GET_Choose
 		case $Choose in
 		q)
@@ -506,64 +511,59 @@ do
 			Enter
 		;;
 		2)
-			clear
-			if [ ! -d ./AdGuardHome ];then
-				:
-			else
-				rm -rf AdGuardHome
-				Say="已删除软件包 luci-app-adguardhome" && Color_Y
-				Say="已删除软件包 adguardhome" && Color_Y
-			fi
-			git clone https://github.com/Hyy2001X/AdGuardHome.git
-			echo " "
-			if [ -f ./AdGuardHome/luci-app-adguardhome/Makefile ];then
-				Say="已成功添加软件包 luci-app-adguardhome" && Color_Y
-			else
-				Say="未成功添加软件包 luci-app-adguardhome,请重试!" && Color_R
-			fi
-			if [ -f ./AdGuardHome/adguardhome/Makefile ];then
-				Say="已成功添加软件包 adguardhome" && Color_Y
-			else
-				Say="未成功添加软件包 adguardhome,请重试!" && Color_R
-			fi
+			PKG_NAME=luci-app-adguardhome
+			PKG_URL=https://github.com/rufengsuixing/luci-app-adguardhome.git
+			Add_Packages
 		;;
 		3)
+			PKG_NAME=luci-app-clash
+			PKG_URL=https://github.com/frainzy1477/luci-app-clash.git
+			Add_Packages
+		;;
+		4)
 			cd $Home/Projects/$Project
 			grep "lienol" feeds.conf.default > /dev/null
 			if [ $? -eq 0 ]; then
 				echo " "
-				Say="已检测到Lienol-LUCI Sources,无需添加!" && Color_Y
+				Say="已检测到Lienol's Package Sources,无需添加!" && Color_Y
 			else
 				echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
 				echo " "
 				grep "lienol" feeds.conf.default > /dev/null
 				if [ $? -eq 0 ]; then
-					Say="已添加Lienol-LUCI Sources到feeds.conf.default" && Color_Y
+					Say="添加成功!" && Color_Y
 				else
-					Say="Lienol-LUCI Sources添加失败!" && Color_R
+					Say="添加失败!" && Color_R
 				fi
 			fi
 		;;
-		4)
+		5)
+			cd $Home/Projects/$Project
 			clear
-			if [ ! -d ./luci-app-clash ];then
+			if [ -d ./package/lean ];then
+				rm -rf ./package/lean
+			else
 				:
-			else
-				rm -rf luci-app-clash
-				Say="已删除软件包 luci-app-clash" && Color_Y
 			fi
-			git clone https://github.com/frainzy1477/luci-app-clash.git
+			svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean ./package/lean
 			echo " "
-			if [ -f ./luci-app-clash/Makefile ];then
-				Say="已成功添加软件包 luci-app-clash" && Color_Y
+			if [[ $? -eq 0 ]]; then
+				Say="下载完成!" && Color_Y
 			else
-				Say="未成功添加软件包 luci-app-clash,请重试!" && Color_R
+				Say="下载失败!" && Color_R
 			fi
 		;;
 		esac
-	sleep 3
+		sleep 3
 	done
-	;;	
+	;;
+	7)
+		clear
+		Say="开始下载[dl]库,线程数:$CPU_Threads" && Color_Y
+		make -j$CPU_Threads download V=s
+		echo " "
+		Enter
+	;;
 	esac
 done
 }
@@ -600,8 +600,8 @@ Say="备份与恢复" && Color_B
 echo " "
 echo "1.备份[.config]"
 echo "2.恢复[.config]"
-echo "3.备份[dl]文件夹"
-echo "4.恢复[dl]文件夹"
+echo "3.备份[dl]库"
+echo "4.恢复[dl]库"
 echo "q.返回"
 GET_Choose
 case $Choose in
@@ -709,6 +709,23 @@ esac
 done
 }
 
+function Add_Packages() {
+clear
+if [ ! -d ./$PKG_NAME ];then
+	:
+else
+	rm -rf $PKG_NAME
+	Say="已删除软件包 $PKG_NAME" && Color_Y
+fi
+	git clone $PKG_URL $PKG_NAME
+	echo " "
+	if [ -f ./$PKG_NAME/Makefile ];then
+	Say="已成功添加软件包 $PKG_NAME" && Color_Y
+	else
+	Say="未成功添加软件包 $PKG_NAME,请重试!" && Color_R
+	fi
+}
+
 function Edit_Menuconfig() {
 clear
 cd $Home/Projects/$Project
@@ -752,10 +769,17 @@ echo " "
 read -p '请从上方选择一个操作:' Choose
 }
 
+White="\033[0m"
+Yellow="\033[33m"
+Red="\033[31m"
+Blue="\035[31m"
+
 ################################################################MainBuild
 ################################################################MainBuild
 while :
 do
+CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
+CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 #test "$home" || home=$PWD
 Home=$(cd $(dirname $0); pwd)
 Dir_Check
@@ -912,8 +936,9 @@ do
 		read -p '请创建一个快捷启动的名称:' FastOpen		
 		echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
 		source ~/.bashrc
+		echo " "
 		Say="创建完成!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
-		Enter
+		sleep 5
 	;;
 	7)
 		clear
