@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.27
-Main_Version=BETA-V2.2.0
+Main_Version=BETA-V2.2.1
 
 function Second_Menu() {
 while :
@@ -23,11 +23,9 @@ do
 				Say="版本号:未知" && Color_R
 			fi
 		fi
-		Sources_ERROR=0
 	else
 		Say="源码文件:未检测到,请前往[高级选项]下载!" && Color_R
 		rm -rf TEMP
-		Sources_ERROR=1
 	fi
 	echo " "
 	echo "1.更新$Project源代码和Feeds"
@@ -36,14 +34,7 @@ do
 	echo "4.执行编译"
 	echo "5.高级选项"
 	echo "q.返回"
-	if [ $Sources_ERROR == 0 ];then
-		GET_Choose
-	elif [ $Sources_ERROR == 1 ];then
-		echo " "
-		read -p '请从上方选择一个操作[部分功能不可用]:' Choose
-	else
-		:
-	fi
+	GET_Choose
 	case $Choose in
 	q)
 		break
@@ -74,7 +65,11 @@ function Update() {
 	./scripts/feeds update -a
 	./scripts/feeds install -a
 	echo " "
-	Say="更新完成!" && Color_Y
+	if [ $? -eq 0 ]; then
+		Say="更新成功!" && Color_Y
+	else
+		Say="更新失败!" && Color_R
+	fi
 	sleep 3
 }
 
@@ -233,6 +228,99 @@ do
 	break
 done
 }
+
+function Sources_Download() {
+cd $Home
+if [ -f "./Projects/$Project/LICENSE" ];then
+	echo " "
+	GET_Branch=`(awk 'NR==1' ./Config/$Project.branch)`
+	Say="已检测到$Project源码,当前分支:$GET_Branch" && Color_Y
+	sleep 3
+else
+	clear
+	if  [ $Project == 'Lede' ];then
+		git clone https://github.com/coolsnowwolf/lede $Project
+		Branch=master
+		Sources_Download_Check
+	elif [ $Project == 'Openwrt' ];then
+	while :
+	do
+		clear
+		Say="$Project源码下载-分支选择" && Color_B && echo " "
+		Branch_1=master
+		Branch_2=lede-17.01
+		Branch_3=openwrt-18.06
+		Branch_4=openwrt-19.07
+		echo "1.$Branch_1[默认]" && echo "2.$Branch_2"
+		echo "3.$Branch_3" && echo "4.$Branch_4"
+		echo "q.返回"
+		echo ""
+		read -p '请从上方选择一个分支:' Branch
+		clear
+		case $Branch in
+		q)
+			break
+		;;
+		1)
+			git clone https://github.com/openwrt/openwrt $Project
+			Branch=master
+		;;
+		2)
+			git clone -b $Branch_2 https://github.com/openwrt/openwrt $Project
+			Branch=$Branch_2
+		;;
+		3)
+			git clone -b $Branch_3 https://github.com/openwrt/openwrt $Project
+			Branch=$Branch_3
+		;;
+		4)
+			git clone -b $Branch_4 https://github.com/openwrt/openwrt $Project
+			Branch=$Branch_4
+		;;
+		esac
+			Sources_Download_Check
+		break
+	done
+	elif [ $Project == 'Lienol' ];then			
+	while :
+	do
+		clear
+		Say="$Project分支选择" && Color_B && echo " "
+		Branch_1=dev-19.07
+		Branch_2=dev-lean-lede
+		Branch_3=dev-master
+		echo "1.$Branch_1[默认]" && echo "2.$Branch_2"
+		echo "3.$Branch_3"
+		echo "q.返回"
+		echo ""
+		read -p '请从上方选择一个分支:' Branch
+		clear
+		case $Branch in
+		q)
+			break
+		;;
+		1)
+			git clone -b $Branch_1 https://github.com/Lienol/openwrt $Project
+			Branch=$Branch_1
+		;;
+		2)
+			git clone -b $Branch_2 https://github.com/Lienol/openwrt $Project
+			Branch=$Branch_2
+		;;
+		3)
+			git clone -b $Branch_3 https://github.com/Lienol/openwrt $Project
+			Branch=$Branch_3
+		;;
+		esac
+			Sources_Download_Check
+		break
+	done
+	else 
+		:
+	fi
+fi
+}
+
 function Adv_Option() {
 while :
 do
@@ -254,95 +342,7 @@ do
 		break
 	;;
 	1)
-		cd $Home
-		if [ -f "./Projects/$Project/LICENSE" ];then
-			echo " "
-			GET_Branch=`(awk 'NR==1' ./Config/$Project.branch)`
-			Say="已检测到$Project源码,当前分支:$GET_Branch" && Color_Y
-			sleep 3
-		else
-			clear
-			if  [ $Project == 'Lede' ];then
-				git clone https://github.com/coolsnowwolf/lede $Project
-				Branch=master
-				Sources_Download_Check
-			elif [ $Project == 'Openwrt' ];then
-			while :
-			do
-				clear
-				Say="$Project分支选择" && Color_B && echo " "
-				Branch_1=master
-				Branch_2=lede-17.01
-				Branch_3=openwrt-18.06
-				Branch_4=openwrt-19.07
-				echo "1.$Branch_1[默认]" && echo "2.$Branch_2"
-				echo "3.$Branch_3" && echo "4.$Branch_4"
-				echo "q.返回"
-				echo ""
-				read -p '请从上方选择一个分支:' Branch
-				clear
-				case $Branch in
-				q)
-					break
-				;;
-				1)
-					git clone https://github.com/openwrt/openwrt $Project
-					Branch=master
-				;;
-				2)
-					git clone -b $Branch_2 https://github.com/openwrt/openwrt $Project
-					Branch=$Branch_2
-				;;
-				3)
-					git clone -b $Branch_3 https://github.com/openwrt/openwrt $Project
-					Branch=$Branch_3
-				;;
-				4)
-					git clone -b $Branch_4 https://github.com/openwrt/openwrt $Project
-					Branch=$Branch_4
-				;;
-				esac
-					Sources_Download_Check
-				break
-			done
-			elif [ $Project == 'Lienol' ];then			
-			while :
-			do
-				clear
-				Say="$Project分支选择" && Color_B && echo " "
-				Branch_1=dev-19.07
-				Branch_2=dev-lean-lede
-				Branch_3=dev-master
-				echo "1.$Branch_1[默认]" && echo "2.$Branch_2"
-				echo "3.$Branch_3"
-				echo "q.返回"
-				echo ""
-				read -p '请从上方选择一个分支:' Branch
-				clear
-				case $Branch in
-				q)
-					break
-				;;
-				1)
-					git clone -b $Branch_1 https://github.com/Lienol/openwrt $Project
-					Branch=$Branch_1
-				;;
-				2)
-					git clone -b $Branch_2 https://github.com/Lienol/openwrt $Project
-					Branch=$Branch_2
-				;;
-				3)
-					git clone -b $Branch_3 https://github.com/Lienol/openwrt $Project
-					Branch=$Branch_3
-				;;
-				esac
-					Sources_Download_Check
-				break
-			done
-			else 
-					:
-			fi
-		fi
+		Sources_Download
 	;;
 	2)
 		cd $Home/Projects/$Project
@@ -547,7 +547,7 @@ do
 			fi
 			svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean ./package/lean
 			echo " "
-			if [[ $? -eq 0 ]]; then
+			if [ $? -eq 0 ]; then
 				Say="下载完成!" && Color_Y
 			else
 				Say="下载失败!" && Color_R
@@ -750,6 +750,18 @@ function Color_B() {
 echo -e "\e[34m$Say\e[0m"
 }
 
+function Second_Menu_Check() {
+if [ -f ./Projects/$Project/feeds.conf.default ];then
+	Second_Menu
+else
+	Second_Menu_ERROR
+fi
+}
+
+function Second_Menu_ERROR() {
+Sources_Download
+}
+
 function Sources_Download_Check() {
 cd $Home
 echo " "
@@ -842,13 +854,13 @@ do
 		break
 	;;
 	1)
-		Second_Menu
+		Second_Menu_Check
 	;;
 	2)
-		Second_Menu
+		Second_Menu_Check
 	;;
 	3)
-		Second_Menu
+		Second_Menu_Check
 	;;
 	4)
 		Custom_Second_Menu
