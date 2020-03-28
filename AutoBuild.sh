@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.27
-Main_Version=BETA-V2.2.1
+Update=2020.03.28
+Main_Version=BETA-V2.2.2
 
 function Second_Menu() {
 while :
@@ -570,6 +570,11 @@ done
 
 function Dir_Check() {
 	cd $Home
+	if [ ! -d ./Projects ];then
+		mkdir Projects
+	else
+		:
+	fi
 	if [ ! -d ./TEMP ];then
 		mkdir TEMP
 	else
