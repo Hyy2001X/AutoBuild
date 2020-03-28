@@ -238,6 +238,7 @@ if [ -f "./Projects/$Project/LICENSE" ];then
 	sleep 3
 else
 	clear
+	cd $Home/Projects
 	if  [ $Project == 'Lede' ];then
 		git clone https://github.com/coolsnowwolf/lede $Project
 		Branch=master
