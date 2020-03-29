@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.29
-Version=BETA-V2.3.0
+Version=BETA-V2.3.1
 
 function Second_Menu() {
 while :
@@ -929,18 +929,24 @@ fi
 function Settings_1() {
 while :
 do
+	Color_GET
 	clear
 	Say="设置[实验性]" && Color_B
 	echo " "
 	if [ $DeveloperMode == 0 ];then
-		Say="1.DeveloperMode		[OFF]" && Color_R
+		Say="1.Developer Mode	[OFF]" && Color_R
 	else
-		Say="1.DeveloperMode		[ON]" && Color_Y
+		Say="1.Developer Mode	[ON]" && Color_Y
 	fi
 	if [ $SimpleCompilation == 0 ];then
-		Say="2.SimpleCompilation	[OFF]" && Color_R
+		Say="2.Simple Compilation	[OFF]" && Color_R
 	else
-		Say="2.SimpleCompilation	[ON]" && Color_Y
+		Say="2.Simple Compilation	[ON]" && Color_Y
+	fi
+	if [ $ColorfulUI == 0 ];then
+		Say="3.Colorful UI		[OFF]" && Color_R
+	else
+		Say="3.Colorful UI		[ON]" && Color_Y
 	fi
 	echo "q.返回"
 	GET_Choose
@@ -962,6 +968,13 @@ do
 			SimpleCompilation=0
 		fi
 	;;
+	3)
+		if [ $ColorfulUI == 0 ];then
+			ColorfulUI=1
+		else
+			ColorfulUI=0
+		fi
+	;;
 	esac
 done
 }
@@ -971,13 +984,22 @@ echo " "
 read -p '请从上方选择一个操作:' Choose
 }
 
+function Color_GET() {
+if [ $ColorfulUI == 1 ];then
+	White="\e[0m"
+	Yellow="\e[33m"
+	Red="\e[31m"
+	Blue="\e[34m"
+else
+	White="\e[0m"
+	Yellow="\e[0m"
+	Red="\e[0m"
+	Blue="\e[0m"
+fi
+}
+
 HOME=$(cd $(dirname $0); pwd)
 #test "$HOME" || home=$PWD
-
-White="\e[0m"
-Yellow="\e[33m"
-Red="\e[31m"
-Blue="\e[34m"
 
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
@@ -988,12 +1010,14 @@ Lienol_git=https://github.com/lienol/openwrt
 
 DeveloperMode=0
 SimpleCompilation=1
+ColorfulUI=1
 
 ################################################################Main code
 ################################################################Main code
 while :
 do
 Dir_Check
+Color_GET
 clear
 Say="AutoBuild AIO $Version by Hyy2001" && Color_B
 echo ""
