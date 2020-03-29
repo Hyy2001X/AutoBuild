@@ -48,7 +48,7 @@ do
 		Backup_Recovery
 	;;
 	4)
-		Compile_Firmware
+		SimpleCompilation_Check
 	;;
 	5)
 		Advanced_Options_2
@@ -108,7 +108,7 @@ do
 		echo 处理器型号:$NEW_SUBTARGET
 		echo 设备名称:$NEW_PROFILE
 		echo ""
-		echo -e "处理器状态:$Yellow$CPU_Cores核$CPU_Threads线程$White"
+		echo -e "用户CPU参数:$Yellow$CPU_Cores核$CPU_Threads线程$White"
 	else
 		echo " "
 		Say="未检测到配置文件,无法进行编译!" && Color_R
@@ -116,13 +116,13 @@ do
 		break
 	fi
 	echo " "
-	Say="选择编译参数" && Color_B
+	Say="编译参数" && Color_B
 	echo "1.make -j1"
 	echo "2.make -j1 V=s"
 	echo "3.make -j4"
 	echo "4.make -j4 V=s"
-	Say="5.自动选择" && Color_Y
-	Say="6.手动输入参数" && Color_Y
+	echo -e "5.$Yellow自动选择$White"
+	echo "6.手动输入参数"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -202,10 +202,10 @@ do
 			mv ./bin/targets/$NEW_BOARD/$NEW_SUBTARGET/$Firmware_Name $HOME/Packages/$NEW_Firmware_Name
 			cd $HOME/Packages
 			Firmware_Size=`ls -l $NEW_Firmware_Name | awk '{print $5}'`
-			echo -e "\e[33m编译完成!固件已自动移动到'$HOME/Packages' "
+			echo -e "$Yellow编译成功!固件已自动移动到'$HOME/Packages' "
 			echo "固件名称:$NEW_Firmware_Name"
 			awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'
-			echo -ne "\e[0m"
+			echo -ne "$White"
 		else
 			echo " "
 			Compile_END=`date +'%Y-%m-%d %H:%M:%S'`
@@ -214,13 +214,9 @@ do
 			echo -ne "\e[34m$Compile_START --> $Compile_END "
 			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
 			Say="编译失败!" && Color_R
-			Say="可能原因如下:" && Color_R
-			Say="	1.编译可能成功了,但是设备可能不受AutoBuild支持,请自行前往'$HOME/Projects/$Project/bin/'查看." && Color_R
-			Say="	2.编译出错,请使用日志输出编译以进行分析" && Color_R
-			Say="	3.网络原因导致依赖包下载失败,使用全局梯子进行编译"
 		fi
 	else
-		echo "本次编译为X86架构，请自行前往'$HOME/Projects/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果."
+		echo "所选编译设备为X86架构，请自行前往'$HOME/Projects/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果."
 	fi
 	echo " "
 	Enter
@@ -744,34 +740,6 @@ make menuconfig
 Enter
 }
 
-function Enter() {
-read -p "按下[回车]键以继续..." Key
-}
-
-function Color_Y() {
-echo -e "\e[33m$Say\e[0m"
-}
-
-function Color_R() {
-echo -e "\e[31m$Say\e[0m"
-}
-
-function Color_B() {
-echo -e "\e[34m$Say\e[0m"
-}
-
-function Second_Menu_Check() {
-if [ -f ./Projects/$Project/feeds.conf.default ];then
-	Second_Menu
-else
-	if [ $DeveloperMode == 1 ];then
-		Second_Menu
-	else
-		Sources_Download
-	fi
-fi
-}
-
 function Sources_Download_Check() {
 cd $HOME
 echo " "
@@ -800,23 +768,11 @@ do
 	echo "6.为AutoBuild添加快捷启动"
 	echo "7.查看磁盘空间大小"
 	echo "8.定时关机"
-	if [ $DeveloperMode == 0 ];then
-		Say="x.[DeveloperMode:OFF]" && Color_R
-	else
-		Say="x.[DeveloperMode:ON]" && Color_Y
-	fi
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
 	q)
 		break
-	;;
-	x)
-		if [ $DeveloperMode == 0 ];then
-			DeveloperMode=1
-		else
-			DeveloperMode=0
-		fi
 	;;
 	1)
 		clear
@@ -930,6 +886,86 @@ echo ""
 Enter	
 }
 
+function Enter() {
+read -p "按下[回车]键以继续..." Key
+}
+
+function Color_Y() {
+echo -e "$Yellow$Say$White"
+}
+
+function Color_R() {
+echo -e "$Red$Say$White"
+}
+
+function Color_B() {
+echo -e "$Blue$Say$White"
+}
+
+function Second_Menu_Check() {
+if [ -f ./Projects/$Project/feeds.conf.default ];then
+	Second_Menu
+else
+	if [ $DeveloperMode == 1 ];then
+		Second_Menu
+	else
+		Sources_Download
+	fi
+fi
+}
+
+function SimpleCompilation_Check() {
+if [ $SimpleCompilation == 1 ];then
+	Compile_Firmware
+else
+	clear
+	cd $HOME/Projects/$Project
+	make -j$(($(nproc) + 1)) V=s
+	echo " "
+	Enter
+fi
+}
+
+function Settings_1() {
+while :
+do
+	clear
+	Say="设置[实验性]" && Color_B
+	echo " "
+	if [ $DeveloperMode == 0 ];then
+		Say="1.DeveloperMode		[OFF]" && Color_R
+	else
+		Say="1.DeveloperMode		[ON]" && Color_Y
+	fi
+	if [ $SimpleCompilation == 0 ];then
+		Say="2.SimpleCompilation	[OFF]" && Color_R
+	else
+		Say="2.SimpleCompilation	[ON]" && Color_Y
+	fi
+	echo "q.返回"
+	GET_Choose
+	case $Choose in
+	q)
+		break
+	;;
+	1)
+		if [ $DeveloperMode == 0 ];then
+			DeveloperMode=1
+		else
+			DeveloperMode=0
+		fi
+	;;
+	2)
+		if [ $SimpleCompilation == 0 ];then
+			SimpleCompilation=1
+		else
+			SimpleCompilation=0
+		fi
+	;;
+	esac
+done
+}
+
 function GET_Choose() {
 echo " "
 read -p '请从上方选择一个操作:' Choose
@@ -938,10 +974,10 @@ read -p '请从上方选择一个操作:' Choose
 HOME=$(cd $(dirname $0); pwd)
 #test "$HOME" || home=$PWD
 
-White="\033[0m"
-Yellow="\033[33m"
-Red="\033[31m"
-Blue="\035[31m"
+White="\e[0m"
+Yellow="\e[33m"
+Red="\e[31m"
+Blue="\e[34m"
 
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
@@ -951,7 +987,7 @@ Openwrt_git=https://github.com/openwrt/openwrt
 Lienol_git=https://github.com/lienol/openwrt
 
 DeveloperMode=0
-PatentMode=1
+SimpleCompilation=1
 
 ################################################################Main code
 ################################################################Main code
@@ -964,6 +1000,7 @@ echo ""
 echo "1.Choose a Project"
 echo "2.检查网络连通性"
 echo "3.高级选项"
+echo "4.设置"
 echo "q.退出"
 GET_Choose
 case $Choose in
@@ -1036,6 +1073,9 @@ done
 ;;
 3)
 	Advanced_Options_1
+;;
+4)
+	Settings_1
 ;;
 esac
 done
