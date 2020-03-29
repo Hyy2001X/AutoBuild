@@ -3,17 +3,16 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.29
-Main_Version=BETA-V2.2.4
+Version=BETA-V2.3.0
 
 function Second_Menu() {
 while :
 do
-	clear
-	cd $Home
+	cd $HOME
 	Dir_Check
 	if [ -f "./Projects/$Project/feeds.conf.default" ];then
 		Say="源码文件:已检测到,当前项目:$Project" && Color_Y
-		Say="项目位置:'$Home/Projects/$Project'" && Color_Y
+		Say="项目位置:'$HOME/Projects/$Project'" && Color_Y
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd ./Projects/$Project/package/lean/default-settings/files
@@ -40,10 +39,10 @@ do
 		break
 	;;
 	1)
-		Update		
+		Sources_Update		
 	;;
 	2)
-		Edit_Menuconfig
+		Make_Menuconfig
 	;;
 	3)
 		Backup_Recovery
@@ -52,15 +51,15 @@ do
 		Compile_Firmware
 	;;
 	5)
-		Adv_Option
+		Advanced_Options_2
 	;;
 	esac
 done
 }
 
-function Update() {
+function Sources_Update() {
 	clear
-	cd $Home/Projects/$Project
+	cd $HOME/Projects/$Project
 	git pull
 	./scripts/feeds update -a
 	./scripts/feeds install -a
@@ -80,11 +79,11 @@ function Custom_Second_Menu() {
 function Compile_Firmware() {
 while :
 do
-	cd $Home/Projects/$Project
+	cd $HOME/Projects/$Project
 	if [ -f ".config" ];then
 		clear
-		cp .config $Home/TEMP/$Project.TEMP
-		cd $Home/TEMP
+		cp .config $HOME/TEMP/$Project.TEMP
+		cd $HOME/TEMP
 		GET_BOARD=$(awk '/CONFIG_TARGET_BOARD=/{print}' $Project.TEMP);
 		GET_SUBTARGET=$(awk '/CONFIG_TARGET_SUBTARGET=/{print}' $Project.TEMP);
 		GET_PROFILE=$(awk '/CONFIG_TARGET_PROFILE=/{print}' $Project.TEMP);
@@ -99,10 +98,10 @@ do
 		NEW_SUBTARGET=${PROCESSED_SUBTARGET:24}	
 		if [ ! $NEW_BOARD == x86 ];then
 			NEW_PROFILE=${PROCESSED_PROFILE:29}
-			X86SET=0
+			X86_Check=0
 		else
 			NEW_PROFILE=${PROCESSED_PROFILE:22}
-			X86SET=1
+			X86_Check=1
 		fi
 		Say="配置文件解析" && Color_B
 		echo CPU架构:$NEW_BOARD
@@ -171,7 +170,7 @@ do
 	Firmware_Name=openwrt-$NEW_BOARD-$NEW_SUBTARGET-$NEW_PROFILE-squashfs-sysupgrade.bin
 	read -p '请输入附加信息:' Extra
 	NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
-	cd $Home
+	cd $HOME
 	while [ -f "./Packages/$NEW_Firmware_Name" ]
 	do
 		read -p '包含该附加信息的名称已存在!请重新添加:' Extra
@@ -188,10 +187,10 @@ do
 	echo " "
 	Say="开始编译$Project..." && Color_Y
 	Compile_START=`date +'%Y-%m-%d %H:%M:%S'`
-	cd $Home/Projects/$Project
+	cd $HOME/Projects/$Project
 	$Thread
 	echo " "
-	if [ $X86SET == 0 ];then
+	if [ $X86_Check == 0 ];then
 		if [ -f ./bin/targets/$NEW_BOARD/$NEW_SUBTARGET/$Firmware_Name ];then
 			Compile_END=`date +'%Y-%m-%d %H:%M:%S'`
 			Start_Seconds=$(date --date="$Compile_START" +%s);
@@ -200,10 +199,10 @@ do
 			echo -ne "\e[34m$Compile_START --> $Compile_END "
 			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
 			echo -ne "\e[0m"
-			mv ./bin/targets/$NEW_BOARD/$NEW_SUBTARGET/$Firmware_Name $Home/Packages/$NEW_Firmware_Name
-			cd $Home/Packages
+			mv ./bin/targets/$NEW_BOARD/$NEW_SUBTARGET/$Firmware_Name $HOME/Packages/$NEW_Firmware_Name
+			cd $HOME/Packages
 			Firmware_Size=`ls -l $NEW_Firmware_Name | awk '{print $5}'`
-			echo -e "\e[33m编译完成!固件已自动移动到'$Home/Packages' "
+			echo -e "\e[33m编译完成!固件已自动移动到'$HOME/Packages' "
 			echo "固件名称:$NEW_Firmware_Name"
 			awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'
 			echo -ne "\e[0m"
@@ -216,12 +215,12 @@ do
 			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
 			Say="编译失败!" && Color_R
 			Say="可能原因如下:" && Color_R
-			Say="	1.编译可能成功了,但是设备可能不受AutoBuild支持,请自行前往'$Home/Projects/$Project/bin/'查看." && Color_R
+			Say="	1.编译可能成功了,但是设备可能不受AutoBuild支持,请自行前往'$HOME/Projects/$Project/bin/'查看." && Color_R
 			Say="	2.编译出错,请使用日志输出编译以进行分析" && Color_R
 			Say="	3.网络原因导致依赖包下载失败,使用全局梯子进行编译"
 		fi
 	else
-		echo "本次编译为X86架构，请自行前往'$Home/Projects/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果."
+		echo "本次编译为X86架构，请自行前往'$HOME/Projects/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果."
 	fi
 	echo " "
 	Enter
@@ -230,7 +229,7 @@ done
 }
 
 function Sources_Download() {
-cd $Home
+cd $HOME
 if [ -f "./Projects/$Project/LICENSE" ];then
 	echo " "
 	GET_Branch=`(awk 'NR==1' ./Config/$Project.branch)`
@@ -238,7 +237,7 @@ if [ -f "./Projects/$Project/LICENSE" ];then
 	sleep 3
 else
 	clear
-	cd $Home/Projects
+	cd $HOME/Projects
 	if  [ $Project == 'Lede' ];then
 		git clone $Lede_git $Project
 		Branch=master
@@ -326,17 +325,17 @@ else
 fi
 }
 
-function Adv_Option() {
+function Advanced_Options_2() {
 while :
 do
-	cd $Home/Projects/$Project
 	clear
+	cd $HOME/Projects/$Project
 	Say="高级选项" && Color_B
 	echo " "
 	echo "1.从Github拉取$Project源代码"
 	echo "2.强制更新源代码且合并到本地"
 	echo "3.添加第三方主题包"
-	Say="4.磁盘清理" && Color_R
+	echo -e "4.$Red磁盘清理$White"
 	echo "5.删除配置文件"
 	echo "6.添加第三方软件包"
 	echo "7.下载[dl]库"
@@ -350,7 +349,7 @@ do
 		Sources_Download
 	;;
 	2)
-		cd $Home/Projects/$Project
+		cd $HOME/Projects/$Project
 		clear
 		git fetch --all
 		git reset --hard origin/master
@@ -359,7 +358,7 @@ do
 	;;
 	3)
 		clear
-		cd $Home/Projects
+		cd $HOME/Projects
 		if [ -d ./$Project/package/themes ];then
 			:
 		else
@@ -368,15 +367,15 @@ do
 		fi
 		clear
 		if [ $Project == 'Lede' ];then
-			cd $Home/Projects/$Project/package/lean
+			cd $HOME/Projects/$Project/package/lean
 			rm -rf luci-theme-argon
 			Say="已删除'./package/lean/luci-theme-argon'" && Color_Y
 			git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
-			cd $Home/Projects/$Project/package/themes
+			cd $HOME/Projects/$Project/package/themes
 			rm -rf luci-theme-rosy
 			Say="已删除'./package/themes/luci-theme-rosy'" && Color_Y
 			git clone https://github.com/rosywrt/luci-theme-rosy luci-theme-rosy
-			cd $Home/Projects/$Project
+			cd $HOME/Projects/$Project
 			grep "darkmatter" feeds.conf.default > /dev/null
 			if [ $? -eq 0 ]; then
 				:
@@ -403,7 +402,7 @@ do
 				Say="主题包 luci-theme-darkmatter 添加失败!" && Color_R
 			fi	
 		else
-			cd $Home/Projects/$Project/package/themes
+			cd $HOME/Projects/$Project/package/themes
 			rm -rf luci-theme-argon
 			Say="已删除'$Project/package/themes/luci-theme-argon'" && Color_Y
 			git clone https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
@@ -424,7 +423,7 @@ do
 		echo "4.删除$Project项目"
 		echo "q.返回"
 		GET_Choose
-		cd $Home/Projects/$Project
+		cd $HOME/Projects/$Project
 		case $Choose in
 		q)
 			break
@@ -445,12 +444,12 @@ do
 			break
 		;;
 		4)
-			cd $Home/Projects
+			cd $HOME/Projects
 			echo " "
 			Say="正在删除$Project,请耐心等待..." && Color_B
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
-				cd $Home/Config
+				cd $HOME/Config
 				rm $Project.branch
 				Say="删除成功!" && Color_Y
 			else 
@@ -462,7 +461,7 @@ do
 	done
 	;;
 	5)
-		cd $Home/Projects/$Project
+		cd $HOME/Projects/$Project
 		rm .config
 		rm .config.old
 		Say="删除成功!" && Color_Y
@@ -471,7 +470,7 @@ do
 	6)
 	while :
 	do
-		cd $Home/Projects/$Project/package
+		cd $HOME/Projects/$Project/package
 		if [ ! -d ./custom ];then
 			mkdir custom
 		else
@@ -526,7 +525,7 @@ do
 			Add_Packages
 		;;
 		4)
-			cd $Home/Projects/$Project
+			cd $HOME/Projects/$Project
 			grep "lienol" feeds.conf.default > /dev/null
 			if [ $? -eq 0 ]; then
 				echo " "
@@ -543,7 +542,7 @@ do
 			fi
 		;;
 		5)
-			cd $Home/Projects/$Project
+			cd $HOME/Projects/$Project
 			clear
 			if [ -d ./package/lean ];then
 				rm -rf ./package/lean
@@ -574,7 +573,7 @@ done
 }
 
 function Dir_Check() {
-	cd $Home
+	cd $HOME
 	if [ ! -d ./Projects ];then
 		mkdir Projects
 	else
@@ -600,6 +599,7 @@ function Dir_Check() {
 	else
 		:
 	fi
+	clear
 }
 
 function Backup_Recovery() {
@@ -634,15 +634,15 @@ do
 	;;
 	1)
 		Config_Name=$Project-$Version-`(date +%m%d_%H:%M)`
-		cp $Home/Projects/$Project/.config $Home/Backups/$Config_Name
+		cp $HOME/Projects/$Project/.config $HOME/Backups/$Config_Name
 	;;
 	2)
 		read -p '请输入你想要的文件名:' Config_Name
 		echo " "
-		cp $Home/Projects/$Project/.config $Home/Backups/$Config_Name
+		cp $HOME/Projects/$Project/.config $HOME/Backups/$Config_Name
 	;;	
 	esac
-	Say="备份完成!备份文件存放于:$Home/Backups" && Color_Y
+	Say="备份完成!备份文件存放于:$HOME/Backups" && Color_Y
 	Say="文件名称:$Config_Name" && Color_Y
 	sleep 3
 done
@@ -652,7 +652,7 @@ while :
 do
 	clear
 	Say="当前操作:恢复[.config]" && Color_B && echo " "
-	cd $Home/Backups
+	cd $HOME/Backups
 	echo -n "备份文件"
 	ls -lh -u -o
 	echo " "
@@ -664,7 +664,7 @@ do
 		break
 	fi
 	if [ -f ./$Config_Recovery ];then
-		cd $Home
+		cd $HOME
 		Config_PATH_NAME=./Projects/$Project/.config
 		rm $Config_PATH_NAME
 		cp ./Backups/$Config_Recovery $Config_PATH_NAME
@@ -683,15 +683,15 @@ done
 ;;
 3)
 	echo " "
-	cd $Home/Projects
+	cd $HOME/Projects
 	if [ ! -d ./$Project/dl ];then
-		Say="没有找到'$Home/$Project/dl'文件夹,无法进行备份!" && Color_R
+		Say="没有找到'$HOME/$Project/dl'文件夹,无法进行备份!" && Color_R
 		Say="您似乎还没有下载$Project源代码或编译." && Color_R
 	else
 		Say="备份中,请耐心等待!" && Color_B
-		cp -a $Home/Projects/$Project/dl $Home/Backups/
-		Say="完成![dl]文件夹已备份到:'$Home/Backups/dl'" && Color_Y
-		cd $Home/Backups
+		cp -a $HOME/Projects/$Project/dl $HOME/Backups/
+		Say="完成![dl]文件夹已备份到:'$HOME/Backups/dl'" && Color_Y
+		cd $HOME/Backups
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
 	fi
@@ -700,15 +700,15 @@ done
 ;;
 4)
 	echo " "
-	cd $Home
+	cd $HOME
 	if [ ! -d ./Backups/dl ];then
-		Say="没有找到'$Home/Backups/dl'文件夹,无法进行恢复!" && Color_R
+		Say="没有找到'$HOME/Backups/dl'文件夹,无法进行恢复!" && Color_R
 		Say="您似乎还没有进行过备份." && Color_R
 	else
 		Say="恢复中,请耐心等待!" && Color_B
-		cp -a $Home/Backups/dl $Home/Projects/$Project
-		Say="完成![dl]文件夹已恢复到:'$Home/Projects/$Project/dl'" && Color_Y
-		cd $Home/Projects/$Project
+		cp -a $HOME/Backups/dl $HOME/Projects/$Project
+		Say="完成![dl]文件夹已恢复到:'$HOME/Projects/$Project/dl'" && Color_Y
+		cd $HOME/Projects/$Project
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
 	fi
@@ -736,9 +736,9 @@ fi
 	fi
 }
 
-function Edit_Menuconfig() {
+function Make_Menuconfig() {
 clear
-cd $Home/Projects/$Project
+cd $HOME/Projects/$Project
 Say="Loading $Project Configuration..." && Color_B
 make menuconfig
 Enter
@@ -764,158 +764,29 @@ function Second_Menu_Check() {
 if [ -f ./Projects/$Project/feeds.conf.default ];then
 	Second_Menu
 else
-	Second_Menu_ERROR
-fi
-}
-
-function Second_Menu_ERROR() {
-if [ $DeveloperMode == 1 ];then
-	Second_Menu
-else
-	Sources_Download
+	if [ $DeveloperMode == 1 ];then
+		Second_Menu
+	else
+		Sources_Download
+	fi
 fi
 }
 
 function Sources_Download_Check() {
-cd $Home
+cd $HOME
 echo " "
 if [ -f "./Projects/$Project/feeds.conf.default" ];then
-	cd $Home/Config
+	cd $HOME/Config
 	echo "$Branch" > $Project.branch
-	cp -r ./Projects/$Project $Home/Backups/Projects/$Project
-	Say="$Project源代码下载完成,已自动备份到'$Home/Backups/Projects/$Project'" && Color_Y
+	cp -r ./Projects/$Project $HOME/Backups/Projects/$Project
+	Say="$Project源代码下载完成,已自动备份到'$HOME/Backups/Projects/$Project'" && Color_Y
 else
 	Say="下载失败,请检查网络后重试!" && Color_R
 fi
 	Enter
 }
 
-function GET_Choose() {
-echo " "
-read -p '请从上方选择一个操作:' Choose
-}
-
-White="\033[0m"
-Yellow="\033[33m"
-Red="\033[31m"
-Blue="\035[31m"
-
-Lede_git=https://github.com/coolsnowwolf/lede
-Openwrt_git=https://github.com/openwrt/openwrt
-Lienol_git=https://github.com/lienol/openwrt
-
-DeveloperMode=0
-
-################################################################MainBuild
-################################################################MainBuild
-while :
-do
-CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
-CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
-#test "$home" || home=$PWD
-Home=$(cd $(dirname $0); pwd)
-Dir_Check
-clear
-Say="AutoBuild AIO $Main_Version by Hyy2001" && Color_B
-echo ""
-echo "1.Choose a Project"
-echo "2.检查网络连通性"
-echo "3.高级选项"
-echo "q.退出"
-GET_Choose
-case $Choose in
-q)
-	rm -rf $Home/TEMP
-	clear
-	break
-;;
-1)
-while :
-do
-	clear
-	Say="AutoBuild AIO $Main_Version by Hyy2001" && Color_B
-	echo " "
-	cd $Home
-	if [ -f ./Projects/Lede/feeds.conf.default ];then
-		echo -e "1.Lede			\e[33m[已检测到]\e[0m"
-	else
-		echo -e "1.Lede			\e[31m[未检测到]\e[0m"
-	fi
-	if [ -f ./Projects/Openwrt/feeds.conf.default ];then
-		echo -e "2.Openwrt_Offical	\e[33m[已检测到]\e[0m"
-	else
-		echo -e "2.Openwrt_Offical	\e[31m[未检测到]\e[0m"
-	fi
-	if [ -f ./Projects/Lienol/feeds.conf.default ];then
-		echo -e "3.Lienol		\e[33m[已检测到]\e[0m"
-	else
-		echo -e "3.Lienol		\e[31m[未检测到]\e[0m"
-	fi
-	if [ -f ./Projects/Custom/feeds.conf.default ];then
-		echo -e "4.Custom_Sources	\e[33m[已检测到]\e[0m"
-	else
-		echo -e "4.Custom_Sources	\e[31m[未检测到]\e[0m"
-	fi
-	echo "q.返回"
-	GET_Choose
-	if [ $Choose == 1 ]; then
-		Project=Lede
-	elif [ $Choose == 2 ]; then
-		Project=Openwrt
-	elif [ $Choose == 3 ]; then
-		Project=Lienol
-	elif [ $Choose == 4 ]; then
-		Project=Custom
-	else
-		:
-	fi
-	case $Choose in
-	q)
-		break
-	;;
-	1)
-		Second_Menu_Check
-	;;
-	2)
-		Second_Menu_Check
-	;;
-	3)
-		Second_Menu_Check
-	;;
-	4)
-		Custom_Second_Menu
-	;;
-	esac
-done
-;;
-2)
-	clear
-	Say="Network Connectivity Test" && Color_B
-	echo " "
-	Network_OK="\e[33m连接正常\e[0m"
-	Network_ERROR="\e[31m连接错误\e[0m"
-	timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
-	if [ $? -eq 0 ];then
-		echo -e "百度		$Network_OK" 
-	else
-		echo -e "百度		$Network_ERROR"
-	fi
-	timeout 3 httping -c 1 www.github.com > /dev/null 2>&1
-	if [ $? -eq 0 ];then
-		echo -e "Github		$Network_OK" 
-	else
-		echo -e "Github		$Network_ERROR"
-	fi
-	timeout 3 httping -c 1 www.google.com > /dev/null 2>&1
-	if [ $? -eq 0 ];then
-		echo -e "Google		$Network_OK" 
-	else
-		echo -e "Google		$Network_ERROR"
-	fi
-	echo ""
-	Enter	
-;;
-3)
+Advanced_Options_1() {
 while :
 do
 	clear
@@ -978,7 +849,7 @@ do
 	6)
 		echo " "
 		read -p '请创建一个快捷启动的名称:' FastOpen		
-		echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
+		echo "alias $FastOpen='$HOME/AutoBuild.sh'" >> ~/.bashrc
 		source ~/.bashrc
 		echo " "
 		Say="创建完成!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
@@ -1029,6 +900,142 @@ do
 	;;
 	esac
 done
+}
+
+function Network_Test() {
+clear
+Say="Network Connectivity Test" && Color_B
+echo " "
+Network_OK="\e[33m连接正常\e[0m"
+Network_ERROR="\e[31m连接错误\e[0m"
+timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
+	echo -e "百度		$Network_OK" 
+else
+	echo -e "百度		$Network_ERROR"
+fi
+timeout 3 httping -c 1 www.github.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
+	echo -e "Github		$Network_OK" 
+else
+	echo -e "Github		$Network_ERROR"
+fi
+timeout 3 httping -c 1 www.google.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
+	echo -e "Google		$Network_OK" 
+else
+	echo -e "Google		$Network_ERROR"
+fi
+echo ""
+Enter	
+}
+
+function GET_Choose() {
+echo " "
+read -p '请从上方选择一个操作:' Choose
+}
+
+HOME=$(cd $(dirname $0); pwd)
+#test "$HOME" || home=$PWD
+
+White="\033[0m"
+Yellow="\033[33m"
+Red="\033[31m"
+Blue="\035[31m"
+
+CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
+CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
+
+Lede_git=https://github.com/coolsnowwolf/lede
+Openwrt_git=https://github.com/openwrt/openwrt
+Lienol_git=https://github.com/lienol/openwrt
+
+DeveloperMode=0
+PatentMode=1
+
+################################################################Main code
+################################################################Main code
+while :
+do
+Dir_Check
+clear
+Say="AutoBuild AIO $Version by Hyy2001" && Color_B
+echo ""
+echo "1.Choose a Project"
+echo "2.检查网络连通性"
+echo "3.高级选项"
+echo "q.退出"
+GET_Choose
+case $Choose in
+q)
+	rm -rf $HOME/TEMP
+	clear
+	break
+;;
+1)
+while :
+do
+	clear
+	Say="AutoBuild AIO $Version by Hyy2001" && Color_B
+	echo " "
+	cd $HOME
+	if [ -f ./Projects/Lede/feeds.conf.default ];then
+		echo -e "1.Lede			$Yellow[已检测到]$White"
+	else
+		echo -e "1.Lede			$Red[未检测到]$White"
+	fi
+	if [ -f ./Projects/Openwrt/feeds.conf.default ];then
+		echo -e "2.Openwrt_Offical	$Yellow[已检测到]$White"
+	else
+		echo -e "2.Openwrt_Offical	$Red[未检测到]$White"
+	fi
+	if [ -f ./Projects/Lienol/feeds.conf.default ];then
+		echo -e "3.Lienol		$Yellow[已检测到]$White"
+	else
+		echo -e "3.Lienol		$Red[未检测到]$White"
+	fi
+	if [ -f ./Projects/Custom/feeds.conf.default ];then
+		echo -e "4.Custom_Sources	$Yellow[已检测到]$White"
+	else
+		echo -e "4.Custom_Sources	$Red[未检测到]$White"
+	fi
+	echo "q.返回"
+	GET_Choose
+	if [ $Choose == 1 ]; then
+		Project=Lede
+	elif [ $Choose == 2 ]; then
+		Project=Openwrt
+	elif [ $Choose == 3 ]; then
+		Project=Lienol
+	elif [ $Choose == 4 ]; then
+		Project=Custom
+	else
+		:
+	fi
+	case $Choose in
+	q)
+		break
+	;;
+	1)
+		Second_Menu_Check
+	;;
+	2)
+		Second_Menu_Check
+	;;
+	3)
+		Second_Menu_Check
+	;;
+	4)
+		Custom_Second_Menu
+	;;
+	esac
+done
+;;
+2)
+	Network_Test
+;;
+3)
+	Advanced_Options_1
 ;;
 esac
 done
