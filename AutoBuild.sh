@@ -769,7 +769,11 @@ fi
 }
 
 function Second_Menu_ERROR() {
-Sources_Download
+if [ $DeveloperMode == 1 ];then
+	Second_Menu
+else
+	Sources_Download
+fi
 }
 
 function Sources_Download_Check() {
@@ -800,6 +804,7 @@ Lede_git=https://github.com/coolsnowwolf/lede
 Openwrt_git=https://github.com/openwrt/openwrt
 Lienol_git=https://github.com/lienol/openwrt
 
+DeveloperMode=0
 
 ################################################################MainBuild
 ################################################################MainBuild
@@ -924,11 +929,23 @@ do
 	echo "6.为AutoBuild添加快捷启动"
 	echo "7.查看磁盘空间大小"
 	echo "8.定时关机"
+	if [ $DeveloperMode == 0 ];then
+		Say="x.[DeveloperMode:OFF]" && Color_R
+	else
+		Say="x.[DeveloperMode:ON]" && Color_Y
+	fi
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
 	q)
 		break
+	;;
+	x)
+		if [ $DeveloperMode == 0 ];then
+			DeveloperMode=1
+		else
+			DeveloperMode=0
+		fi
 	;;
 	1)
 		clear
