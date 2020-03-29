@@ -240,14 +240,16 @@ else
 	clear
 	cd $Home/Projects
 	if  [ $Project == 'Lede' ];then
-		git clone https://github.com/coolsnowwolf/lede $Project
+		git clone $Lede_git $Project
 		Branch=master
 		Sources_Download_Check
 	elif [ $Project == 'Openwrt' ];then
 	while :
 	do
 		clear
-		Say="$Project源码下载-分支选择" && Color_B && echo " "
+		Say="$Project源码下载-分支选择" && Color_B
+		Say="Github仓库:$Openwrt_git" && Color_Y
+		echo " "
 		Branch_1=master
 		Branch_2=lede-17.01
 		Branch_3=openwrt-18.06
@@ -263,19 +265,19 @@ else
 			break
 		;;
 		1)
-			git clone https://github.com/openwrt/openwrt $Project
+			git clone $Openwrt_git $Project
 			Branch=master
 		;;
 		2)
-			git clone -b $Branch_2 https://github.com/openwrt/openwrt $Project
+			git clone -b $Branch_2 $Openwrt_git $Project
 			Branch=$Branch_2
 		;;
 		3)
-			git clone -b $Branch_3 https://github.com/openwrt/openwrt $Project
+			git clone -b $Branch_3 $Openwrt_git $Project
 			Branch=$Branch_3
 		;;
 		4)
-			git clone -b $Branch_4 https://github.com/openwrt/openwrt $Project
+			git clone -b $Branch_4 $Openwrt_git $Project
 			Branch=$Branch_4
 		;;
 		esac
@@ -286,7 +288,9 @@ else
 	while :
 	do
 		clear
-		Say="$Project分支选择" && Color_B && echo " "
+		Say="$Project分支选择" && Color_B
+		Say="Github仓库:$Lienol_git" && Color_Y
+		echo " "
 		Branch_1=dev-19.07
 		Branch_2=dev-lean-lede
 		Branch_3=dev-master
@@ -301,15 +305,15 @@ else
 			break
 		;;
 		1)
-			git clone -b $Branch_1 https://github.com/Lienol/openwrt $Project
+			git clone -b $Branch_1 $Lienol_git $Project
 			Branch=$Branch_1
 		;;
 		2)
-			git clone -b $Branch_2 https://github.com/Lienol/openwrt $Project
+			git clone -b $Branch_2 $Lienol_git $Project
 			Branch=$Branch_2
 		;;
 		3)
-			git clone -b $Branch_3 https://github.com/Lienol/openwrt $Project
+			git clone -b $Branch_3 $Lienol_git $Project
 			Branch=$Branch_3
 		;;
 		esac
@@ -480,8 +484,8 @@ do
 		echo "1.SmartDNS"
 		echo "2.AdGuardHome"
 		echo "3.Clash"
-		Say="4.[特殊]Lienol's Package Sources" && Color_Y
-		Say="5.[特殊]Lean's Package Sources" && Color_Y
+		Say="4.[软件库]Lienol's Package Sources" && Color_Y
+		Say="5.[软件库]Lean's Package Sources" && Color_Y
 		echo "q.返回"
 		GET_Choose
 		case $Choose in
@@ -791,6 +795,11 @@ White="\033[0m"
 Yellow="\033[33m"
 Red="\033[31m"
 Blue="\035[31m"
+
+Lede_git=https://github.com/coolsnowwolf/lede
+Openwrt_git=https://github.com/openwrt/openwrt
+Lienol_git=https://github.com/lienol/openwrt
+
 
 ################################################################MainBuild
 ################################################################MainBuild
