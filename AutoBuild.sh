@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.30
-Version=BETA-V2.3.7
+Version=BETA-V2.3.8
 
 function Second_Menu() {
 while :
@@ -93,19 +93,19 @@ do
 		PROCESSED_BOARD=`(awk 'NR==1' $Project.TEMP2)`
 		PROCESSED_SUBTARGET=`(awk 'NR==2' $Project.TEMP2)`
 		PROCESSED_PROFILE=`(awk 'NR==3' $Project.TEMP2)`
-		NEW_BOARD=${PROCESSED_BOARD:20}
-		NEW_SUBTARGET=${PROCESSED_SUBTARGET:24}	
-		if [ ! $NEW_BOARD == x86 ];then
-			NEW_PROFILE=${PROCESSED_PROFILE:29}
+		TARGET_BOARD=${PROCESSED_BOARD:20}
+		TARGET_SUBTARGET=${PROCESSED_SUBTARGET:24}	
+		if [ ! $TARGET_BOARD == x86 ];then
+			TARGET_PROFILE=${PROCESSED_PROFILE:29}
 			X86_Check=0
 		else
-			NEW_PROFILE=${PROCESSED_PROFILE:22}
+			TARGET_PROFILE=${PROCESSED_PROFILE:22}
 			X86_Check=1
 		fi
 		Say="配置文件解析" && Color_B
-		echo CPU架构:$NEW_BOARD
-		echo 处理器型号:$NEW_SUBTARGET
-		echo 设备名称:$NEW_PROFILE
+		echo CPU架构:$TARGET_BOARD
+		echo 处理器型号:$TARGET_SUBTARGET
+		echo 设备名称:$TARGET_PROFILE
 		echo ""
 		echo -e "用户CPU参数:$Yellow$CPU_Cores核$CPU_Threads线程$White"
 	else
@@ -166,14 +166,14 @@ do
 	else
 		Thread=$Threads
 	fi
-	Firmware_Name=openwrt-$NEW_BOARD-$NEW_SUBTARGET-$NEW_PROFILE-squashfs-sysupgrade.bin
+	Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
 	read -p '请输入附加信息:' Extra
-	NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
+	NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
 	cd $HOME
 	while [ -f "./Packages/$NEW_Firmware_Name" ]
 	do
 		read -p '包含该附加信息的名称已存在!请重新添加:' Extra
-		NEW_Firmware_Name="AutoBuild-$NEW_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
+		NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
 	done
 	rm -rf ./TEMP
 	clear
@@ -190,7 +190,7 @@ do
 	$Thread
 	echo " "
 	if [ $X86_Check == 0 ];then
-		if [ -f ./bin/targets/$NEW_BOARD/$NEW_SUBTARGET/$Firmware_Name ];then
+		if [ -f ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name ];then
 			Compile_END=`date +'%Y-%m-%d %H:%M:%S'`
 			Start_Seconds=$(date --date="$Compile_START" +%s);
 			End_Seconds=$(date --date="$Compile_END" +%s);
@@ -198,7 +198,7 @@ do
 			echo -ne "\e[34m$Compile_START --> $Compile_END "
 			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
 			echo -ne "\e[0m"
-			mv ./bin/targets/$NEW_BOARD/$NEW_SUBTARGET/$Firmware_Name $HOME/Packages/$NEW_Firmware_Name
+			mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $HOME/Packages/$NEW_Firmware_Name
 			cd $HOME/Packages
 			Firmware_Size=`ls -l $NEW_Firmware_Name | awk '{print $5}'`
 			echo -e "$Yellow编译成功!固件已自动移动到'$HOME/Packages' "
@@ -215,7 +215,7 @@ do
 			Say="编译失败!" && Color_R
 		fi
 	else
-		echo "所选编译设备为X86架构，请自行前往'$HOME/Projects/$Project/bin/targets/$NEW_BOARD/$NEW_SUBTARGET'查看结果."
+		echo "所选编译设备为X86架构，请自行前往'$HOME/Projects/$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET'查看结果."
 	fi
 	echo " "
 	Enter
@@ -660,7 +660,7 @@ do
 		else
 			:
 		fi
-		svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean ./package/lean
+		svn checkout $Lede_git/trunk/package/lean ./package/lean
 		echo " "
 		if [ $? -eq 0 ]; then
 			Say="下载成功!" && Color_Y
@@ -824,11 +824,11 @@ function Script_Update() {
 		mv ./TEMP/README.md $HOME/README.md
 		chmod +x AutoBuild.sh
 		rm -rf .subversion
-		Say="更新成功" && Color_Y
+		Say="更新成功!" && Color_Y
 		sleep 3
 		./AutoBuild.sh
 	else
-		Say="更新失败" && Color_R
+		Say="更新失败!" && Color_R
 	fi
 }
 
@@ -883,7 +883,7 @@ if [ -f "./Projects/$Project/feeds.conf.default" ];then
 	cd $HOME/Config
 	echo "$Branch" > $Project.branch
 	cp -r $HOME/Projects/$Project $HOME/Backups/Projects/$Project
-	Say="$Project源代码下载成功,已自动备份到'$HOME/Backups/Projects/$Project'" && Color_Y
+	Say="$Project源码下载成功,已自动备份到'$HOME/Backups/Projects/$Project'" && Color_Y
 else
 	Say="下载失败,请检查网络后重试!" && Color_R
 fi
