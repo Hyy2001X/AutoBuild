@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.30
-Version=BETA-V2.3.6
+Version=BETA-V2.3.7
 
 function Second_Menu() {
 while :
@@ -19,12 +19,11 @@ do
 				Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" zzz-default-settings`
 				Say="版本号:$Version" && Color_Y
 			else
-				Say="版本号:未知" && Color_R
+				:
 			fi
 		fi
 	else
 		Say="源码文件:未检测到,请前往[高级选项]下载!" && Color_R
-		rm -rf TEMP
 	fi
 	echo " "
 	echo "1.更新$Project源代码和Feeds"
@@ -518,7 +517,7 @@ do
 		cp $HOME/Projects/$Project/.config $HOME/Backups/$Config_Name
 	;;	
 	esac
-	Say="备份完成!备份文件存放于:$HOME/Backups" && Color_Y
+	Say="备份成功!备份文件存放于:$HOME/Backups" && Color_Y
 	Say="文件名称:$Config_Name" && Color_Y
 	sleep 3
 done
@@ -545,7 +544,7 @@ do
 		rm $Config_PATH_NAME
 		cp ./Backups/$Config_Recovery $Config_PATH_NAME
 		if [ -f $Config_PATH_NAME ];then
-			Say="恢复完成!" && Color_Y
+			Say="恢复成功!" && Color_Y
 		else
 			Say="恢复失败!" && Color_R
 		fi
@@ -566,7 +565,8 @@ done
 	else
 		Say="备份中,请耐心等待!" && Color_B
 		cp -a $HOME/Projects/$Project/dl $HOME/Backups/
-		Say="完成![dl]文件夹已备份到:'$HOME/Backups/dl'" && Color_Y
+		echo " "
+		Say="备份成功![dl]文件夹已备份到:'$HOME/Backups/dl'" && Color_Y
 		cd $HOME/Backups
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
@@ -583,7 +583,8 @@ done
 	else
 		Say="恢复中,请耐心等待!" && Color_B
 		cp -a $HOME/Backups/dl $HOME/Projects/$Project
-		Say="完成![dl]文件夹已恢复到:'$HOME/Projects/$Project/dl'" && Color_Y
+		echo " "
+		Say="恢复成功![dl]文件夹已恢复到:'$HOME/Projects/$Project/dl'" && Color_Y
 		cd $HOME/Projects/$Project
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
@@ -611,8 +612,8 @@ do
 	echo "1.SmartDNS"
 	echo "2.AdGuardHome"
 	echo "3.Clash"
-	Say="4.[软件库]Lienol's Package Sources" && Color_Y
-	Say="5.[软件库]Lean's Package Sources" && Color_Y
+	echo -e "4.$Yellow[软件库]$BlueLienol's Package Sources$White"
+	echo -e "5.$Yellow[软件库]$BlueLean's Package Sources$White"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -620,27 +621,9 @@ do
 		break	
 	;;
 	1)
-		clear
-		if [ ! -d ./SmartDNS ];then
-			:
-		else
-			rm -rf SmartDNS
-			Say="已删除软件包 luci-app-smartdns" && Color_Y
-			Say="已删除软件包 smartdns" && Color_Y
-		fi
-		git clone https://github.com/Hyy2001X/SmartDNS.git
-		echo " "
-		if [ -f ./SmartDNS/luci-app-smartdns/Makefile ];then
-			Say="已成功添加软件包 luci-app-smartdns" && Color_Y
-		else
-			Say="未成功添加软件包 luci-app-smartdns,请重试!" && Color_R
-		fi
-		if [ -f ./SmartDNS/smartdns/Makefile ];then
-			Say="已成功添加软件包 smartdns" && Color_Y
-		else
-			Say="未成功添加软件包 smartdns,请重试!" && Color_R
-		fi
-		Enter
+		PKG_NAME=SmartDNS
+		PKG_URL=https://github.com/Hyy2001X/SmartDNS.git
+		Add_Packages_mod
 	;;
 	2)
 		PKG_NAME=luci-app-adguardhome
@@ -680,7 +663,7 @@ do
 		svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean ./package/lean
 		echo " "
 		if [ $? -eq 0 ]; then
-			Say="下载完成!" && Color_Y
+			Say="下载成功!" && Color_Y
 		else
 			Say="下载失败!" && Color_R
 		fi
@@ -771,7 +754,7 @@ do
 		echo "alias $FastOpen='$HOME/AutoBuild.sh'" >> ~/.bashrc
 		source ~/.bashrc
 		echo " "
-		Say="创建完成!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
+		Say="创建成功!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
 		sleep 5
 	;;
 	7)
@@ -900,7 +883,7 @@ if [ -f "./Projects/$Project/feeds.conf.default" ];then
 	cd $HOME/Config
 	echo "$Branch" > $Project.branch
 	cp -r $HOME/Projects/$Project $HOME/Backups/Projects/$Project
-	Say="$Project源代码下载完成,已自动备份到'$HOME/Backups/Projects/$Project'" && Color_Y
+	Say="$Project源代码下载成功,已自动备份到'$HOME/Backups/Projects/$Project'" && Color_Y
 else
 	Say="下载失败,请检查网络后重试!" && Color_R
 fi
