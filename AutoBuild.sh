@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.30
-Version=BETA-V2.3.5
+Version=BETA-V2.3.6
 
 function Second_Menu() {
 while :
@@ -324,8 +324,8 @@ fi
 function Advanced_Options_2() {
 while :
 do
-	clear
 	cd $HOME/Projects/$Project
+	clear
 	Say="高级选项" && Color_B
 	echo " "
 	echo "1.从Github拉取$Project源代码"
@@ -899,7 +899,7 @@ echo " "
 if [ -f "./Projects/$Project/feeds.conf.default" ];then
 	cd $HOME/Config
 	echo "$Branch" > $Project.branch
-	cp -r ./Projects/$Project $HOME/Backups/Projects/$Project
+	cp -r $HOME/Projects/$Project $HOME/Backups/Projects/$Project
 	Say="$Project源代码下载完成,已自动备份到'$HOME/Backups/Projects/$Project'" && Color_Y
 else
 	Say="下载失败,请检查网络后重试!" && Color_R
