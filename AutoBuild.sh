@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.30
-Version=BETA-V2.3.4
+Version=BETA-V2.3.5
 
 function Second_Menu() {
 while :
@@ -746,7 +746,8 @@ do
 	2)
 		clear
 		sudo apt-get update
-		sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib ntpdate httping
+		sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib
+		sudo apt-get -y install $Extra_Packages
 		echo " "
 		Enter
 	;;
@@ -1034,6 +1035,7 @@ done
 
 HOME=$(cd $(dirname $0); pwd)
 #test "$HOME" || home=$PWD
+Extra_Packages="ntpdate httping subversion"
 
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
