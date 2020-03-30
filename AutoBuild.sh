@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.30
-Version=BETA-V2.3.2
+Version=BETA-V2.3.3
 
 function Second_Menu() {
 while :
@@ -768,6 +768,7 @@ do
 	echo "6.为AutoBuild添加快捷启动"
 	echo "7.查看磁盘空间大小"
 	echo "8.定时关机"
+	echo -e "9.$Yellow更新脚本$White"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -854,10 +855,35 @@ do
 		sleep 3
 	done
 	;;
+	9)
+		Script_Update
+	;;
 	esac
 done
 }
-
+function Script_Update() {
+	cd $HOME
+	if [ -f ./TEMP/AutoBuild.sh ];then
+		rm ./TEMP/AutoBuild.sh
+	elif [ -f ./TEMP/README.md ];then
+		rm ./TEMP/README.md
+	else
+		:
+	fi
+	svn checkout $AutoBuild_git/trunk ./TEMP
+	if [ -f ./TEMP/AutoBuild.sh ];then
+		rm AutoBuild.sh
+		rm README.md
+		mv ./TEMP/AutoBuild.sh $HOME/AutoBuild.sh
+		mv ./TEMP/README.md $HOME/README.md
+		chmod +x AutoBuild.sh
+		Say="更新成功" && Color_Y
+		sleep 3
+		./AutoBuild.sh
+	else
+		Say="更新失败" && Color_R
+	fi
+}
 function Network_Test() {
 clear
 Say="Network Connectivity Test" && Color_B
@@ -1007,6 +1033,7 @@ CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 Lede_git=https://github.com/coolsnowwolf/lede
 Openwrt_git=https://github.com/openwrt/openwrt
 Lienol_git=https://github.com/lienol/openwrt
+AutoBuild_git=https://github.com/Hyy2001X/AutoBuild
 
 DeveloperMode=0
 SimpleCompilation=1
