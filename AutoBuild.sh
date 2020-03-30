@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.30
-Version=BETA-V2.3.3
+Version=BETA-V2.3.4
 
 function Second_Menu() {
 while :
@@ -449,7 +449,7 @@ do
 				rm $Project.branch
 				Say="删除成功!" && Color_Y
 			else 
-				Say="删除失败,请重试!" && Color_R
+				Say="删除失败!" && Color_R
 			fi
 			sleep 3
 			break
@@ -460,102 +460,12 @@ do
 		cd $HOME/Projects/$Project
 		rm .config
 		rm .config.old
+		echo " "
 		Say="删除成功!" && Color_Y
 		sleep 3
 	;;
 	6)
-	while :
-	do
-		cd $HOME/Projects/$Project/package
-		if [ ! -d ./custom ];then
-			mkdir custom
-		else
-			:
-		fi
-		cd ./custom
-		clear
-		Say="手动添加软件包" && Color_B
-		echo " "
-		echo "1.SmartDNS"
-		echo "2.AdGuardHome"
-		echo "3.Clash"
-		Say="4.[软件库]Lienol's Package Sources" && Color_Y
-		Say="5.[软件库]Lean's Package Sources" && Color_Y
-		echo "q.返回"
-		GET_Choose
-		case $Choose in
-		q)
-			break	
-		;;
-		1)
-			clear
-			if [ ! -d ./SmartDNS ];then
-				:
-			else
-				rm -rf SmartDNS
-				Say="已删除软件包 luci-app-smartdns" && Color_Y
-				Say="已删除软件包 smartdns" && Color_Y
-			fi
-			git clone https://github.com/Hyy2001X/SmartDNS.git
-			echo " "
-			if [ -f ./SmartDNS/luci-app-smartdns/Makefile ];then
-				Say="已成功添加软件包 luci-app-smartdns" && Color_Y
-			else
-				Say="未成功添加软件包 luci-app-smartdns,请重试!" && Color_R
-			fi
-			if [ -f ./SmartDNS/smartdns/Makefile ];then
-				Say="已成功添加软件包 smartdns" && Color_Y
-			else
-				Say="未成功添加软件包 smartdns,请重试!" && Color_R
-			fi
-			Enter
-		;;
-		2)
-			PKG_NAME=luci-app-adguardhome
-			PKG_URL=https://github.com/rufengsuixing/luci-app-adguardhome.git
-			Add_Packages
-		;;
-		3)
-			PKG_NAME=luci-app-clash
-			PKG_URL=https://github.com/frainzy1477/luci-app-clash.git
-			Add_Packages
-		;;
-		4)
-			cd $HOME/Projects/$Project
-			grep "lienol" feeds.conf.default > /dev/null
-			if [ $? -eq 0 ]; then
-				echo " "
-				Say="已检测到Lienol's Package Sources,无需添加!" && Color_Y
-			else
-				echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
-				echo " "
-				grep "lienol" feeds.conf.default > /dev/null
-				if [ $? -eq 0 ]; then
-					Say="添加成功!" && Color_Y
-				else
-					Say="添加失败!" && Color_R
-				fi
-			fi
-		;;
-		5)
-			cd $HOME/Projects/$Project
-			clear
-			if [ -d ./package/lean ];then
-				rm -rf ./package/lean
-			else
-				:
-			fi
-			svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean ./package/lean
-			echo " "
-			if [ $? -eq 0 ]; then
-				Say="下载完成!" && Color_Y
-			else
-				Say="下载失败!" && Color_R
-			fi
-		;;
-		esac
-		sleep 3
-	done
+		Add_Packages
 	;;
 	7)
 		clear
@@ -566,36 +476,6 @@ do
 	;;
 	esac
 done
-}
-
-function Dir_Check() {
-	cd $HOME
-	if [ ! -d ./Projects ];then
-		mkdir Projects
-	else
-		:
-	fi
-	if [ ! -d ./TEMP ];then
-		mkdir TEMP
-	else
-		:
-	fi
-	if [ ! -d ./Packages ];then
-		mkdir Packages
-	else
-		:
-	fi
-	if [ ! -d ./Backups ];then
-		mkdir Backups
-	else
-		:
-	fi
-	if [ ! -d ./Config ];then
-		mkdir Config
-	else
-		:
-	fi
-	clear
 }
 
 function Backup_Recovery() {
@@ -716,6 +596,101 @@ done
 }
 
 function Add_Packages() {
+while :
+do
+	cd $HOME/Projects/$Project/package
+	if [ ! -d ./custom ];then
+		mkdir custom
+	else
+		:
+	fi
+	cd ./custom
+	clear
+	Say="手动添加软件包" && Color_B
+	echo " "
+	echo "1.SmartDNS"
+	echo "2.AdGuardHome"
+	echo "3.Clash"
+	Say="4.[软件库]Lienol's Package Sources" && Color_Y
+	Say="5.[软件库]Lean's Package Sources" && Color_Y
+	echo "q.返回"
+	GET_Choose
+	case $Choose in
+	q)
+		break	
+	;;
+	1)
+		clear
+		if [ ! -d ./SmartDNS ];then
+			:
+		else
+			rm -rf SmartDNS
+			Say="已删除软件包 luci-app-smartdns" && Color_Y
+			Say="已删除软件包 smartdns" && Color_Y
+		fi
+		git clone https://github.com/Hyy2001X/SmartDNS.git
+		echo " "
+		if [ -f ./SmartDNS/luci-app-smartdns/Makefile ];then
+			Say="已成功添加软件包 luci-app-smartdns" && Color_Y
+		else
+			Say="未成功添加软件包 luci-app-smartdns,请重试!" && Color_R
+		fi
+		if [ -f ./SmartDNS/smartdns/Makefile ];then
+			Say="已成功添加软件包 smartdns" && Color_Y
+		else
+			Say="未成功添加软件包 smartdns,请重试!" && Color_R
+		fi
+		Enter
+	;;
+	2)
+		PKG_NAME=luci-app-adguardhome
+		PKG_URL=https://github.com/rufengsuixing/luci-app-adguardhome.git
+		Add_Packages_mod
+	;;
+	3)
+		PKG_NAME=luci-app-clash
+		PKG_URL=https://github.com/frainzy1477/luci-app-clash.git
+		Add_Packages_mod
+	;;
+	4)
+		cd $HOME/Projects/$Project
+		grep "lienol" feeds.conf.default > /dev/null
+		if [ $? -eq 0 ]; then
+			echo " "
+			Say="已检测到Lienol's Package Sources,无需添加!" && Color_Y
+		else
+			echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
+			echo " "
+			grep "lienol" feeds.conf.default > /dev/null
+			if [ $? -eq 0 ]; then
+				Say="添加成功!" && Color_Y
+			else
+				Say="添加失败!" && Color_R
+			fi
+		fi
+	;;
+	5)
+		cd $HOME/Projects/$Project
+		clear
+		if [ -d ./package/lean ];then
+			rm -rf ./package/lean
+		else
+			:
+		fi
+		svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean ./package/lean
+		echo " "
+		if [ $? -eq 0 ]; then
+			Say="下载完成!" && Color_Y
+		else
+			Say="下载失败!" && Color_R
+		fi
+	;;
+	esac
+	sleep 3
+done
+}
+
+function Add_Packages_mod() {
 clear
 if [ ! -d ./$PKG_NAME ];then
 	:
@@ -738,20 +713,6 @@ cd $HOME/Projects/$Project
 Say="Loading $Project Configuration..." && Color_B
 make menuconfig
 Enter
-}
-
-function Sources_Download_Check() {
-cd $HOME
-echo " "
-if [ -f "./Projects/$Project/feeds.conf.default" ];then
-	cd $HOME/Config
-	echo "$Branch" > $Project.branch
-	cp -r ./Projects/$Project $HOME/Backups/Projects/$Project
-	Say="$Project源代码下载完成,已自动备份到'$HOME/Backups/Projects/$Project'" && Color_Y
-else
-	Say="下载失败,请检查网络后重试!" && Color_R
-fi
-	Enter
 }
 
 Advanced_Options_1() {
@@ -861,6 +822,7 @@ do
 	esac
 done
 }
+
 function Script_Update() {
 	cd $HOME
 	if [ -f ./TEMP/AutoBuild.sh ];then
@@ -877,6 +839,7 @@ function Script_Update() {
 		mv ./TEMP/AutoBuild.sh $HOME/AutoBuild.sh
 		mv ./TEMP/README.md $HOME/README.md
 		chmod +x AutoBuild.sh
+		rm -rf .subversion
 		Say="更新成功" && Color_Y
 		sleep 3
 		./AutoBuild.sh
@@ -884,6 +847,7 @@ function Script_Update() {
 		Say="更新失败" && Color_R
 	fi
 }
+
 function Network_Test() {
 clear
 Say="Network Connectivity Test" && Color_B
@@ -928,6 +892,50 @@ function Color_B() {
 echo -e "$Blue$Say$White"
 }
 
+function Sources_Download_Check() {
+cd $HOME
+echo " "
+if [ -f "./Projects/$Project/feeds.conf.default" ];then
+	cd $HOME/Config
+	echo "$Branch" > $Project.branch
+	cp -r ./Projects/$Project $HOME/Backups/Projects/$Project
+	Say="$Project源代码下载完成,已自动备份到'$HOME/Backups/Projects/$Project'" && Color_Y
+else
+	Say="下载失败,请检查网络后重试!" && Color_R
+fi
+	Enter
+}
+
+function Dir_Check() {
+	cd $HOME
+	if [ ! -d ./Projects ];then
+		mkdir Projects
+	else
+		:
+	fi
+	if [ ! -d ./TEMP ];then
+		mkdir TEMP
+	else
+		:
+	fi
+	if [ ! -d ./Packages ];then
+		mkdir Packages
+	else
+		:
+	fi
+	if [ ! -d ./Backups ];then
+		mkdir Backups
+	else
+		:
+	fi
+	if [ ! -d ./Config ];then
+		mkdir Config
+	else
+		:
+	fi
+	clear
+}
+
 function Second_Menu_Check() {
 if [ -f ./Projects/$Project/feeds.conf.default ];then
 	Second_Menu
@@ -952,10 +960,29 @@ else
 fi
 }
 
+function ColorfulUI_Check() {
+if [ $ColorfulUI == 1 ];then
+	White="\e[0m"
+	Yellow="\e[33m"
+	Red="\e[31m"
+	Blue="\e[34m"
+else
+	White="\e[0m"
+	Yellow="\e[0m"
+	Red="\e[0m"
+	Blue="\e[0m"
+fi
+}
+
+function GET_Choose() {
+echo " "
+read -p '请从上方选择一个操作:' Choose
+}
+
 function Settings_1() {
 while :
 do
-	Color_GET
+	ColorfulUI_Check
 	clear
 	Say="设置[实验性]" && Color_B
 	echo " "
@@ -1005,25 +1032,6 @@ do
 done
 }
 
-function GET_Choose() {
-echo " "
-read -p '请从上方选择一个操作:' Choose
-}
-
-function Color_GET() {
-if [ $ColorfulUI == 1 ];then
-	White="\e[0m"
-	Yellow="\e[33m"
-	Red="\e[31m"
-	Blue="\e[34m"
-else
-	White="\e[0m"
-	Yellow="\e[0m"
-	Red="\e[0m"
-	Blue="\e[0m"
-fi
-}
-
 HOME=$(cd $(dirname $0); pwd)
 #test "$HOME" || home=$PWD
 
@@ -1044,7 +1052,7 @@ ColorfulUI=1
 while :
 do
 Dir_Check
-Color_GET
+ColorfulUI_Check
 clear
 Say="AutoBuild AIO $Version by Hyy2001" && Color_B
 echo ""
