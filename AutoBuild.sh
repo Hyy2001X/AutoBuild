@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.29
-Version=BETA-V2.3.1
+Update=2020.03.30
+Version=BETA-V2.3.2
 
 function Second_Menu() {
 while :
