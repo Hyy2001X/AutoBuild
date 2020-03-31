@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.31
-Version=BETA-V2.4.1
+Version=V2.5.0
 
 function Second_Menu() {
 while :
