@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.30
-Version=BETA-V2.3.8
+Update=2020.03.31
+Version=BETA-V2.4.0
 
 function Second_Menu() {
 while :
@@ -225,22 +225,56 @@ done
 
 function Sources_Download() {
 cd $HOME
-if [ -f "./Projects/$Project/LICENSE" ];then
+if [ -f "./Projects/$Project/Makefile" ];then
 	echo " "
-	GET_Branch=`(awk 'NR==1' ./Config/$Project.branch)`
-	Say="已检测到$Project源码,当前分支:$GET_Branch" && Color_Y
+	if [ -f ./Config/$Project.branch ];then
+		GET_Branch=`(awk 'NR==1' ./Config/$Project.branch)`
+		Say="已检测到$Project源码,当前分支:$GET_Branch" && Color_Y
+	else
+		Say="已检测到$Project源码!" && Color_Y
+	fi
 	sleep 3
 else
 	clear
 	cd $HOME/Projects
 	if  [ $Project == 'Lede' ];then
-		git clone $Lede_git $Project
-		Branch=master
-		Sources_Download_Check
+	while :
+	do
+		Say="$Project源码下载-分支选择" && Color_B
+		Say="Github仓库:$Lede_git" && Color_Y
+		echo " "
+		Branch_1=master
+		echo "1.$Branch_1[默认]"
+		if [ $DeveloperMode == 0 ];then
+			echo -e "2.$Blue恢复[$Project源代码]$White"
+		else
+			:
+		fi
+		echo "q.返回"
+		read -p '请从上方选择一个分支:' Branch
+		clear
+		case $Branch in
+		q)
+			break
+		;;
+		1)
+			git clone $Lede_git $Project
+			Branch=master
+		;;
+		2)
+			Sources_Recover
+		;;
+		esac
+		if [ ! $Branch == 2 ];then
+			Sources_Download_Check
+		else
+			:
+		fi
+		break
+	done
 	elif [ $Project == 'Openwrt' ];then
 	while :
 	do
-		clear
 		Say="$Project源码下载-分支选择" && Color_B
 		Say="Github仓库:$Openwrt_git" && Color_Y
 		echo " "
@@ -248,8 +282,15 @@ else
 		Branch_2=lede-17.01
 		Branch_3=openwrt-18.06
 		Branch_4=openwrt-19.07
-		echo "1.$Branch_1[默认]" && echo "2.$Branch_2"
-		echo "3.$Branch_3" && echo "4.$Branch_4"
+		echo "1.$Branch_1[默认]"
+		echo "2.$Branch_2"
+		echo "3.$Branch_3"
+		echo "4.$Branch_4"
+		if [ $DeveloperMode == 0 ];then
+			echo -e "5.$Blue恢复[$Project源代码]$White"
+		else
+			:
+		fi
 		echo "q.返回"
 		echo ""
 		read -p '请从上方选择一个分支:' Branch
@@ -274,22 +315,34 @@ else
 			git clone -b $Branch_4 $Openwrt_git $Project
 			Branch=$Branch_4
 		;;
+		5)
+			Sources_Recover
+		;;
 		esac
+		if [ ! $Branch == 5 ];then
 			Sources_Download_Check
+		else
+			:
+		fi
 		break
 	done
 	elif [ $Project == 'Lienol' ];then			
 	while :
 	do
-		clear
-		Say="$Project分支选择" && Color_B
-		Say="Github仓库:$Lienol_git" && Color_Y
+		Say="$Project源码下载-分支选择" && Color_B
+		Say="Github仓库:$Openwrt_git" && Color_Y
 		echo " "
 		Branch_1=dev-19.07
 		Branch_2=dev-lean-lede
 		Branch_3=dev-master
-		echo "1.$Branch_1[默认]" && echo "2.$Branch_2"
+		echo "1.$Branch_1[默认]"
+		echo "2.$Branch_2"
 		echo "3.$Branch_3"
+		if [ $DeveloperMode == 0 ];then
+			echo -e "4.$Blue恢复[$Project源代码]$White"
+		else
+			:
+		fi
 		echo "q.返回"
 		echo ""
 		read -p '请从上方选择一个分支:' Branch
@@ -310,8 +363,15 @@ else
 			git clone -b $Branch_3 $Lienol_git $Project
 			Branch=$Branch_3
 		;;
+		4)
+			Sources_Recover
+		;;
 		esac
+		if [ ! $Branch == 4 ];then
 			Sources_Download_Check
+		else
+			:
+		fi
 		break
 	done
 	else 
@@ -441,14 +501,20 @@ do
 		4)
 			cd $HOME/Projects
 			echo " "
-			Say="正在删除$Project,请耐心等待..." && Color_B
+			Say="正在删除$Project项目,请耐心等待..." && Color_B
+			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
-				cd $HOME/Config
-				rm $Project.branch
-				Say="删除成功!" && Color_Y
+				cd $HOME
+				if [ -f ./Config/$Project.branch ];then
+					rm $Project.branch
+					Say="已删除$Project.branch" && Color_Y
+				else
+					:
+				fi
+				Say="[$Project项目]删除成功!" && Color_Y
 			else 
-				Say="删除失败!" && Color_R
+				Say="[$Project项目]删除失败!" && Color_R
 			fi
 			sleep 3
 			break
@@ -487,6 +553,7 @@ echo "1.备份[.config]"
 echo "2.恢复[.config]"
 echo "3.备份[dl]库"
 echo "4.恢复[dl]库"
+echo "5.恢复[$Project源代码]"
 echo "q.返回"
 GET_Choose
 case $Choose in
@@ -566,7 +633,7 @@ done
 		Say="备份中,请耐心等待!" && Color_B
 		cp -a $HOME/Projects/$Project/dl $HOME/Backups/
 		echo " "
-		Say="备份成功![dl]文件夹已备份到:'$HOME/Backups/dl'" && Color_Y
+		Say="备份成功![dl]库已备份到:'$HOME/Backups/dl'" && Color_Y
 		cd $HOME/Backups
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
@@ -584,7 +651,7 @@ done
 		Say="恢复中,请耐心等待!" && Color_B
 		cp -a $HOME/Backups/dl $HOME/Projects/$Project
 		echo " "
-		Say="恢复成功![dl]文件夹已恢复到:'$HOME/Projects/$Project/dl'" && Color_Y
+		Say="恢复成功![dl]库已恢复到:'$HOME/Projects/$Project/dl'" && Color_Y
 		cd $HOME/Projects/$Project
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
@@ -592,9 +659,29 @@ done
 	echo " "
 	Enter
 ;;
+5)
+	Sources_Recover
+;;
 esac
 done
 }
+
+function Sources_Recover() {
+cd $HOME
+echo " "
+if [ -f ./Backups/Projects/$Project/Makefile ];then
+	Say="恢复中,请耐心等待!" && Color_B
+	cp -a $HOME/Backups/Projects/$Project $HOME/Projects
+	echo " "
+	Say="恢复成功!" && Color_Y
+	Say="[$Project源代码]已恢复到:'$HOME/Projects/'" && Color_Y
+else
+	Say="没有找到'$HOME/Backups/Projects/$Project'文件夹,无法进行恢复!" && Color_R
+	Say="您似乎还没有进行过备份." && Color_R
+fi
+sleep 3
+}
+
 
 function Add_Packages() {
 while :
@@ -686,7 +773,7 @@ fi
 	if [ -f ./$PKG_NAME/Makefile ];then
 	Say="已成功添加软件包 $PKG_NAME" && Color_Y
 	else
-	Say="未成功添加软件包 $PKG_NAME,请重试!" && Color_R
+	Say="未成功添加软件包 $PKG_NAME,请重试!_" && Color_R
 	fi
 }
 
@@ -909,6 +996,11 @@ function Dir_Check() {
 	fi
 	if [ ! -d ./Backups ];then
 		mkdir Backups
+	else
+		:
+	fi
+	if [ ! -d ./Backups/Projects ];then
+		mkdir Backups/Projects
 	else
 		:
 	fi
