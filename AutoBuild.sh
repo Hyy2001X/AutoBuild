@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.31
-Version=V2.5.0
+Version=V2.5.1
 
 function Second_Menu() {
 while :
@@ -513,7 +513,7 @@ do
 			if [ ! -d ./$Project ];then
 				cd $HOME
 				if [ -f ./Config/$Project.branch ];then
-					rm $Project.branch
+					rm ./Config/$Project.branch
 					Say="已删除$Project.branch" && Color_Y
 				else
 					:
@@ -925,33 +925,6 @@ function Script_Update() {
 	fi
 }
 
-function Network_Test() {
-clear
-Say="Network Connectivity Test" && Color_B
-echo " "
-Network_OK="\e[33m连接正常\e[0m"
-Network_ERROR="\e[31m连接错误\e[0m"
-timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
-if [ $? -eq 0 ];then
-	echo -e "百度		$Network_OK" 
-else
-	echo -e "百度		$Network_ERROR"
-fi
-timeout 3 httping -c 1 www.github.com > /dev/null 2>&1
-if [ $? -eq 0 ];then
-	echo -e "Github		$Network_OK" 
-else
-	echo -e "Github		$Network_ERROR"
-fi
-timeout 3 httping -c 1 www.google.com > /dev/null 2>&1
-if [ $? -eq 0 ];then
-	echo -e "Google		$Network_OK" 
-else
-	echo -e "Google		$Network_ERROR"
-fi
-echo ""
-Enter	
-}
 
 function Enter() {
 read -p "按下[回车]键以继续..." Key
@@ -981,6 +954,34 @@ else
 	Say="下载失败,请检查网络后重试!" && Color_R
 fi
 	Enter
+}
+
+function Network_Test() {
+clear
+Say="Network Connectivity Test" && Color_B
+echo " "
+Network_OK="\e[33m连接正常\e[0m"
+Network_ERROR="\e[31m连接错误\e[0m"
+timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
+	echo -e "百度		$Network_OK" 
+else
+	echo -e "百度		$Network_ERROR"
+fi
+timeout 3 httping -c 1 www.github.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
+	echo -e "Github		$Network_OK" 
+else
+	echo -e "Github		$Network_ERROR"
+fi
+timeout 3 httping -c 1 www.google.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
+	echo -e "Google		$Network_OK" 
+else
+	echo -e "Google		$Network_ERROR"
+fi
+echo ""
+Enter	
 }
 
 function Dir_Check() {
