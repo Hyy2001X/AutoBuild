@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.03.31
-Version=BETA-V2.4.0
+Version=BETA-V2.4.1
 
 function Second_Menu() {
 while :
@@ -252,12 +252,12 @@ else
 		fi
 		echo "q.返回"
 		read -p '请从上方选择一个分支:' Branch
-		clear
 		case $Branch in
 		q)
 			break
 		;;
 		1)
+			clear
 			git clone $Lede_git $Project
 			Branch=master
 		;;
@@ -294,24 +294,27 @@ else
 		echo "q.返回"
 		echo ""
 		read -p '请从上方选择一个分支:' Branch
-		clear
 		case $Branch in
 		q)
 			break
 		;;
 		1)
+			clear
 			git clone $Openwrt_git $Project
 			Branch=master
 		;;
 		2)
+			clear
 			git clone -b $Branch_2 $Openwrt_git $Project
 			Branch=$Branch_2
 		;;
 		3)
+			clear
 			git clone -b $Branch_3 $Openwrt_git $Project
 			Branch=$Branch_3
 		;;
 		4)
+			clear
 			git clone -b $Branch_4 $Openwrt_git $Project
 			Branch=$Branch_4
 		;;
@@ -346,20 +349,22 @@ else
 		echo "q.返回"
 		echo ""
 		read -p '请从上方选择一个分支:' Branch
-		clear
 		case $Branch in
 		q)
 			break
 		;;
 		1)
+			clear
 			git clone -b $Branch_1 $Lienol_git $Project
 			Branch=$Branch_1
 		;;
 		2)
+			clear
 			git clone -b $Branch_2 $Lienol_git $Project
 			Branch=$Branch_2
 		;;
 		3)
+			clear
 			git clone -b $Branch_3 $Lienol_git $Project
 			Branch=$Branch_3
 		;;
@@ -424,11 +429,9 @@ do
 		if [ $Project == 'Lede' ];then
 			cd $HOME/Projects/$Project/package/lean
 			rm -rf luci-theme-argon
-			Say="已删除'./package/lean/luci-theme-argon'" && Color_Y
 			git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
 			cd $HOME/Projects/$Project/package/themes
 			rm -rf luci-theme-rosy
-			Say="已删除'./package/themes/luci-theme-rosy'" && Color_Y
 			git clone https://github.com/rosywrt/luci-theme-rosy luci-theme-rosy
 			cd $HOME/Projects/$Project
 			grep "darkmatter" feeds.conf.default > /dev/null
@@ -442,7 +445,7 @@ do
 			scripts/feeds install luci-theme-darkmatter
 			echo " "
 			if [ -d ./package/lean/luci-theme-argon ];then
-				Say="已更新主题包 luci-theme-argon" && Color_Y
+				Say="已添加主题包 luci-theme-argon" && Color_Y
 			else
 				Say="主题包 luci-theme-argon 添加失败!" && Color_R
 			fi
@@ -459,10 +462,13 @@ do
 		else
 			cd $HOME/Projects/$Project/package/themes
 			rm -rf luci-theme-argon
-			Say="已删除'$Project/package/themes/luci-theme-argon'" && Color_Y
 			git clone https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
 			echo " "
-			Say="已添加主题包 luci-theme-argon" && Color_Y
+			if [ -d ./luci-theme-argon ];then
+				Say="已添加主题包 luci-theme-argon" && Color_Y
+			else
+				Say="主题包 luci-theme-argon 添加失败!" && Color_R
+			fi
 		fi
 		Enter
 	;;
@@ -660,6 +666,7 @@ done
 	Enter
 ;;
 5)
+	echo " "
 	Sources_Recover
 ;;
 esac
@@ -668,7 +675,6 @@ done
 
 function Sources_Recover() {
 cd $HOME
-echo " "
 if [ -f ./Backups/Projects/$Project/Makefile ];then
 	Say="恢复中,请耐心等待!" && Color_B
 	cp -a $HOME/Backups/Projects/$Project $HOME/Projects
@@ -773,7 +779,7 @@ fi
 	if [ -f ./$PKG_NAME/Makefile ];then
 	Say="已成功添加软件包 $PKG_NAME" && Color_Y
 	else
-	Say="未成功添加软件包 $PKG_NAME,请重试!_" && Color_R
+	Say="未成功添加软件包 $PKG_NAME,请重试!" && Color_R
 	fi
 }
 
