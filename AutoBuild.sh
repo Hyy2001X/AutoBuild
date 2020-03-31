@@ -241,7 +241,7 @@ else
 	while :
 	do
 		Say="$Project源码下载-分支选择" && Color_B
-		Say="Github仓库:$Lede_git" && Color_Y
+		Say="$GitSource_Out仓库:$Lede_git" && Color_Y
 		echo " "
 		Branch_1=master
 		echo "1.$Branch_1[默认]"
@@ -276,7 +276,7 @@ else
 	while :
 	do
 		Say="$Project源码下载-分支选择" && Color_B
-		Say="Github仓库:$Openwrt_git" && Color_Y
+		Say="$GitSource_Out仓库:$Openwrt_git" && Color_Y
 		echo " "
 		Branch_1=master
 		Branch_2=lede-17.01
@@ -333,7 +333,7 @@ else
 	while :
 	do
 		Say="$Project源码下载-分支选择" && Color_B
-		Say="Github仓库:$Openwrt_git" && Color_Y
+		Say="$GitSource_Out仓库:$Openwrt_git" && Color_Y
 		echo " "
 		Branch_1=dev-19.07
 		Branch_2=dev-lean-lede
@@ -392,7 +392,7 @@ do
 	clear
 	Say="高级选项" && Color_B
 	echo " "
-	echo "1.从Github拉取$Project源代码"
+	echo "1.从$GitSource_Out拉取$Project源代码"
 	echo "2.强制更新源代码且合并到本地"
 	echo "3.添加第三方主题包"
 	echo -e "4.$Red磁盘清理$White"
@@ -1056,6 +1056,21 @@ else
 fi
 }
 
+function GitSource_Check() {
+if [ $GitSource == 1 ];then
+	Lede_git=https://gitee.com/Hyy2001X/Lede
+	Openwrt_git=https://gitee.com/Hyy2001X/Openwrt
+	Lienol_git=https://gitee.com/Hyy2001X/Lienol
+	GitSource_Out=Gitee
+else
+	Lede_git=https://github.com/coolsnowwolf/lede
+	Openwrt_git=https://github.com/openwrt/openwrt
+	Lienol_git=https://github.com/lienol/openwrt
+	GitSource_Out=Github
+fi
+}
+
+
 function GET_Choose() {
 echo " "
 read -p '请从上方选择一个操作:' Choose
@@ -1069,19 +1084,24 @@ do
 	Say="设置[实验性]" && Color_B
 	echo " "
 	if [ $DeveloperMode == 0 ];then
-		Say="1.Developer Mode	[OFF]" && Color_R
+		Say="1.开发者模式	[OFF]" && Color_R
 	else
-		Say="1.Developer Mode	[ON]" && Color_Y
+		Say="1.开发者模式	[ON]" && Color_Y
 	fi
 	if [ $SimpleCompilation == 0 ];then
-		Say="2.Simple Compilation	[OFF]" && Color_R
+		Say="2.轻松编译	[OFF]" && Color_R
 	else
-		Say="2.Simple Compilation	[ON]" && Color_Y
+		Say="2.轻松编译	[ON]" && Color_Y
 	fi
 	if [ $ColorfulUI == 0 ];then
-		Say="3.Colorful UI		[OFF]" && Color_R
+		Say="3.彩色UI	[OFF]" && Color_R
 	else
-		Say="3.Colorful UI		[ON]" && Color_Y
+		Say="3.彩色UI	[ON]" && Color_Y
+	fi
+	if [ $GitSource == 0 ];then
+		Say="4.默认下载源	[Github]" && Color_Y
+	else
+		Say="4.默认下载源	[Gitee]" && Color_B
 	fi
 	echo "q.返回"
 	GET_Choose
@@ -1110,6 +1130,13 @@ do
 			ColorfulUI=0
 		fi
 	;;
+	4)
+		if [ $GitSource == 0 ];then
+			GitSource=1
+		else
+			GitSource=0
+		fi
+	;;
 	esac
 done
 }
@@ -1121,21 +1148,19 @@ Extra_Packages="ntpdate httping subversion"
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 
-Lede_git=https://github.com/coolsnowwolf/lede
-Openwrt_git=https://github.com/openwrt/openwrt
-Lienol_git=https://github.com/lienol/openwrt
 AutoBuild_git=https://github.com/Hyy2001X/AutoBuild
 
 DeveloperMode=0
 SimpleCompilation=1
 ColorfulUI=1
+GitSource=0
 
-################################################################Main code
 ################################################################Main code
 while :
 do
 Dir_Check
 ColorfulUI_Check
+GitSource_Check
 clear
 Say="AutoBuild AIO $Version by Hyy2001" && Color_B
 echo ""
@@ -1173,11 +1198,11 @@ do
 	else
 		echo -e "3.Lienol		$Red[未检测到]$White"
 	fi
-	if [ -f ./Projects/Custom/feeds.conf.default ];then
-		echo -e "4.Custom_Sources	$Yellow[已检测到]$White"
-	else
-		echo -e "4.Custom_Sources	$Red[未检测到]$White"
-	fi
+#	if [ -f ./Projects/Custom/feeds.conf.default ];then
+#		echo -e "4.Custom_Sources	$Yellow[已检测到]$White"
+#	else
+#		echo -e "4.Custom_Sources	$Red[未检测到]$White"
+#	fi
 	echo "q.返回"
 	GET_Choose
 	if [ $Choose == 1 ]; then
