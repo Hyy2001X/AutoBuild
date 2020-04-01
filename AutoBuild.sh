@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.04.01
-Version=V2.5.4
+Version=V2.5.5
 
 function Second_Menu() {
 while :
@@ -914,14 +914,14 @@ done
 
 function Script_Update() {
 	cd $Home
-	rm -rf ./TEMP
+	rm -rf $Home/TEMP
+	rm -rf $Home/Modules
 	svn checkout $AutoBuild_git/trunk ./TEMP
 	echo " "
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		mv ./TEMP/AutoBuild.sh $Home/AutoBuild.sh
 		mv ./TEMP/README.md $Home/README.md
 		mv ./TEMP/Modules $Home
-		rm -rf $Home/Modules
 		chmod +x AutoBuild.sh
 		chmod +x -R $Home/Modules
 		Say="更新成功!" && Color_Y
