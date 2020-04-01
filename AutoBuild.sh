@@ -920,9 +920,9 @@ function Script_Update() {
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		mv ./TEMP/AutoBuild.sh $Home/AutoBuild.sh
 		mv ./TEMP/README.md $Home/README.md
-		mv -a ./TEMP/Modules $Home/Modules
+		mv ./TEMP/Modules $Home/Modules
 		chmod +x AutoBuild.sh
-		chmod +x -R ./Modules
+		chmod +x -R $Home/Modules
 		Say="更新成功!" && Color_Y
 		sleep 3
 		./AutoBuild
