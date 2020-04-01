@@ -925,7 +925,7 @@ function Script_Update() {
 		chmod +x -R $Home/Modules
 		Say="更新成功!" && Color_Y
 		sleep 3
-		./AutoBuild
+		./AutoBuild.sh
 	else
 		Say="更新失败!" && Color_R
 		sleep 3
