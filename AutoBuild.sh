@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.04.01
-Version=V2.5.2
+Version=V2.5.3
 
 function Second_Menu() {
 while :
@@ -57,6 +57,8 @@ done
 }
 
 function Sources_Update() {
+timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
 	clear
 	cd $Home/Projects/$Project
 	git pull
@@ -68,7 +70,11 @@ function Sources_Update() {
 	else
 		Say="更新失败!" && Color_R
 	fi
-	sleep 3
+else
+	echo " "
+	Say="无网络连接,无法更新!" && Color_R
+fi
+sleep 3
 }
 
 function Custom_Second_Menu() {
@@ -800,7 +806,7 @@ do
 	echo "1.更新系统软件包"
 	echo "2.安装编译所需的依赖包"
 	echo "3.SSH访问路由器"
-	echo "4.同步系统时间"
+	echo "4.同步网络时间"
 	echo "5.清理DNS缓存"
 	echo "6.为AutoBuild添加快捷启动"
 	echo "7.查看磁盘空间大小"
@@ -843,12 +849,18 @@ do
 	;;
 	6)
 		echo " "
-		read -p '请创建一个快捷启动的名称:' FastOpen		
-		echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
-		source ~/.bashrc
-		echo " "
-		Say="创建成功!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
-		sleep 5
+		cd ~
+		if [ -f .bashrc ];then
+		
+			read -p '请创建一个快捷启动的名称:' FastOpen		
+			echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
+			source ~/.bashrc
+			echo " "
+			Say="创建成功!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
+		else
+			Say="未检测到.bashrc,无法创建!" && Color_R
+		fi
+		sleep 3
 	;;
 	7)
 		clear
