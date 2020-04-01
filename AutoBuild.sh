@@ -971,11 +971,6 @@ function Dir_Check() {
 	else
 		:
 	fi
-	if [ ! -d ./Modules ];then
-		mkdir Modules
-	else
-		:
-	fi
 	if [ ! -d ./TEMP ];then
 		mkdir TEMP
 	else
@@ -1152,8 +1147,8 @@ GitSource_Check
 clear
 Say="AutoBuild AIO $Version by Hyy2001" && Color_B
 echo ""
-echo "1.Choose a Project"
-echo "2.检查网络连通性"
+echo -e "1.${Yellow}Choose a Project$White"
+echo "2.网络测试"
 echo "3.高级选项"
 echo "4.设置"
 echo "q.退出"
