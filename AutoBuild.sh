@@ -921,6 +921,7 @@ function Script_Update() {
 		mv ./TEMP/AutoBuild.sh $Home/AutoBuild.sh
 		mv ./TEMP/README.md $Home/README.md
 		mv ./TEMP/Modules $Home
+		rm -rf $Home/Modules
 		chmod +x AutoBuild.sh
 		chmod +x -R $Home/Modules
 		Say="更新成功!" && Color_Y
