@@ -2,17 +2,17 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.03.31
-Version=V2.5.1
+Update=2020.04.01
+Version=V2.5.2
 
 function Second_Menu() {
 while :
 do
-	cd $HOME
+	cd $Home
 	Dir_Check
 	if [ -f "./Projects/$Project/feeds.conf.default" ];then
 		Say="源码文件:已检测到,当前项目:$Project" && Color_Y
-		Say="项目位置:'$HOME/Projects/$Project'" && Color_Y
+		Say="项目位置:'$Home/Projects/$Project'" && Color_Y
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd ./Projects/$Project/package/lean/default-settings/files
@@ -58,7 +58,7 @@ done
 
 function Sources_Update() {
 	clear
-	cd $HOME/Projects/$Project
+	cd $Home/Projects/$Project
 	git pull
 	./scripts/feeds update -a
 	./scripts/feeds install -a
@@ -78,11 +78,11 @@ function Custom_Second_Menu() {
 function Compile_Firmware() {
 while :
 do
-	cd $HOME/Projects/$Project
+	cd $Home/Projects/$Project
 	if [ -f ".config" ];then
 		clear
-		cp .config $HOME/TEMP/$Project.TEMP
-		cd $HOME/TEMP
+		cp .config $Home/TEMP/$Project.TEMP
+		cd $Home/TEMP
 		GET_BOARD=$(awk '/CONFIG_TARGET_BOARD=/{print}' $Project.TEMP);
 		GET_SUBTARGET=$(awk '/CONFIG_TARGET_SUBTARGET=/{print}' $Project.TEMP);
 		GET_PROFILE=$(awk '/CONFIG_TARGET_PROFILE=/{print}' $Project.TEMP);
@@ -169,7 +169,7 @@ do
 	Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
 	read -p '请输入附加信息:' Extra
 	NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
-	cd $HOME
+	cd $Home
 	while [ -f "./Packages/$NEW_Firmware_Name" ]
 	do
 		read -p '包含该附加信息的名称已存在!请重新添加:' Extra
@@ -186,7 +186,7 @@ do
 	echo " "
 	Say="开始编译$Project..." && Color_Y
 	Compile_START=`date +'%Y-%m-%d %H:%M:%S'`
-	cd $HOME/Projects/$Project
+	cd $Home/Projects/$Project
 	$Thread
 	echo " "
 	if [ $X86_Check == 0 ];then
@@ -198,10 +198,10 @@ do
 			echo -ne "\e[34m$Compile_START --> $Compile_END "
 			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
 			echo -ne "\e[0m"
-			mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $HOME/Packages/$NEW_Firmware_Name
-			cd $HOME/Packages
+			mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Packages/$NEW_Firmware_Name
+			cd $Home/Packages
 			Firmware_Size=`ls -l $NEW_Firmware_Name | awk '{print $5}'`
-			echo -e "$Yellow编译成功!固件已自动移动到'$HOME/Packages' "
+			echo -e "$Yellow编译成功!固件已自动移动到'$Home/Packages' "
 			echo "固件名称:$NEW_Firmware_Name"
 			awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'
 			echo -ne "$White"
@@ -215,7 +215,7 @@ do
 			Say="编译失败!" && Color_R
 		fi
 	else
-		echo "所选编译设备为X86架构，请自行前往'$HOME/Projects/$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET'查看结果."
+		echo "所选编译设备为X86架构，请自行前往'$Home/Projects/$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET'查看结果."
 	fi
 	echo " "
 	Enter
@@ -224,7 +224,7 @@ done
 }
 
 function Sources_Download() {
-cd $HOME
+cd $Home
 if [ -f "./Projects/$Project/Makefile" ];then
 	echo " "
 	if [ -f ./Config/$Project.branch ];then
@@ -236,7 +236,7 @@ if [ -f "./Projects/$Project/Makefile" ];then
 	sleep 3
 else
 	clear
-	cd $HOME/Projects
+	cd $Home/Projects
 	if  [ $Project == 'Lede' ];then
 	while :
 	do
@@ -388,7 +388,7 @@ fi
 function Advanced_Options_2() {
 while :
 do
-	cd $HOME/Projects/$Project
+	cd $Home/Projects/$Project
 	clear
 	Say="高级选项" && Color_B
 	echo " "
@@ -409,7 +409,7 @@ do
 		Sources_Download
 	;;
 	2)
-		cd $HOME/Projects/$Project
+		cd $Home/Projects/$Project
 		clear
 		git fetch --all
 		git reset --hard origin/master
@@ -418,7 +418,7 @@ do
 	;;
 	3)
 		clear
-		cd $HOME/Projects
+		cd $Home/Projects
 		if [ -d ./$Project/package/themes ];then
 			:
 		else
@@ -427,13 +427,13 @@ do
 		fi
 		clear
 		if [ $Project == 'Lede' ];then
-			cd $HOME/Projects/$Project/package/lean
+			cd $Home/Projects/$Project/package/lean
 			rm -rf luci-theme-argon
 			git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
-			cd $HOME/Projects/$Project/package/themes
+			cd $Home/Projects/$Project/package/themes
 			rm -rf luci-theme-rosy
 			git clone https://github.com/rosywrt/luci-theme-rosy luci-theme-rosy
-			cd $HOME/Projects/$Project
+			cd $Home/Projects/$Project
 			grep "darkmatter" feeds.conf.default > /dev/null
 			if [ $? -eq 0 ]; then
 				:
@@ -460,7 +460,7 @@ do
 				Say="主题包 luci-theme-darkmatter 添加失败!" && Color_R
 			fi	
 		else
-			cd $HOME/Projects/$Project/package/themes
+			cd $Home/Projects/$Project/package/themes
 			rm -rf luci-theme-argon
 			git clone https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
 			echo " "
@@ -484,7 +484,7 @@ do
 		echo "4.删除$Project项目"
 		echo "q.返回"
 		GET_Choose
-		cd $HOME/Projects/$Project
+		cd $Home/Projects/$Project
 		case $Choose in
 		q)
 			break
@@ -505,13 +505,13 @@ do
 			break
 		;;
 		4)
-			cd $HOME/Projects
+			cd $Home/Projects
 			echo " "
 			Say="正在删除$Project项目,请耐心等待..." && Color_B
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
-				cd $HOME
+				cd $Home
 				if [ -f ./Config/$Project.branch ];then
 					rm ./Config/$Project.branch
 					Say="已删除$Project.branch" && Color_Y
@@ -528,7 +528,7 @@ do
 	done
 	;;
 	5)
-		cd $HOME/Projects/$Project
+		cd $Home/Projects/$Project
 		rm .config
 		rm .config.old
 		echo " "
@@ -582,15 +582,15 @@ do
 	;;
 	1)
 		Config_Name=$Project-$Version-`(date +%m%d_%H:%M)`
-		cp $HOME/Projects/$Project/.config $HOME/Backups/$Config_Name
+		cp $Home/Projects/$Project/.config $Home/Backups/$Config_Name
 	;;
 	2)
 		read -p '请输入你想要的文件名:' Config_Name
 		echo " "
-		cp $HOME/Projects/$Project/.config $HOME/Backups/$Config_Name
+		cp $Home/Projects/$Project/.config $Home/Backups/$Config_Name
 	;;	
 	esac
-	Say="备份成功!备份文件存放于:$HOME/Backups" && Color_Y
+	Say="备份成功!备份文件存放于:$Home/Backups" && Color_Y
 	Say="文件名称:$Config_Name" && Color_Y
 	sleep 3
 done
@@ -600,7 +600,7 @@ while :
 do
 	clear
 	Say="当前操作:恢复[.config]" && Color_B && echo " "
-	cd $HOME/Backups
+	cd $Home/Backups
 	echo -n "备份文件"
 	ls -lh -u -o
 	echo " "
@@ -612,7 +612,7 @@ do
 		break
 	fi
 	if [ -f ./$Config_Recovery ];then
-		cd $HOME
+		cd $Home
 		Config_PATH_NAME=./Projects/$Project/.config
 		rm $Config_PATH_NAME
 		cp ./Backups/$Config_Recovery $Config_PATH_NAME
@@ -631,16 +631,16 @@ done
 ;;
 3)
 	echo " "
-	cd $HOME/Projects
+	cd $Home/Projects
 	if [ ! -d ./$Project/dl ];then
-		Say="没有找到'$HOME/$Project/dl'文件夹,无法进行备份!" && Color_R
+		Say="没有找到'$Home/$Project/dl'文件夹,无法进行备份!" && Color_R
 		Say="您似乎还没有下载$Project源代码或编译." && Color_R
 	else
 		Say="备份中,请耐心等待!" && Color_B
-		cp -a $HOME/Projects/$Project/dl $HOME/Backups/
+		cp -a $Home/Projects/$Project/dl $Home/Backups/
 		echo " "
-		Say="备份成功![dl]库已备份到:'$HOME/Backups/dl'" && Color_Y
-		cd $HOME/Backups
+		Say="备份成功![dl]库已备份到:'$Home/Backups/dl'" && Color_Y
+		cd $Home/Backups
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
 	fi
@@ -649,16 +649,16 @@ done
 ;;
 4)
 	echo " "
-	cd $HOME
+	cd $Home
 	if [ ! -d ./Backups/dl ];then
-		Say="没有找到'$HOME/Backups/dl'文件夹,无法进行恢复!" && Color_R
+		Say="没有找到'$Home/Backups/dl'文件夹,无法进行恢复!" && Color_R
 		Say="您似乎还没有进行过备份." && Color_R
 	else
 		Say="恢复中,请耐心等待!" && Color_B
-		cp -a $HOME/Backups/dl $HOME/Projects/$Project
+		cp -a $Home/Backups/dl $Home/Projects/$Project
 		echo " "
-		Say="恢复成功![dl]库已恢复到:'$HOME/Projects/$Project/dl'" && Color_Y
-		cd $HOME/Projects/$Project
+		Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_Y
+		cd $Home/Projects/$Project
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
 	fi
@@ -674,15 +674,15 @@ done
 }
 
 function Sources_Recover() {
-cd $HOME
+cd $Home
 if [ -f ./Backups/Projects/$Project/Makefile ];then
 	Say="恢复中,请耐心等待!" && Color_B
-	cp -a $HOME/Backups/Projects/$Project $HOME/Projects
+	cp -a $Home/Backups/Projects/$Project $Home/Projects
 	echo " "
 	Say="恢复成功!" && Color_Y
-	Say="[$Project源代码]已恢复到:'$HOME/Projects/'" && Color_Y
+	Say="[$Project源代码]已恢复到:'$Home/Projects/'" && Color_Y
 else
-	Say="没有找到'$HOME/Backups/Projects/$Project'文件夹,无法进行恢复!" && Color_R
+	Say="没有找到'$Home/Backups/Projects/$Project'文件夹,无法进行恢复!" && Color_R
 	Say="您似乎还没有进行过备份." && Color_R
 fi
 sleep 3
@@ -692,7 +692,7 @@ sleep 3
 function Add_Packages() {
 while :
 do
-	cd $HOME/Projects/$Project/package
+	cd $Home/Projects/$Project/package
 	if [ ! -d ./custom ];then
 		mkdir custom
 	else
@@ -729,7 +729,7 @@ do
 		Add_Packages_mod
 	;;
 	4)
-		cd $HOME/Projects/$Project
+		cd $Home/Projects/$Project
 		grep "lienol" feeds.conf.default > /dev/null
 		if [ $? -eq 0 ]; then
 			echo " "
@@ -746,7 +746,7 @@ do
 		fi
 	;;
 	5)
-		cd $HOME/Projects/$Project
+		cd $Home/Projects/$Project
 		clear
 		if [ -d ./package/lean ];then
 			rm -rf ./package/lean
@@ -785,7 +785,7 @@ fi
 
 function Make_Menuconfig() {
 clear
-cd $HOME/Projects/$Project
+cd $Home/Projects/$Project
 Say="Loading $Project Configuration..." && Color_B
 make menuconfig
 Enter
@@ -844,7 +844,7 @@ do
 	6)
 		echo " "
 		read -p '请创建一个快捷启动的名称:' FastOpen		
-		echo "alias $FastOpen='$HOME/AutoBuild.sh'" >> ~/.bashrc
+		echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
 		source ~/.bashrc
 		echo " "
 		Say="创建成功!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
@@ -901,7 +901,7 @@ done
 }
 
 function Script_Update() {
-	cd $HOME
+	cd $Home
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		rm ./TEMP/AutoBuild.sh
 	elif [ -f ./TEMP/README.md ];then
@@ -913,8 +913,8 @@ function Script_Update() {
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		rm AutoBuild.sh
 		rm README.md
-		mv ./TEMP/AutoBuild.sh $HOME/AutoBuild.sh
-		mv ./TEMP/README.md $HOME/README.md
+		mv ./TEMP/AutoBuild.sh $Home/AutoBuild.sh
+		mv ./TEMP/README.md $Home/README.md
 		chmod +x AutoBuild.sh
 		rm -rf .subversion
 		Say="更新成功!" && Color_Y
@@ -943,13 +943,13 @@ echo -e "$Blue$Say$White"
 }
 
 function Sources_Download_Check() {
-cd $HOME
+cd $Home
 echo " "
 if [ -f "./Projects/$Project/feeds.conf.default" ];then
-	cd $HOME/Config
+	cd $Home/Config
 	echo "$Branch" > $Project.branch
-	cp -r $HOME/Projects/$Project $HOME/Backups/Projects/$Project
-	Say="$Project源码下载成功,已自动备份到'$HOME/Backups/Projects/$Project'" && Color_Y
+	cp -r $Home/Projects/$Project $Home/Backups/Projects/$Project
+	Say="$Project源码下载成功,已自动备份到'$Home/Backups/Projects/$Project'" && Color_Y
 else
 	Say="下载失败,请检查网络后重试!" && Color_R
 fi
@@ -985,7 +985,7 @@ Enter
 }
 
 function Dir_Check() {
-	cd $HOME
+	cd $Home
 	if [ ! -d ./Projects ];then
 		mkdir Projects
 	else
@@ -1036,7 +1036,7 @@ if [ $SimpleCompilation == 1 ];then
 	Compile_Firmware
 else
 	clear
-	cd $HOME/Projects/$Project
+	cd $Home/Projects/$Project
 	make -j$(($(nproc) + 1)) V=s
 	echo " "
 	Enter
@@ -1142,8 +1142,8 @@ do
 done
 }
 
-HOME=$(cd $(dirname $0); pwd)
-#test "$HOME" || home=$PWD
+Home=$(cd $(dirname $0); pwd)
+#test "$Home" || home=$PWD
 Extra_Packages="ntpdate httping subversion"
 
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
@@ -1173,7 +1173,7 @@ echo "q.退出"
 GET_Choose
 case $Choose in
 q)
-	rm -rf $HOME/TEMP
+	rm -rf $Home/TEMP
 	clear
 	break
 ;;
@@ -1183,7 +1183,7 @@ do
 	clear
 	Say="AutoBuild AIO $Version by Hyy2001" && Color_B
 	echo " "
-	cd $HOME
+	cd $Home
 	if [ -f ./Projects/Lede/feeds.conf.default ];then
 		echo -e "1.Lede			$Yellow[已检测到]$White"
 	else
