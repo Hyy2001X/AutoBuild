@@ -920,7 +920,7 @@ function Script_Update() {
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		mv ./TEMP/AutoBuild.sh $Home/AutoBuild.sh
 		mv ./TEMP/README.md $Home/README.md
-		mv ./TEMP/Modules $Home/Modules
+		mv ./TEMP/Modules $Home
 		chmod +x AutoBuild.sh
 		chmod +x -R $Home/Modules
 		Say="更新成功!" && Color_Y
@@ -967,6 +967,11 @@ function Dir_Check() {
 	cd $Home
 	if [ ! -d ./Projects ];then
 		mkdir Projects
+	else
+		:
+	fi
+	if [ ! -d ./Modules ];then
+		mkdir Modules
 	else
 		:
 	fi
