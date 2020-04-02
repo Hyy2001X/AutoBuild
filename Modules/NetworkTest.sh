@@ -1,10 +1,11 @@
 # AutoBuild Script Module by Hyy2001
-Update=2020.04.02
-Version=V1.0.0
 
 function Network_Test() {
+Update=2020.04.02
+Module_Version=V1.0.0
+
 clear
-Say="Network Connectivity Test" && Color_B
+Say="Network Connectivity Test Script $Module_Version by Hyy2001" && Color_B
 echo " "
 Network_OK="\e[33m连接正常\e[0m"
 Network_ERROR="\e[31m连接错误\e[0m"
