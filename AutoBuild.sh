@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.04.02
-Version=V2.5.8
+Version=V2.5.9
 
 function Second_Menu() {
 while :
@@ -807,7 +807,7 @@ do
 	echo "2.安装编译所需的依赖包"
 	echo "3.SSH访问路由器"
 	echo "4.同步网络时间"
-	echo "5.清理DNS缓存"
+	echo "5.项目空间占用统计"
 	echo "6.为AutoBuild添加快捷启动"
 	echo "7.查看磁盘空间大小"
 	echo "8.定时关机"
@@ -848,8 +848,7 @@ do
 		sudo hwclock --systohc
 	;;
 	5)
-		sudo systemctl restart systemd-resolved.service
-		sudo systemd-resolve --flush-caches
+		StorageStat
 	;;
 	6)
 		echo " "
@@ -1144,6 +1143,7 @@ GitSource=0
 chmod +x -R $Home/Modules
 source $Home/Modules/NetworkTest.sh
 source $Home/Modules/Systeminfo.sh
+source $Home/Modules/StorageStat.sh
 
 ################################################################Main code
 while :
