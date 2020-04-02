@@ -819,6 +819,9 @@ do
 	q)
 		break
 	;;
+	u)
+		Script_Update
+	;;
 	1)
 		clear
 		sudo apt update
@@ -909,8 +912,6 @@ do
 	9)
 		Systeminfo
 	;;
-	10)
-		Script_Update
 	esac
 done
 }
