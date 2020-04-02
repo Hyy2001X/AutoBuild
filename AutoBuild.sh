@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.04.02
-Version=V2.5.7
+Version=V2.5.8
 
 function Second_Menu() {
 while :
@@ -811,7 +811,8 @@ do
 	echo "6.为AutoBuild添加快捷启动"
 	echo "7.查看磁盘空间大小"
 	echo "8.定时关机"
-	echo -e "9.$Yellow更新脚本$White"
+	echo -e "9.$Skyb系统信息$White"
+	echo -e "u.$Yellow更新脚本$White"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -906,8 +907,10 @@ do
 	done
 	;;
 	9)
-		Script_Update
+		Systeminfo
 	;;
+	10)
+		Script_Update
 	esac
 done
 }
@@ -1150,11 +1153,10 @@ GitSource_Check
 clear
 Say="AutoBuild AIO $Version by Hyy2001" && Color_B
 echo ""
-echo -e "1.${Yellow}Choose a Project$White"
+echo -e "1.${Yellow}Get Started!$White"
 echo "2.网络测试"
 echo "3.高级选项"
 echo "4.设置"
-echo "5.系统信息"
 echo "q.退出"
 GET_Choose
 case $Choose in
@@ -1231,7 +1233,5 @@ done
 4)
 	Settings_1
 ;;
-5)
-	Systeminfo
 esac
 done
