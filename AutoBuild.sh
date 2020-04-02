@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.04.02
-Version=V2.5.9
+Version=V2.6.0
 
 function Second_Menu() {
 while :
@@ -54,27 +54,6 @@ do
 	;;
 	esac
 done
-}
-
-function Sources_Update() {
-timeout 3 httping -c 1 www.github.com > /dev/null 2>&1
-if [ $? -eq 0 ];then
-	clear
-	cd $Home/Projects/$Project
-	git pull
-	./scripts/feeds update -a
-	./scripts/feeds install -a
-	echo " "
-	if [ $? -eq 0 ]; then
-		Say="更新成功!" && Color_Y
-	else
-		Say="更新失败!" && Color_R
-	fi
-else
-	echo " "
-	Say="无网络连接,无法更新!" && Color_R
-fi
-sleep 3
 }
 
 function Custom_Second_Menu() {
@@ -916,7 +895,10 @@ done
 }
 
 function Script_Update() {
+timeout 5 httping -c 1 www.github.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
 	cd $Home
+	rm $Home/AutoBuild.sh
 	rm -rf $Home/TEMP
 	rm -rf $Home/Modules
 	svn checkout $AutoBuild_git/trunk ./TEMP
@@ -932,10 +914,34 @@ function Script_Update() {
 		./AutoBuild.sh
 	else
 		Say="更新失败!" && Color_R
-		sleep 3
 	fi
+else
+	echo " "
+	Say="无网络连接,无法更新!" && Color_R
+fi
+sleep 3
 }
 
+function Sources_Update() {
+timeout 5 httping -c 1 www.github.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
+	clear
+	cd $Home/Projects/$Project
+	git pull
+	./scripts/feeds update -a
+	./scripts/feeds install -a
+	echo " "
+	if [ $? -eq 0 ]; then
+		Say="更新成功!" && Color_Y
+	else
+		Say="更新失败!" && Color_R
+	fi
+else
+	echo " "
+	Say="无网络连接,无法更新!" && Color_R
+fi
+sleep 3
+}
 
 function Enter() {
 read -p "按下[回车]键以继续..." Key
