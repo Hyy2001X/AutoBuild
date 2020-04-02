@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.04.02
-Version=V2.5.6
+Version=V2.5.7
 
 function Second_Menu() {
 while :
@@ -57,7 +57,7 @@ done
 }
 
 function Sources_Update() {
-timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
+timeout 3 httping -c 1 www.github.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	clear
 	cd $Home/Projects/$Project
@@ -1029,11 +1029,13 @@ if [ $ColorfulUI == 1 ];then
 	Yellow="\e[33m"
 	Red="\e[31m"
 	Blue="\e[34m"
+	Skyb="\e[36m"
 else
 	White="\e[0m"
 	Yellow="\e[0m"
 	Red="\e[0m"
 	Blue="\e[0m"
+	Skyb="\e[0m"
 fi
 }
 
@@ -1137,6 +1139,7 @@ GitSource=0
 
 chmod +x -R $Home/Modules
 source $Home/Modules/NetworkTest.sh
+source $Home/Modules/Systeminfo.sh
 
 ################################################################Main code
 while :
@@ -1151,6 +1154,7 @@ echo -e "1.${Yellow}Choose a Project$White"
 echo "2.网络测试"
 echo "3.高级选项"
 echo "4.设置"
+echo "5.系统信息"
 echo "q.退出"
 GET_Choose
 case $Choose in
@@ -1227,5 +1231,7 @@ done
 4)
 	Settings_1
 ;;
+5)
+	Systeminfo
 esac
 done
