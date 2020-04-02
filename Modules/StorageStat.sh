@@ -1,8 +1,9 @@
 # AutoBuild Script Module by Hyy2001
-Update=2020.04.02
-Version=V1.0.0
 
 function StorageStat() {
+Update=2020.04.02
+Module_Version=V1.0.0
+
 Decoration() {
 	echo -ne "$Skyb"
 	printf "%-70s\n" "-" | sed 's/\s/-/g'
@@ -45,7 +46,7 @@ else
 fi
 
 clear
-Say="Storage Statistics Script $Version by Hyy2001" && Color_B
+Say="Storage Statistics Script $Module_Version by Hyy2001" && Color_B
 Decoration
 echo -e "$Skyb项目名称	位置				存储占用$White"
 echo " "
