@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.04.01
-Version=V2.5.5
+Update=2020.04.02
+Version=V2.5.6
 
 function Second_Menu() {
 while :
@@ -840,7 +840,7 @@ do
 		ssh root@192.168.1.1
 	;;
 	4)
-		sudo ntpdate cn.pool.ntp.org
+		sudo ntpdate ntp1.aliyun.com
 		sudo hwclock --systohc
 	;;
 	5)
