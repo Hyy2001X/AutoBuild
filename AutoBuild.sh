@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
 Update=2020.04.02
-Version=V2.6.0
+Version=V2.6.1
 
 function Second_Menu() {
 while :
@@ -895,8 +895,11 @@ done
 }
 
 function Script_Update() {
+echo " "
+Say="检查网络连接..." && Color_B
 timeout 5 httping -c 1 www.github.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
+	Say="网络连接正常,开始更新..." && Color_Y
 	cd $Home
 	rm $Home/AutoBuild.sh
 	rm -rf $Home/TEMP
@@ -916,15 +919,18 @@ if [ $? -eq 0 ];then
 		Say="更新失败!" && Color_R
 	fi
 else
-	echo " "
 	Say="无网络连接,无法更新!" && Color_R
 fi
 sleep 3
 }
 
 function Sources_Update() {
+echo " "
+Say="检查网络连接..." && Color_B
 timeout 5 httping -c 1 www.github.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
+	Say="网络连接正常,开始更新..." && Color_Y
+	sleep 1
 	clear
 	cd $Home/Projects/$Project
 	git pull
