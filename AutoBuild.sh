@@ -1207,31 +1207,24 @@ do
 #	fi
 	echo "q.返回"
 	GET_Choose
-	if [ $Choose == 1 ]; then
-		Project=Lede
-	elif [ $Choose == 2 ]; then
-		Project=Openwrt
-	elif [ $Choose == 3 ]; then
-		Project=Lienol
-	elif [ $Choose == 4 ]; then
-		Project=Custom
-	else
-		:
-	fi
 	case $Choose in
 	q)
 		break
 	;;
 	1)
+		Project=Lede
 		Second_Menu_Check
 	;;
 	2)
+		Project=Openwrt
 		Second_Menu_Check
 	;;
 	3)
+		Project=Lienol
 		Second_Menu_Check
 	;;
 	4)
+		Project=Custom
 		Custom_Second_Menu
 	;;
 	esac
