@@ -1,3 +1,7 @@
+# AutoBuild Script Module by Hyy2001
+Update=2020.04.02
+Version=V1.0.0
+
 function Network_Test() {
 clear
 Say="Network Connectivity Test" && Color_B
