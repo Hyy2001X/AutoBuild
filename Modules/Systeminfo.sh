@@ -32,7 +32,7 @@ Decoration() {
 	printf "%-70s\n" "-" | sed 's/\s/-/g'
 	echo -ne "$White"
 }
-
+clear
 Say="System info Script $Module_Version by Hyy2001" && Color_B
 
 Decoration
