@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.04.02
-Version=V2.6.1
+Update=2020.04.03
+Version=V2.6.2
 
 function Second_Menu() {
 while :
@@ -897,7 +897,7 @@ done
 function Script_Update() {
 echo " "
 Say="检查网络连接..." && Color_B
-timeout 5 httping -c 1 www.github.com > /dev/null 2>&1
+timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="网络连接正常,开始更新..." && Color_Y
 	cd $Home
@@ -927,7 +927,7 @@ sleep 3
 function Sources_Update() {
 echo " "
 Say="检查网络连接..." && Color_B
-timeout 5 httping -c 1 www.github.com > /dev/null 2>&1
+timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="网络连接正常,开始更新..." && Color_Y
 	sleep 1
@@ -1207,24 +1207,31 @@ do
 #	fi
 	echo "q.返回"
 	GET_Choose
+	if [ $Choose == 1 ]; then
+		Project=Lede
+	elif [ $Choose == 2 ]; then
+		Project=Openwrt
+	elif [ $Choose == 3 ]; then
+		Project=Lienol
+	elif [ $Choose == 4 ]; then
+		Project=Custom
+	else
+		:
+	fi
 	case $Choose in
 	q)
 		break
 	;;
 	1)
-		Project=Lede
 		Second_Menu_Check
 	;;
 	2)
-		Project=Openwrt
 		Second_Menu_Check
 	;;
 	3)
-		Project=Lienol
 		Second_Menu_Check
 	;;
 	4)
-		Project=Custom
 		Custom_Second_Menu
 	;;
 	esac
