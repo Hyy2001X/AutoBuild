@@ -897,7 +897,7 @@ done
 function Script_Update() {
 echo " "
 Say="检查网络连接..." && Color_B
-timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
+timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="网络连接正常,开始更新..." && Color_Y
 	cd $Home
@@ -927,7 +927,7 @@ sleep 3
 function Sources_Update() {
 echo " "
 Say="检查网络连接..." && Color_B
-timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
+timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="网络连接正常,开始更新..." && Color_Y
 	sleep 1
