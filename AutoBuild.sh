@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.04.03
-Version=V2.6.2
+Update=2020.04.05
+Version=V2.6.3
 
 function Second_Menu() {
 while :
@@ -139,27 +139,39 @@ do
 		if [ ! $Choose == 5 ];then
 			if [ $Print_CompileLog == 0 ];then
 				Thread="make -j$Threads"
-				Compile_Say="当前选择:使用$Threads线程编译,不在屏幕上输出日志[快]"
+				Compile_Say="当前选择:$Skyb$Threads线程编译,不在屏幕上输出日志[快]$White"
 			else
 				Thread="make -j$Threads V=s"
-				Compile_Say="当前选择:使用$Threads线程编译,并在屏幕上输出日志[慢]"
+				Compile_Say="当前选择:$Skyb$Threads线程编译,并在屏幕上输出日志[慢]$White"
 			fi
 		else
-			Compile_Say="自动选择:使用$Threads线程编译"
+			Compile_Say="自动选择:$Skyb$Threads线程编译$White"
 			Thread="make -j$Threads"
 		fi
 	else
 		Thread=$Threads
 	fi
 	Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
-	read -p '请输入附加信息:' Extra
-	NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
-	cd $Home
-	while [ -f "./Packages/$NEW_Firmware_Name" ]
-	do
-		read -p '包含该附加信息的名称已存在!请重新添加:' Extra
+	if [ $Project == Lede ];then
+		read -p '请输入附加信息:' Extra
 		NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
-	done
+		cd $Home
+		while [ -f "./Packages/$NEW_Firmware_Name" ]
+		do
+			read -p '包含该附加信息的名称已存在!请重新添加:' Extra
+			NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
+		done
+	else
+		read -p '请输入附加信息:' Extra
+		NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
+		cd $Home
+		while [ -f "./Packages/$NEW_Firmware_Name" ]
+		do
+			read -p '包含该附加信息的名称已存在!请重新添加:' Extra
+			NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
+		done
+
+	fi
 	rm -rf ./TEMP
 	clear
 	if [ ! $Choose == 6 ];then
@@ -236,6 +248,7 @@ else
 			:
 		fi
 		echo "q.返回"
+		echo " "
 		read -p '请从上方选择一个分支:' Branch
 		case $Branch in
 		q)
@@ -380,7 +393,7 @@ do
 	echo "1.从$GitSource_Out拉取$Project源代码"
 	echo "2.强制更新源代码且合并到本地"
 	echo "3.添加第三方主题包"
-	echo -e "4.$Red磁盘清理$White"
+	echo "4.磁盘清理"
 	echo "5.删除配置文件"
 	echo "6.添加第三方软件包"
 	echo "7.下载[dl]库"
@@ -499,13 +512,13 @@ do
 				cd $Home
 				if [ -f ./Config/$Project.branch ];then
 					rm ./Config/$Project.branch
-					Say="已删除$Project.branch" && Color_Y
+					Say="已删除$Home/Config/$Project.branch" && Color_Y
 				else
 					:
 				fi
-				Say="[$Project项目]删除成功!" && Color_Y
+				Say="[$Project]删除成功!" && Color_Y
 			else 
-				Say="[$Project项目]删除失败!" && Color_R
+				Say="[$Project]删除失败!" && Color_R
 			fi
 			sleep 3
 			break
@@ -690,8 +703,8 @@ do
 	echo "1.SmartDNS"
 	echo "2.AdGuardHome"
 	echo "3.Clash"
-	echo -e "4.$Yellow[软件库]$BlueLienol's Package Sources$White"
-	echo -e "5.$Yellow[软件库]$BlueLean's Package Sources$White"
+	echo -e "4.${Yellow}[软件库]${Blue}Lienol's Package Sources${White}"
+	echo -e "5.${Yellow}[软件库]${Blue}Lean's Package Sources${White}"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -773,6 +786,7 @@ clear
 cd $Home/Projects/$Project
 Say="Loading $Project Configuration..." && Color_B
 make menuconfig
+echo " "
 Enter
 }
 
@@ -976,7 +990,8 @@ if [ -f "./Projects/$Project/feeds.conf.default" ];then
 else
 	Say="下载失败,请检查网络后重试!" && Color_R
 fi
-	Enter
+echo " "
+Enter
 }
 
 function Dir_Check() {
