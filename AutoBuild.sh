@@ -1,9 +1,9 @@
 #!/bin/bash
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
-# Support System:Ubuntu 19.10、Ubuntu 18.04 [WSL]
-Update=2020.04.05
-Version=V2.6.3
+# Support System:Ubuntu 19.10、Ubuntu 18.04
+Update=2020.04.06
+Version=V2.6.4
 
 function Second_Menu() {
 while :
@@ -175,11 +175,11 @@ do
 	rm -rf ./TEMP
 	clear
 	if [ ! $Choose == 6 ];then
-		echo -e "\e[33m$Compile_Say\e[0m"
+		echo -e "$Yellow$Compile_Say$White"
 	else
 		:
 	fi
-	Say="预期名称:$NEW_Firmware_Name" && Color_Y
+	echo -e "$Yellow预期名称:$Blue$NEW_Firmware_Name$White"
 	echo " "
 	Say="开始编译$Project..." && Color_Y
 	Compile_START=`date +'%Y-%m-%d %H:%M:%S'`
@@ -191,24 +191,26 @@ do
 			Compile_END=`date +'%Y-%m-%d %H:%M:%S'`
 			Start_Seconds=$(date --date="$Compile_START" +%s);
 			End_Seconds=$(date --date="$Compile_END" +%s);
+			echo -ne "$Skyb$Compile_START --> $Compile_END "
+			Compile_TIME=`awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'`
+			echo -ne "$Compile_TIME$White"
 			echo " "
-			echo -ne "\e[34m$Compile_START --> $Compile_END "
-			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
-			echo -ne "\e[0m"
 			mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Packages/$NEW_Firmware_Name
 			cd $Home/Packages
 			Firmware_Size=`ls -l $NEW_Firmware_Name | awk '{print $5}'`
-			echo -e "$Yellow编译成功!固件已自动移动到'$Home/Packages' "
-			echo "固件名称:$NEW_Firmware_Name"
-			awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'
-			echo -ne "$White"
+			Say="$Project编译成功!固件已自动移动到'$Home/Packages' " && Color_Y
+			echo -e "$Yellow固件名称:$Blue$NEW_Firmware_Name$White"
+			Firmware_Size_MB=`awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'`
+			Say="$Firmware_Size_MB" && Color_Y
 		else
 			echo " "
 			Compile_END=`date +'%Y-%m-%d %H:%M:%S'`
 			Start_Seconds=$(date --date="$Compile_START" +%s);
 			End_Seconds=$(date --date="$Compile_END" +%s);
-			echo -ne "\e[34m$Compile_START --> $Compile_END "
-			awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'
+			echo -ne "$Red$Compile_START --> $Compile_END$White "
+			Compile_TIME=`awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'`
+			echo -ne "$Red$Compile_TIME$White"
+			echo " "
 			Say="编译失败!" && Color_R
 		fi
 	else
@@ -557,7 +559,7 @@ echo "1.备份[.config]"
 echo "2.恢复[.config]"
 echo "3.备份[dl]库"
 echo "4.恢复[dl]库"
-echo "5.恢复[$Project源代码]"
+echo "5.恢复[$Project]源代码"
 echo "q.返回"
 GET_Choose
 case $Choose in
@@ -631,16 +633,15 @@ done
 	echo " "
 	cd $Home/Projects
 	if [ ! -d ./$Project/dl ];then
-		Say="没有找到'$Home/$Project/dl'文件夹,无法进行备份!" && Color_R
-		Say="您似乎还没有下载$Project源代码或编译." && Color_R
+		Say="没有找到'$Home/Projects/$Project/dl',无法进行备份!" && Color_R
 	else
-		Say="备份中,请耐心等待!" && Color_B
+		echo -ne "\r$Blue正在备份[dl]库...$White\r"
 		cp -a $Home/Projects/$Project/dl $Home/Backups/
-		echo " "
 		Say="备份成功![dl]库已备份到:'$Home/Backups/dl'" && Color_Y
 		cd $Home/Backups
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
-		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
+		dl_Size_MB=`awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'`
+		Say="$dl_Size_MB" && Color_Y
 	fi
 	echo " "
 	Enter
@@ -649,16 +650,15 @@ done
 	echo " "
 	cd $Home
 	if [ ! -d ./Backups/dl ];then
-		Say="没有找到'$Home/Backups/dl'文件夹,无法进行恢复!" && Color_R
-		Say="您似乎还没有进行过备份." && Color_R
+		Say="没有找到'$Home/Backups/dl',无法进行恢复!" && Color_R
 	else
-		Say="恢复中,请耐心等待!" && Color_B
+		echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 		cp -a $Home/Backups/dl $Home/Projects/$Project
-		echo " "
 		Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_Y
 		cd $Home/Projects/$Project
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
-		awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'
+		dl_Size_MB=`awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'`
+		Say="$dl_Size_MB" && Color_Y
 	fi
 	echo " "
 	Enter
@@ -910,7 +910,7 @@ done
 
 function Script_Update() {
 echo " "
-Say="检查网络连接..." && Color_B
+echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="网络连接正常,开始更新..." && Color_Y
@@ -940,10 +940,10 @@ sleep 3
 
 function Sources_Update() {
 echo " "
-Say="检查网络连接..." && Color_B
+echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	Say="网络连接正常,开始更新..." && Color_Y
+	Say="网络连接正常,准备开始更新..." && Color_Y
 	sleep 1
 	clear
 	cd $Home/Projects/$Project
