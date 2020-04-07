@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Support System:Ubuntu 19.10、Ubuntu 18.04
-Update=2020.04.06
-Version=V2.6.4
+Update=2020.04.07
+Version=V2.6.5
 
 function Second_Menu() {
 while :
@@ -514,13 +514,13 @@ do
 				cd $Home
 				if [ -f ./Config/$Project.branch ];then
 					rm ./Config/$Project.branch
-					Say="已删除$Home/Config/$Project.branch" && Color_Y
+					Say="已删除'$Home/Config/$Project.branch'" && Color_Y
 				else
 					:
 				fi
-				Say="[$Project]删除成功!" && Color_Y
+				Say="[$Project]项目删除成功!" && Color_Y
 			else 
-				Say="[$Project]删除失败!" && Color_R
+				Say="[$Project]项目删除失败!" && Color_R
 			fi
 			sleep 3
 			break
@@ -529,8 +529,13 @@ do
 	;;
 	5)
 		cd $Home/Projects/$Project
-		rm .config
-		rm .config.old
+		if [ -f .config ];then
+			rm .config
+		elif [ -f .config.old ];then
+			rm .config.old
+		else
+			:
+		fi
 		echo " "
 		Say="删除成功!" && Color_Y
 		sleep 3
@@ -571,7 +576,11 @@ while :
 do
 	clear
 	Say="当前操作:备份[.config]" && Color_B && echo " "
-	echo "1.标准名称/文件格式:[$Project-版本号-日期_时间]"
+	if [ $Project == Lede ];then
+		echo "1.标准名称/文件格式:[$Project-版本号-日期_时间]"
+	else
+		echo "1.标准名称/文件格式:[$Project-日期_时间]"
+	fi
 	echo "2.自定义文件名称"
 	echo "q.返回"
 	GET_Choose
@@ -581,7 +590,11 @@ do
 		break
 	;;
 	1)
-		Config_Name=$Project-$Version-`(date +%m%d_%H:%M)`
+		if [ $Project == Lede ];then
+			Config_Name=$Project-$Version-`(date +%m%d_%H:%M)`
+		else
+			Config_Name=$Project-`(date +%m%d_%H:%M)`
+		fi
 		cp $Home/Projects/$Project/.config $Home/Backups/$Config_Name
 	;;
 	2)
@@ -614,7 +627,11 @@ do
 	if [ -f ./$Config_Recovery ];then
 		cd $Home
 		Config_PATH_NAME=./Projects/$Project/.config
-		rm $Config_PATH_NAME
+		if [ -f $Config_PATH_NAME ];then
+			rm $Config_PATH_NAME
+		else
+			:
+		fi
 		cp ./Backups/$Config_Recovery $Config_PATH_NAME
 		if [ -f $Config_PATH_NAME ];then
 			Say="恢复成功!" && Color_Y
@@ -983,8 +1000,13 @@ function Sources_Download_Check() {
 cd $Home
 echo " "
 if [ -f "./Projects/$Project/feeds.conf.default" ];then
-	cd $Home/Config
-	echo "$Branch" > $Project.branch
+	echo "$Branch" > $Home/Config/$Project.branch
+	cd $Home
+	if [ -d ./Backups/Projects/$Project ];then
+		rm -rf $Home/Backups/Projects/$Project
+	else
+		:
+	fi
 	cp -r $Home/Projects/$Project $Home/Backups/Projects/$Project
 	Say="$Project源码下载成功,已自动备份到'$Home/Backups/Projects/$Project'" && Color_Y
 else
