@@ -1,9 +1,9 @@
 #!/bin/bash
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
-# Support System:Ubuntu 19.10、Ubuntu 18.04
-Update=2020.04.07
-Version=V2.6.5
+# Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04
+Update=2020.04.08
+Version=V2.6.6
 
 function Second_Menu() {
 while :
@@ -172,7 +172,7 @@ do
 		done
 
 	fi
-	rm -rf ./TEMP
+	rm -rf $Home/TEMP
 	clear
 	if [ ! $Choose == 6 ];then
 		echo -e "$Yellow$Compile_Say$White"
@@ -184,7 +184,11 @@ do
 	Say="开始编译$Project..." && Color_Y
 	Compile_START=`date +'%Y-%m-%d %H:%M:%S'`
 	cd $Home/Projects/$Project
-	$Thread
+	if [ $LogOutput == 0 ];then
+		$Thread
+	else
+		$Thread 2>&1 | tee $Home/Log/$Project-`(date +%m%d_%H:%M)`.log
+	fi
 	echo " "
 	if [ $X86_Check == 0 ];then
 		if [ -f ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name ];then
@@ -1048,6 +1052,11 @@ function Dir_Check() {
 	else
 		:
 	fi
+	if [ ! -d ./Log ];then
+		mkdir Log
+	else
+		:
+	fi
 	clear
 }
 
@@ -1119,24 +1128,29 @@ do
 	Say="设置[实验性]" && Color_B
 	echo " "
 	if [ $DeveloperMode == 0 ];then
-		Say="1.开发者模式	[OFF]" && Color_R
+		Say="1.开发者模式		[OFF]" && Color_R
 	else
-		Say="1.开发者模式	[ON]" && Color_Y
+		Say="1.开发者模式		[ON]" && Color_Y
 	fi
 	if [ $SimpleCompilation == 0 ];then
-		Say="2.轻松编译	[OFF]" && Color_R
+		Say="2.轻松编译		[OFF]" && Color_R
 	else
-		Say="2.轻松编译	[ON]" && Color_Y
+		Say="2.轻松编译		[ON]" && Color_Y
 	fi
 	if [ $ColorfulUI == 0 ];then
-		Say="3.彩色UI	[OFF]" && Color_R
+		Say="3.彩色UI		[OFF]" && Color_R
 	else
-		Say="3.彩色UI	[ON]" && Color_Y
+		Say="3.彩色UI		[ON]" && Color_Y
 	fi
 	if [ $GitSource == 0 ];then
-		Say="4.默认下载源	[Github]" && Color_Y
+		Say="4.默认下载源		[Github]" && Color_Y
 	else
-		Say="4.默认下载源	[Gitee]" && Color_B
+		Say="4.默认下载源		[Gitee]" && Color_B
+	fi
+	if [ $LogOutput == 0 ];then
+		Say="5.输出编译日志		[OFF]" && Color_R
+	else
+		Say="5.输出编译日志		[ON]" && Color_Y
 	fi
 	echo "q.返回"
 	GET_Choose
@@ -1172,6 +1186,14 @@ do
 			GitSource=0
 		fi
 	;;
+	5)
+		if [ $LogOutput == 0 ];then
+			LogOutput=1
+		else
+			LogOutput=0
+		fi
+
+	;;
 	esac
 done
 }
@@ -1182,12 +1204,14 @@ Extra_Packages="ntpdate httping subversion"
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 
-AutoBuild_git=https://github.com/Hyy2001X/AutoBuild
+AutoBuild_github=https://github.com/Hyy2001X/AutoBuild
+AutoBuild_gitee=https://gitee.com/Hyy2001X/AutoBuild
 
 DeveloperMode=0
 SimpleCompilation=1
 ColorfulUI=1
 GitSource=0
+LogOutput=0
 
 chmod +x -R $Home/Modules
 source $Home/Modules/NetworkTest.sh
