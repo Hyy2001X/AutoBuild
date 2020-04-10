@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04
 Update=2020.04.10
-Version=V2.6.7
+Version=V2.6.8
 
 function Second_Menu() {
 while :
@@ -818,7 +818,7 @@ do
 	echo "8.定时关机"
 	echo "9.系统信息"
 	echo "10.更换国内源"
-	echo -e "u.$Yellow更新脚本$White"
+	echo -e "11.$Yellow更新脚本$White"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
