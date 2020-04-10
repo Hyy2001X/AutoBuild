@@ -1140,11 +1140,13 @@ if [ $GitSource == 1 ];then
 	Lede_git=https://gitee.com/Hyy2001X/Lede
 	Openwrt_git=https://gitee.com/Hyy2001X/Openwrt
 	Lienol_git=https://gitee.com/Hyy2001X/Lienol
+	AutoBuild_git=https://gitee.com/Hyy2001X/AutoBuild
 	GitSource_Out=Gitee
 else
 	Lede_git=https://github.com/coolsnowwolf/lede
 	Openwrt_git=https://github.com/openwrt/openwrt
 	Lienol_git=https://github.com/lienol/openwrt
+	AutoBuild_git=https://github.com/Hyy2001X/AutoBuild
 	GitSource_Out=Github
 fi
 }
@@ -1245,9 +1247,6 @@ Extra_Packages="ntpdate httping subversion"
 
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
-
-AutoBuild_github=https://github.com/Hyy2001X/AutoBuild
-AutoBuild_gitee=https://gitee.com/Hyy2001X/AutoBuild
 
 chmod +x -R $Home/Modules
 source $Home/Modules/NetworkTest.sh
