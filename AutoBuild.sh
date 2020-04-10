@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04
-Update=2020.04.08
-Version=V2.6.6
+Update=2020.04.10
+Version=V2.6.7
 
 function Second_Menu() {
 while :
@@ -54,10 +54,6 @@ do
 	;;
 	esac
 done
-}
-
-function Custom_Second_Menu() {
-	:
 }
 
 function Compile_Firmware() {
@@ -230,8 +226,8 @@ function Sources_Download() {
 cd $Home
 if [ -f "./Projects/$Project/Makefile" ];then
 	echo " "
-	if [ -f ./Config/$Project.branch ];then
-		GET_Branch=`(awk 'NR==1' ./Config/$Project.branch)`
+	if [ -f ./Configs/$Project.branch ];then
+		GET_Branch=`(awk 'NR==1' ./Configs/$Project.branch)`
 		Say="已检测到$Project源码,当前分支:$GET_Branch" && Color_Y
 	else
 		Say="已检测到$Project源码!" && Color_Y
@@ -397,7 +393,7 @@ do
 	Say="高级选项" && Color_B
 	echo " "
 	echo "1.从$GitSource_Out拉取$Project源代码"
-	echo "2.强制更新源代码且合并到本地"
+	echo "2.强制更新$Project源代码和Feeds"
 	echo "3.添加第三方主题包"
 	echo "4.磁盘清理"
 	echo "5.删除配置文件"
@@ -413,12 +409,7 @@ do
 		Sources_Download
 	;;
 	2)
-		cd $Home/Projects/$Project
-		clear
-		git fetch --all
-		git reset --hard origin/master
-		git pull
-		Enter
+		Enforce_Sources_Update
 	;;
 	3)
 		clear
@@ -516,9 +507,9 @@ do
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
 				cd $Home
-				if [ -f ./Config/$Project.branch ];then
-					rm ./Config/$Project.branch
-					Say="已删除'$Home/Config/$Project.branch'" && Color_Y
+				if [ -f ./Configs/$Project.branch ];then
+					rm ./Configs/$Project.branch
+					Say="已删除'$Home/Configs/$Project.branch'" && Color_Y
 				else
 					:
 				fi
@@ -822,10 +813,11 @@ do
 	echo "3.SSH访问路由器"
 	echo "4.同步网络时间"
 	echo "5.项目空间占用统计"
-	echo "6.为AutoBuild添加快捷启动"
+	echo "6.创建快捷启动方式"
 	echo "7.查看磁盘空间大小"
 	echo "8.定时关机"
-	echo -e "9.$Skyb系统信息$White"
+	echo "9.系统信息"
+	echo "10.更换国内源"
 	echo -e "u.$Yellow更新脚本$White"
 	echo "q.返回"
 	GET_Choose
@@ -845,9 +837,16 @@ do
 	;;
 	2)
 		clear
+		Update_Times=1
 		sudo apt-get update
-		sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib
-		sudo apt-get -y install $Extra_Packages
+		while [ $Update_Times -le 3 ];
+		do
+			echo -ne "\r准备执行第$Update_Times次安装...\r"
+			sleep 2
+			sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib
+			sudo apt-get -y install $Extra_Packages
+			Update_Times=$(($Update_Times + 1))
+		done
 		echo " "
 		Enter
 	;;
@@ -925,6 +924,9 @@ do
 	9)
 		Systeminfo
 	;;
+	10)
+		ReplaceSourcesList
+	;;
 	esac
 done
 }
@@ -937,14 +939,17 @@ if [ $? -eq 0 ];then
 	Say="网络连接正常,开始更新..." && Color_Y
 	cd $Home
 	rm $Home/AutoBuild.sh
+	rm $Home/README.md
 	rm -rf $Home/TEMP
 	rm -rf $Home/Modules
+	rm -rf $Home/Additional
 	svn checkout $AutoBuild_git/trunk ./TEMP
 	echo " "
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		mv ./TEMP/AutoBuild.sh $Home/AutoBuild.sh
 		mv ./TEMP/README.md $Home/README.md
 		mv ./TEMP/Modules $Home
+		mv ./TEMP/Additional $Home
 		chmod +x AutoBuild.sh
 		chmod +x -R $Home/Modules
 		Say="更新成功!" && Color_Y
@@ -984,6 +989,36 @@ fi
 sleep 3
 }
 
+Enforce_Sources_Update() {
+echo " "
+echo -ne "\r$Blue检查网络连接...$White\r"
+timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
+	Say="网络连接正常,准备开始强制更新..." && Color_Y
+	sleep 1
+	cd $Home/Projects/$Project
+	clear
+	git fetch --all
+	git reset --hard origin/master
+	git pull
+	echo " "
+	if [ $? -eq 0 ]; then
+		Say="强制更新成功!" && Color_Y
+	else
+		Say="强制更新失败!" && Color_R
+	fi
+else
+	echo " "
+	Say="无网络连接,无法更新!" && Color_R
+fi
+sleep 3
+}
+
+function GET_Choose() {
+echo " "
+read -p '请从上方选择一个操作:' Choose
+}
+
 function Enter() {
 read -p "按下[回车]键以继续..." Key
 }
@@ -1004,7 +1039,7 @@ function Sources_Download_Check() {
 cd $Home
 echo " "
 if [ -f "./Projects/$Project/feeds.conf.default" ];then
-	echo "$Branch" > $Home/Config/$Project.branch
+	echo "$Branch" > $Home/Configs/$Project.branch
 	cd $Home
 	if [ -d ./Backups/Projects/$Project ];then
 		rm -rf $Home/Backups/Projects/$Project
@@ -1114,13 +1149,7 @@ else
 fi
 }
 
-
-function GET_Choose() {
-echo " "
-read -p '请从上方选择一个操作:' Choose
-}
-
-function Settings_1() {
+function Settings() {
 while :
 do
 	ColorfulUI_Check
@@ -1152,11 +1181,16 @@ do
 	else
 		Say="5.输出编译日志		[ON]" && Color_Y
 	fi
+	echo " "
+	echo "x.恢复默认设置"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
 	q)
 		break
+	;;
+	x)
+		Default_Settings
 	;;
 	1)
 		if [ $DeveloperMode == 0 ];then
@@ -1198,6 +1232,14 @@ do
 done
 }
 
+function Default_Settings() { 
+DeveloperMode=0
+SimpleCompilation=1
+ColorfulUI=1
+GitSource=0
+LogOutput=0
+}
+
 Home=$(cd $(dirname $0); pwd)
 Extra_Packages="ntpdate httping subversion"
 
@@ -1207,16 +1249,12 @@ CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 AutoBuild_github=https://github.com/Hyy2001X/AutoBuild
 AutoBuild_gitee=https://gitee.com/Hyy2001X/AutoBuild
 
-DeveloperMode=0
-SimpleCompilation=1
-ColorfulUI=1
-GitSource=0
-LogOutput=0
-
 chmod +x -R $Home/Modules
 source $Home/Modules/NetworkTest.sh
 source $Home/Modules/Systeminfo.sh
 source $Home/Modules/StorageStat.sh
+source $Home/Modules/ReplaceSourcesList.sh
+Default_Settings
 
 ################################################################Main code
 while :
@@ -1261,11 +1299,6 @@ do
 	else
 		echo -e "3.Lienol		$Red[未检测到]$White"
 	fi
-#	if [ -f ./Projects/Custom/feeds.conf.default ];then
-#		echo -e "4.Custom_Sources	$Yellow[已检测到]$White"
-#	else
-#		echo -e "4.Custom_Sources	$Red[未检测到]$White"
-#	fi
 	echo "q.返回"
 	GET_Choose
 	if [ $Choose == 1 ]; then
@@ -1274,8 +1307,6 @@ do
 		Project=Openwrt
 	elif [ $Choose == 3 ]; then
 		Project=Lienol
-	elif [ $Choose == 4 ]; then
-		Project=Custom
 	else
 		:
 	fi
@@ -1292,9 +1323,6 @@ do
 	3)
 		Second_Menu_Check
 	;;
-	4)
-		Custom_Second_Menu
-	;;
 	esac
 done
 ;;
@@ -1305,7 +1333,7 @@ done
 	Advanced_Options_1
 ;;
 4)
-	Settings_1
+	Settings
 ;;
 esac
 done
