@@ -1,0 +1,12 @@
+#Ubuntu 19.10 Aliyun Sources
+deb http://mirrors.aliyun.com/ubuntu/ eoan main restricted
+deb http://mirrors.aliyun.com/ubuntu/ eoan-updates main restricted
+deb http://mirrors.aliyun.com/ubuntu/ eoan universe
+deb http://mirrors.aliyun.com/ubuntu/ eoan-updates universe
+deb http://mirrors.aliyun.com/ubuntu/ eoan multiverse
+deb http://mirrors.aliyun.com/ubuntu/ eoan-updates multiverse
+deb http://mirrors.aliyun.com/ubuntu/ eoan-backports main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ eoan-security main restricted
+deb http://mirrors.aliyun.com/ubuntu/ eoan-security universe
+deb http://mirrors.aliyun.com/ubuntu/ eoan-security multiverse
+

@@ -1,0 +1,11 @@
+#Ubuntu 19.10 Tuna Sources
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan main restricted
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan-updates main restricted
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan universe
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan-updates universe
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan-updates multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan-backports main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan-security main restricted
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan-security universe
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ eoan-security multiverse
