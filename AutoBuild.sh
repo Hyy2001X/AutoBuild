@@ -825,7 +825,7 @@ do
 	q)
 		break
 	;;
-	u)
+	11)
 		Script_Update
 	;;
 	1)
