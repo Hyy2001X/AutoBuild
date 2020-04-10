@@ -3,7 +3,7 @@
 # Device Support:ALL Device [TEST]
 # Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04
 Update=2020.04.10
-Version=V2.6.8
+Version=V2.6.9
 
 function Second_Menu() {
 while :
@@ -1082,8 +1082,8 @@ function Dir_Check() {
 	else
 		:
 	fi
-	if [ ! -d ./Config ];then
-		mkdir Config
+	if [ ! -d ./Configs ];then
+		mkdir Configs
 	else
 		:
 	fi
