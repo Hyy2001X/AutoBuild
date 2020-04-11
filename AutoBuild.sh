@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Device Support:ALL Device [TEST]
 # Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04
-Update=2020.04.10
-Version=V2.6.9
+Update=2020.04.11
+Version=V2.7.0
 
 function Second_Menu() {
 while :
@@ -60,35 +60,33 @@ function Compile_Firmware() {
 while :
 do
 	cd $Home/Projects/$Project
-	if [ -f ".config" ];then
-		clear
-		cp .config $Home/TEMP/$Project.TEMP
-		cd $Home/TEMP
-		GET_BOARD=$(awk '/CONFIG_TARGET_BOARD=/{print}' $Project.TEMP);
-		GET_SUBTARGET=$(awk '/CONFIG_TARGET_SUBTARGET=/{print}' $Project.TEMP);
-		GET_PROFILE=$(awk '/CONFIG_TARGET_PROFILE=/{print}' $Project.TEMP);
-		echo $GET_BOARD > $Project.TEMP2
-		echo $GET_SUBTARGET >> $Project.TEMP2
-		echo $GET_PROFILE >> $Project.TEMP2
-		sed -i 's/\"//g' $Project.TEMP2
-		PROCESSED_BOARD=`(awk 'NR==1' $Project.TEMP2)`
-		PROCESSED_SUBTARGET=`(awk 'NR==2' $Project.TEMP2)`
-		PROCESSED_PROFILE=`(awk 'NR==3' $Project.TEMP2)`
-		TARGET_BOARD=${PROCESSED_BOARD:20}
-		TARGET_SUBTARGET=${PROCESSED_SUBTARGET:24}	
+	if [ -f .config ];then
+		TARGET_BOARD=`awk -F'[="]+' '/TARGET_BOARD/{print $2}' .config`
+		TARGET_SUBTARGET=`awk -F'[="]+' '/TARGET_SUBTARGET/{print $2}' .config`
+		TARGET_ARCH_PACKAGES=`awk -F'[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config`
+		PROFILE=`awk -F'[="]+' '/TARGET_PROFILE/{print $2}' .config`
 		if [ ! $TARGET_BOARD == x86 ];then
-			TARGET_PROFILE=${PROCESSED_PROFILE:29}
+			if [ ! $PROFILE == Default ];then
+				TARGET_PROFILE=${PROFILE:7}
+				Default_Check=0
+			else
+				Default_Check=1
+				TARGET_PROFILE=编译所有$TARGET_SUBTARGET设备
+			fi
 			X86_Check=0
 		else
-			TARGET_PROFILE=${PROCESSED_PROFILE:22}
+			TARGET_PROFILE=$PROFILE
 			X86_Check=1
 		fi
-		Say="配置文件解析" && Color_B
-		echo CPU架构:$TARGET_BOARD
-		echo 处理器型号:$TARGET_SUBTARGET
-		echo 设备名称:$TARGET_PROFILE
+		clear
+		Say="Simple Compile Script by Hyy2001" && Color_B
+		Decoration
+		echo -e "CPU 架构:$Yellow$TARGET_BOARD$White"
+		echo -e "CPU 型号:$Yellow$TARGET_SUBTARGET$White"
+		echo -e "Arch架构:$Yellow$TARGET_ARCH_PACKAGES$White"
+		echo -e "设备名称:$Yellow$TARGET_PROFILE$White"
 		echo ""
-		echo -e "用户CPU参数:$Yellow$CPU_Cores核$CPU_Threads线程$White"
+		echo -e "用户CPU参数:$Yellow$CPU_Cores核心$CPU_Threads线程$White"
 	else
 		echo " "
 		Say="未检测到配置文件,无法进行编译!" && Color_R
@@ -96,7 +94,7 @@ do
 		break
 	fi
 	echo " "
-	Say="编译参数" && Color_B
+	Say="选择编译参数" && Color_B
 	echo "1.make -j1"
 	echo "2.make -j1 V=s"
 	echo "3.make -j4"
@@ -104,6 +102,7 @@ do
 	echo -e "5.$Yellow自动选择$White"
 	echo "6.手动输入参数"
 	echo "q.返回"
+	Decoration
 	GET_Choose
 	case $Choose in
 	q)
@@ -135,10 +134,10 @@ do
 		if [ ! $Choose == 5 ];then
 			if [ $Print_CompileLog == 0 ];then
 				Thread="make -j$Threads"
-				Compile_Say="当前选择:$Skyb$Threads线程编译,不在屏幕上输出日志[快]$White"
+				Compile_Say="编译参数:$Skyb$Threads线程编译,不在屏幕上输出日志[快]$White"
 			else
 				Thread="make -j$Threads V=s"
-				Compile_Say="当前选择:$Skyb$Threads线程编译,并在屏幕上输出日志[慢]$White"
+				Compile_Say="编译参数:$Skyb$Threads线程编译,并在屏幕上输出日志[慢]$White"
 			fi
 		else
 			Compile_Say="自动选择:$Skyb$Threads线程编译$White"
@@ -147,35 +146,45 @@ do
 	else
 		Thread=$Threads
 	fi
-	Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
-	if [ $Project == Lede ];then
-		read -p '请输入附加信息:' Extra
-		NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
-		cd $Home
-		while [ -f "./Packages/$NEW_Firmware_Name" ]
-		do
-			read -p '包含该附加信息的名称已存在!请重新添加:' Extra
+	if [ $Default_Check == 0 ];then
+		Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
+		if [ $Project == Lede ];then
+			read -p '请输入附加信息:' Extra
 			NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
-		done
-	else
-		read -p '请输入附加信息:' Extra
-		NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
-		cd $Home
-		while [ -f "./Packages/$NEW_Firmware_Name" ]
-		do
-			read -p '包含该附加信息的名称已存在!请重新添加:' Extra
+			cd $Home
+			while [ -f "./Packages/$NEW_Firmware_Name" ]
+			do
+				read -p '包含该附加信息的名称已存在!请重新添加:' Extra
+				NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
+			done
+		else
+			read -p '请输入附加信息:' Extra
 			NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
-		done
-
+			cd $Home
+			while [ -f "./Packages/$NEW_Firmware_Name" ]
+			do
+				read -p '包含该附加信息的名称已存在!请重新添加:' Extra
+				NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
+			done
+		fi
+	else
+		:
 	fi
-	rm -rf $Home/TEMP
 	clear
 	if [ ! $Choose == 6 ];then
 		echo -e "$Yellow$Compile_Say$White"
 	else
 		:
 	fi
-	echo -e "$Yellow预期名称:$Blue$NEW_Firmware_Name$White"
+	if [ $X86_Check == 0 ];then
+		if [ $Default_Check == 0 ];then
+			echo -e "$Yellow预期名称:$Blue$NEW_Firmware_Name$White"
+		else
+			:
+		fi
+	else
+		:
+	fi
 	echo " "
 	Say="开始编译$Project..." && Color_Y
 	Compile_START=`date +'%Y-%m-%d %H:%M:%S'`
@@ -187,34 +196,40 @@ do
 	fi
 	echo " "
 	if [ $X86_Check == 0 ];then
-		if [ -f ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name ];then
-			Compile_END=`date +'%Y-%m-%d %H:%M:%S'`
-			Start_Seconds=$(date --date="$Compile_START" +%s);
-			End_Seconds=$(date --date="$Compile_END" +%s);
-			echo -ne "$Skyb$Compile_START --> $Compile_END "
-			Compile_TIME=`awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'`
-			echo -ne "$Compile_TIME$White"
-			echo " "
-			mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Packages/$NEW_Firmware_Name
-			cd $Home/Packages
-			Firmware_Size=`ls -l $NEW_Firmware_Name | awk '{print $5}'`
-			Say="$Project编译成功!固件已自动移动到'$Home/Packages' " && Color_Y
-			echo -e "$Yellow固件名称:$Blue$NEW_Firmware_Name$White"
-			Firmware_Size_MB=`awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'`
-			Say="$Firmware_Size_MB" && Color_Y
+		if [ $Default_Check == 0 ];then
+			if [ -f ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name ];then
+				Compile_END=`date +'%Y-%m-%d %H:%M:%S'`
+				Start_Seconds=$(date --date="$Compile_START" +%s);
+				End_Seconds=$(date --date="$Compile_END" +%s);
+				echo -ne "$Skyb$Compile_START --> $Compile_END "
+				Compile_TIME=`awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'`
+				echo -ne "$Compile_TIME$White"
+				echo " "
+				mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Packages/$NEW_Firmware_Name
+				cd $Home/Packages
+				Firmware_Size=`ls -l $NEW_Firmware_Name | awk '{print $5}'`
+				Say="$Project编译成功!固件已自动移动到'$Home/Packages' " && Color_Y
+				echo -e "$Yellow固件名称:$Blue$NEW_Firmware_Name$White"
+				Firmware_Size_MB=`awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'`
+				Say="$Firmware_Size_MB" && Color_Y
+			else
+				echo " "
+				Compile_END=`date +'%Y-%m-%d %H:%M:%S'`
+				Start_Seconds=$(date --date="$Compile_START" +%s);
+				End_Seconds=$(date --date="$Compile_END" +%s);
+				echo -ne "$Red$Compile_START --> $Compile_END$White "
+				Compile_TIME=`awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'`
+				echo -ne "$Red$Compile_TIME$White"
+				echo " "
+				Say="编译失败!" && Color_R
+			fi
 		else
-			echo " "
-			Compile_END=`date +'%Y-%m-%d %H:%M:%S'`
-			Start_Seconds=$(date --date="$Compile_START" +%s);
-			End_Seconds=$(date --date="$Compile_END" +%s);
-			echo -ne "$Red$Compile_START --> $Compile_END$White "
-			Compile_TIME=`awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'`
-			echo -ne "$Red$Compile_TIME$White"
-			echo " "
-			Say="编译失败!" && Color_R
+			Say="编译结束." && Color_Y
+			echo "所选编译设备为Default，请前往'$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET'查看结果."
 		fi
 	else
-		echo "所选编译设备为X86架构，请自行前往'$Home/Projects/$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET'查看结果."
+		Say="编译结束." && Color_Y
+		echo "所选编译设备为X86架构，请前往'$Project/bin/targets/$TARGET_BOARD'查看结果."
 	fi
 	echo " "
 	Enter
@@ -600,7 +615,7 @@ do
 	esac
 	Say="备份成功!备份文件存放于:$Home/Backups" && Color_Y
 	Say="文件名称:$Config_Name" && Color_Y
-	sleep 3
+	sleep 2
 done
 ;;
 2)
@@ -633,11 +648,11 @@ do
 		else
 			Say="恢复失败!" && Color_R
 		fi
-		sleep 3
+		sleep 2
 		break
 	else
 		Say="未找到'$Config_Recovery',请检查是否输入正确!" && Color_R
-		sleep 3
+		sleep 2
 	fi
 done
 ;;
@@ -1033,6 +1048,12 @@ echo -e "$Red$Say$White"
 
 function Color_B() {
 echo -e "$Blue$Say$White"
+}
+
+function Decoration() {
+	echo -ne "$Skyb"
+	printf "%-70s\n" "-" | sed 's/\s/-/g'
+	echo -ne "$White"
 }
 
 function Sources_Download_Check() {
