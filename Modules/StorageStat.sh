@@ -1,14 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function StorageStat() {
-Update=2020.04.02
-Module_Version=V1.0.0
-
-Decoration() {
-	echo -ne "$Skyb"
-	printf "%-70s\n" "-" | sed 's/\s/-/g'
-	echo -ne "$White"
-}
+Update=2020.04.11
+Module_Version=V1.1
 
 clear
 Say="Loading Configuration..." && Color_Y

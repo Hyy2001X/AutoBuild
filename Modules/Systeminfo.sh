@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function Systeminfo() {
-Update=2020.04.02
-Module_Version=V1.0.0
+Update=2020.04.11
+Module_Version=V1.1
 
 clear
 CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
@@ -27,11 +27,6 @@ Get_OS() {
 }
 OS_INFO=$( Get_OS )
 
-Decoration() {
-	echo -ne "$Skyb"
-	printf "%-70s\n" "-" | sed 's/\s/-/g'
-	echo -ne "$White"
-}
 clear
 Say="System info Script $Module_Version by Hyy2001" && Color_B
 

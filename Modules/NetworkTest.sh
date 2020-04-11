@@ -1,14 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function Network_Test() {
-Update=2020.04.05
-Module_Version=V2.1
-
-Decoration() {
-	echo -ne "$Skyb"
-	printf "%-70s\n" "-" | sed 's/\s/-/g'
-	echo -ne "$White"
-}
+Update=2020.04.11
+Module_Version=V2.2
 
 function Network_Test_Mod() {
 echo -ne "\r$Blue检测中...$White\r"

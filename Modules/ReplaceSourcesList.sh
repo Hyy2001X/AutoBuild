@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ReplaceSourcesList() {
-Update=2020.04.10
-Module_Version=BETA-V1.0.0
+Update=2020.04.11
+Module_Version=BETA-V1.0
 
 ReplaceSources_mod() {
 if [ -f /etc/apt/sources.list ];then
