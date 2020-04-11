@@ -1,7 +1,7 @@
 #!/bin/bash
 # AutoBuild Script by Hyy2001
-# Device Support:ALL Device [TEST]
-# Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04
+# Supported Devices:All [Test]
+# Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04 LTS
 Update=2020.04.11
 Version=V2.7.1
 
@@ -245,7 +245,7 @@ if [ -f "./Projects/$Project/Makefile" ];then
 		GET_Branch=`(awk 'NR==1' ./Configs/$Project.branch)`
 		Say="已检测到$Project源码,当前分支:$GET_Branch" && Color_Y
 	else
-		Say="已检测到$Project源码!" && Color_Y
+		Say="已检测到$Project源码,无需下载!" && Color_Y
 	fi
 	sleep 3
 else
@@ -824,23 +824,24 @@ do
 	Say="高级选项" && Color_B
 	echo " "
 	echo "1.更新系统软件包"
-	echo "2.安装编译所需的依赖包"
-	echo "3.SSH访问路由器"
+	echo -e "2.$Skyb安装编译环境$White"
+	echo "3.通过SSH访问路由器"
 	echo "4.同步网络时间"
-	echo "5.项目空间占用统计"
-	echo "6.创建快捷启动方式"
-	echo "7.查看磁盘空间大小"
+	echo "5.空间占用统计"
+	echo "6.创建快捷启动"
+	echo "7.查看磁盘信息"
 	echo "8.定时关机"
 	echo "9.系统信息"
-	echo "10.更换国内源"
-	echo -e "11.$Yellow更新脚本$White"
+	echo "10.更换软件源"
+	echo " "
+	echo -e "x.$Yellow更新脚本$White"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
 	q)
 		break
 	;;
-	11)
+	x)
 		Script_Update
 	;;
 	1)
@@ -868,7 +869,6 @@ do
 	3)
 		ssh-keygen -R 192.168.1.1
 		clear
-		echo "路由器默认地址为192.168.1.1"
 		ssh root@192.168.1.1
 	;;
 	4)
@@ -889,7 +889,7 @@ do
 			echo " "
 			Say="创建成功!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
 		else
-			Say="未检测到.bashrc,无法创建!" && Color_R
+			Say="未检测到.bashrc,无法创建快捷启动!" && Color_R
 		fi
 		sleep 3
 	;;
@@ -951,7 +951,7 @@ echo " "
 echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	Say="网络连接正常,开始更新..." && Color_Y
+	Say="连接正常,开始更新脚本..." && Color_Y
 	cd $Home
 	rm $Home/AutoBuild.sh
 	rm $Home/README.md
@@ -1009,7 +1009,7 @@ echo " "
 echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	Say="网络连接正常,准备开始强制更新..." && Color_Y
+	Say="连接正常,准备开始强制更新..." && Color_Y
 	sleep 1
 	cd $Home/Projects/$Project
 	clear
@@ -1070,7 +1070,7 @@ if [ -f "./Projects/$Project/feeds.conf.default" ];then
 	cp -r $Home/Projects/$Project $Home/Backups/Projects/$Project
 	Say="$Project源码下载成功,已自动备份到'$Home/Backups/Projects/$Project'" && Color_Y
 else
-	Say="下载失败,请检查网络后重试!" && Color_R
+	Say="$Project源码下载失败,请检查网络后重试!" && Color_R
 fi
 echo " "
 Enter
