@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04 LTS
-Update=2020.04.11
-Version=V2.7.1
+Update=2020.04.12
+Version=V2.7.2-DEV
 
 function Second_Menu() {
 while :
@@ -11,7 +11,11 @@ do
 	cd $Home
 	Dir_Check
 	if [ -f "./Projects/$Project/feeds.conf.default" ];then
-		Say="源码文件:已检测到,当前项目:$Project" && Color_Y
+		if [ $Project == Custom ];then
+			Say="源码文件:已检测到,当前项目:$Project" && Color_Y
+		else
+			Say="源码文件:已检测到,使用自定义源码." && Color_B
+		fi
 		Say="项目位置:'$Home/Projects/$Project'" && Color_Y
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
@@ -26,7 +30,11 @@ do
 		Say="源码文件:未检测到,请前往[高级选项]下载!" && Color_R
 	fi
 	echo " "
-	echo "1.更新$Project源代码和Feeds"
+	if [ $Project == Custom ];then
+		echo "1.更新源代码和Feeds"
+	else
+		echo "1.更新$Project源代码和Feeds"
+	fi
 	echo "2.打开固件配置界面"
 	echo "3.备份与恢复"
 	echo "4.执行编译"
@@ -407,8 +415,12 @@ do
 	clear
 	Say="高级选项" && Color_B
 	echo " "
-	echo "1.从$GitSource_Out拉取$Project源代码"
-	echo "2.强制更新$Project源代码和Feeds"
+	if [ $Project == Custom ];then
+		echo "2.强制更新源代码和Feeds"
+	else
+		echo "1.从$GitSource_Out拉取$Project源代码"
+		echo "2.强制更新$Project源代码和Feeds"
+	fi
 	echo "3.添加第三方主题包"
 	echo "4.磁盘清理"
 	echo "5.删除配置文件"
@@ -574,7 +586,11 @@ echo "1.备份[.config]"
 echo "2.恢复[.config]"
 echo "3.备份[dl]库"
 echo "4.恢复[dl]库"
-echo "5.恢复[$Project]源代码"
+if [ $Project == Custom ];then
+	:
+else
+	echo "5.恢复[$Project]源代码"
+fi
 echo "q.返回"
 GET_Choose
 case $Choose in
@@ -691,8 +707,12 @@ done
 	Enter
 ;;
 5)
-	echo " "
-	Sources_Recover
+	if [ $Project == Custom ];then
+		:
+	else
+		echo " "
+		Sources_Recover
+	fi
 ;;
 esac
 done
@@ -1117,7 +1137,7 @@ function Dir_Check() {
 }
 
 function Second_Menu_Check() {
-if [ -f ./Projects/$Project/feeds.conf.default ];then
+if [ -f ./Projects/$Project/Makefile ];then
 	Second_Menu
 else
 	if [ $DeveloperMode == 1 ];then
@@ -1180,9 +1200,9 @@ do
 	Say="设置[实验性]" && Color_B
 	echo " "
 	if [ $DeveloperMode == 0 ];then
-		Say="1.开发者模式		[OFF]" && Color_R
+		Say="1.调试模式		[OFF]" && Color_R
 	else
-		Say="1.开发者模式		[ON]" && Color_Y
+		Say="1.调试模式		[ON]" && Color_Y
 	fi
 	if [ $SimpleCompilation == 0 ];then
 		Say="2.轻松编译		[OFF]" && Color_R
@@ -1203,6 +1223,11 @@ do
 		Say="5.输出编译日志		[OFF]" && Color_R
 	else
 		Say="5.输出编译日志		[ON]" && Color_Y
+	fi
+	if [ $CustomSources == 0 ];then
+		Say="6.自定义源码		[OFF]" && Color_R
+	else
+		Say="6.自定义源码		[ON]" && Color_Y
 	fi
 	echo " "
 	echo "x.恢复默认设置"
@@ -1249,7 +1274,13 @@ do
 		else
 			LogOutput=0
 		fi
-
+	;;
+	6)
+		if [ $CustomSources == 0 ];then
+			CustomSources=1
+		else
+			CustomSources=0
+		fi
 	;;
 	esac
 done
@@ -1261,6 +1292,7 @@ SimpleCompilation=1
 ColorfulUI=1
 GitSource=0
 LogOutput=0
+CustomSources=1
 }
 
 Home=$(cd $(dirname $0); pwd)
@@ -1276,6 +1308,9 @@ source $Home/Modules/StorageStat.sh
 source $Home/Modules/ReplaceSourcesList.sh
 Default_Settings
 
+Script_Version=$Version
+Script_info="AutoBuild AIO $Script_Version by Hyy2001"
+
 ################################################################Main code
 while :
 do
@@ -1283,7 +1318,7 @@ Dir_Check
 ColorfulUI_Check
 GitSource_Check
 clear
-Say="AutoBuild AIO $Version by Hyy2001" && Color_B
+Say="$Script_info" && Color_B
 echo ""
 echo -e "1.${Yellow}Get Started!$White"
 echo "2.网络测试"
@@ -1301,47 +1336,60 @@ q)
 while :
 do
 	clear
-	Say="AutoBuild AIO $Version by Hyy2001" && Color_B
+	Say="$Script_info" && Color_B
 	echo " "
 	cd $Home
-	if [ -f ./Projects/Lede/feeds.conf.default ];then
+	if [ -f ./Projects/Lede/Makefile ];then
 		echo -e "1.Lede			$Yellow[已检测到]$White"
 	else
 		echo -e "1.Lede			$Red[未检测到]$White"
 	fi
-	if [ -f ./Projects/Openwrt/feeds.conf.default ];then
+	if [ -f ./Projects/Openwrt/Makefile ];then
 		echo -e "2.Openwrt_Offical	$Yellow[已检测到]$White"
 	else
 		echo -e "2.Openwrt_Offical	$Red[未检测到]$White"
 	fi
-	if [ -f ./Projects/Lienol/feeds.conf.default ];then
+	if [ -f ./Projects/Lienol/Makefile ];then
 		echo -e "3.Lienol		$Yellow[已检测到]$White"
 	else
 		echo -e "3.Lienol		$Red[未检测到]$White"
 	fi
-	echo "q.返回"
-	GET_Choose
-	if [ $Choose == 1 ]; then
-		Project=Lede
-	elif [ $Choose == 2 ]; then
-		Project=Openwrt
-	elif [ $Choose == 3 ]; then
-		Project=Lienol
+	if [ $CustomSources == 1 ];then
+		if [ -f ./Projects/Custom/Makefile ];then
+			echo -e "4.自定义源码		$Blue[已检测到]$White"
+		else
+			echo -e "4.自定义源码		$Red[未检测到]$White"
+		fi
 	else
 		:
 	fi
+	echo "q.返回"
+	GET_Choose
 	case $Choose in
 	q)
 		break
 	;;
 	1)
+		Project=Lede
 		Second_Menu_Check
 	;;
 	2)
+		Project=Openwrt
 		Second_Menu_Check
 	;;
 	3)
+		Project=Lienol
 		Second_Menu_Check
+	;;
+	4)
+		Project=Custom
+		if [ -f ./Projects/Custom/Makefile ];then
+			Second_Menu
+		else
+			echo " "
+			Say="请将源码文件放置到'$Home/Projects/Custom'" && Color_R
+			sleep 3
+		fi
 	;;
 	esac
 done
