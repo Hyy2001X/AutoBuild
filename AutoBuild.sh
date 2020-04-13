@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04 LTS
-Update=2020.04.12
-Version=V2.7.2-DEV
+Update=2020.04.13
+Version=V2.7.3-DEV
 
 function Second_Menu() {
 while :
@@ -11,7 +11,7 @@ do
 	cd $Home
 	Dir_Check
 	if [ -f "./Projects/$Project/feeds.conf.default" ];then
-		if [ $Project == Custom ];then
+		if [ ! $Project == Custom ];then
 			Say="源码文件:已检测到,当前项目:$Project" && Color_Y
 		else
 			Say="源码文件:已检测到,使用自定义源码." && Color_B
