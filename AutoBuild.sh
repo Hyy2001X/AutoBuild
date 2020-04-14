@@ -3,7 +3,7 @@
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04 LTS
 Update=2020.04.14
-Version=V2.7.4
+Version=V2.7.5
 
 function Second_Menu() {
 while :
@@ -932,7 +932,7 @@ echo " "
 echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	Say="连接正常,开始更新脚本..." && Color_Y
+	Say="连接正常,开始更新..." && Color_Y
 	cd $Home
 	rm $Home/AutoBuild.sh
 	rm $Home/README.md
@@ -965,7 +965,7 @@ echo " "
 echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	Say="网络连接正常,准备开始更新..." && Color_Y
+	Say="网络连接正常,开始更新..." && Color_Y
 	sleep 1
 	clear
 	cd $Home/Projects/$Project
@@ -990,7 +990,7 @@ echo " "
 echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	Say="连接正常,准备开始强制更新..." && Color_Y
+	Say="连接正常,开始强制更新..." && Color_Y
 	sleep 1
 	cd $Home/Projects/$Project
 	clear
@@ -1257,7 +1257,7 @@ CustomSources=1
 }
 
 Home=$(cd $(dirname $0); pwd)
-Extra_Packages="ntpdate httping subversion"
+Extra_Packages="ntpdate httping subversion ssh openssh-server openssh-client"
 
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
