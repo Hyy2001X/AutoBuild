@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04 LTS
-Update=2020.04.13
-Version=V2.7.3-DEV
+Update=2020.04.14
+Version=V2.7.4
 
 function Second_Menu() {
 while :
@@ -267,11 +267,6 @@ else
 		echo " "
 		Branch_1=master
 		echo "1.$Branch_1[默认]"
-		if [ $DeveloperMode == 0 ];then
-			echo -e "2.$Blue恢复[$Project源代码]$White"
-		else
-			:
-		fi
 		echo "q.返回"
 		echo " "
 		read -p '请从上方选择一个分支:' Branch
@@ -283,16 +278,7 @@ else
 			clear
 			git clone $Lede_git $Project
 			Branch=master
-		;;
-		2)
-			Sources_Recover
-		;;
 		esac
-		if [ ! $Branch == 2 ];then
-			Sources_Download_Check
-		else
-			:
-		fi
 		break
 	done
 	elif [ $Project == 'Openwrt' ];then
@@ -309,11 +295,6 @@ else
 		echo "2.$Branch_2"
 		echo "3.$Branch_3"
 		echo "4.$Branch_4"
-		if [ $DeveloperMode == 0 ];then
-			echo -e "5.$Blue恢复[$Project源代码]$White"
-		else
-			:
-		fi
 		echo "q.返回"
 		echo ""
 		read -p '请从上方选择一个分支:' Branch
@@ -340,16 +321,7 @@ else
 			clear
 			git clone -b $Branch_4 $Openwrt_git $Project
 			Branch=$Branch_4
-		;;
-		5)
-			Sources_Recover
-		;;
 		esac
-		if [ ! $Branch == 5 ];then
-			Sources_Download_Check
-		else
-			:
-		fi
 		break
 	done
 	elif [ $Project == 'Lienol' ];then			
@@ -364,11 +336,6 @@ else
 		echo "1.$Branch_1[默认]"
 		echo "2.$Branch_2"
 		echo "3.$Branch_3"
-		if [ $DeveloperMode == 0 ];then
-			echo -e "4.$Blue恢复[$Project源代码]$White"
-		else
-			:
-		fi
 		echo "q.返回"
 		echo ""
 		read -p '请从上方选择一个分支:' Branch
@@ -390,16 +357,7 @@ else
 			clear
 			git clone -b $Branch_3 $Lienol_git $Project
 			Branch=$Branch_3
-		;;
-		4)
-			Sources_Recover
-		;;
 		esac
-		if [ ! $Branch == 4 ];then
-			Sources_Download_Check
-		else
-			:
-		fi
 		break
 	done
 	else 
@@ -589,7 +547,7 @@ echo "4.恢复[dl]库"
 if [ $Project == Custom ];then
 	:
 else
-	echo "5.恢复[$Project]源代码"
+	echo "5.恢复[$Project]源码"
 fi
 echo "q.返回"
 GET_Choose
@@ -676,7 +634,7 @@ done
 	echo " "
 	cd $Home/Projects
 	if [ ! -d ./$Project/dl ];then
-		Say="没有找到'$Home/Projects/$Project/dl',无法进行备份!" && Color_R
+		Say="没有找到'$Home/Projects/$Project/dl',无法备份!" && Color_R
 	else
 		echo -ne "\r$Blue正在备份[dl]库...$White\r"
 		cp -a $Home/Projects/$Project/dl $Home/Backups/
@@ -727,7 +685,7 @@ if [ -f ./Backups/Projects/$Project/Makefile ];then
 	Say="恢复成功!" && Color_Y
 	Say="[$Project源代码]已恢复到:'$Home/Projects/'" && Color_Y
 else
-	Say="没有找到'$Home/Backups/Projects/$Project'文件夹,无法进行恢复!" && Color_R
+	Say="没有找到'$Home/Backups/Projects/$Project',无法恢复!" && Color_R
 	Say="您似乎还没有进行过备份." && Color_R
 fi
 sleep 3
@@ -824,7 +782,7 @@ fi
 	if [ -f ./$PKG_NAME/Makefile ];then
 	Say="已成功添加软件包 $PKG_NAME" && Color_Y
 	else
-	Say="未成功添加软件包 $PKG_NAME,请重试!" && Color_R
+	Say="添加软件包 $PKG_NAME 失败,请重试! " && Color_R
 	fi
 }
 
@@ -892,8 +850,12 @@ do
 		ssh root@192.168.1.1
 	;;
 	4)
+		echo " "
+		echo -ne "\r$Yellow正在同步网络时间...$White\r"
 		sudo ntpdate ntp1.aliyun.com
 		sudo hwclock --systohc
+		Say="同步完成!" && Color_Y
+		sleep 2
 	;;
 	5)
 		StorageStat
@@ -902,14 +864,13 @@ do
 		echo " "
 		cd ~
 		if [ -f .bashrc ];then
-		
 			read -p '请创建一个快捷启动的名称:' FastOpen		
 			echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
 			source ~/.bashrc
 			echo " "
 			Say="创建成功!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
 		else
-			Say="未检测到.bashrc,无法创建快捷启动!" && Color_R
+			Say="无法创建快捷启动!" && Color_R
 		fi
 		sleep 3
 	;;
@@ -950,7 +911,7 @@ do
 		4)
 			shutdown -c
 			echo " "
-			Say="已取消关机/重启任务." && Color_Y
+			Say="已取消定时关机/重启任务." && Color_Y
 		;;
 		esac
 		sleep 3
