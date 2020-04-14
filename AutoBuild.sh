@@ -1,7 +1,7 @@
 #!/bin/bash
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
-# Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04 LTS
+# Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
 Update=2020.04.14
 Version=V2.7.5
 
@@ -679,14 +679,13 @@ done
 function Sources_Recover() {
 cd $Home
 if [ -f ./Backups/Projects/$Project/Makefile ];then
-	Say="恢复中,请耐心等待!" && Color_B
+	echo -ne "\r$Blue恢复中,请耐心等待!$White\r"
 	cp -a $Home/Backups/Projects/$Project $Home/Projects
 	echo " "
 	Say="恢复成功!" && Color_Y
 	Say="[$Project源代码]已恢复到:'$Home/Projects/'" && Color_Y
 else
 	Say="没有找到'$Home/Backups/Projects/$Project',无法恢复!" && Color_R
-	Say="您似乎还没有进行过备份." && Color_R
 fi
 sleep 3
 }
@@ -845,9 +844,73 @@ do
 		Enter
 	;;
 	3)
-		ssh-keygen -R 192.168.1.1
-		clear
-		ssh root@192.168.1.1
+		echo " "
+		cd $Home
+		if [ ! -f ./Configs/SSH ];then
+			read -p '请输入路由器的用户名:' SSH_User
+			read -p '请输入路由器的IP地址:' SSH_IP
+			echo "Username=$SSH_User" > ./Configs/SSH
+			echo "IP=$SSH_IP" >> ./Configs/SSH
+			echo " "
+			Say="配置已保存到'$Home/Configs/SSH'" && Color_Y
+			sleep 2
+			ssh-keygen -R $SSH_IP
+			clear
+			ssh $SSH_User@$SSH_IP
+		else
+			SSH_User=`awk -F'[="]+' '/Username/{print $2}' ./Configs/SSH`
+			SSH_IP=`awk -F'[="]+' '/IP/{print $2}' ./Configs/SSH`
+		fi
+		while :
+		do
+			clear
+			Say="通过SSH访问路由器" && Color_B
+			echo " "
+			echo "1.使用上次保存的配置连接"
+			echo "2.创建配置文件"
+			echo "3.删除配置文件"
+			echo "4.重置[RSA Key Fingerprint]"
+			echo "q.返回"
+			GET_Choose
+			case $Choose in
+			q)
+				break
+			;;
+			1)
+				clear
+				ssh $SSH_User@$SSH_IP
+			;;
+			2)
+				echo " "
+				if [ ! -f ./Configs/SSH ];then
+					read -p '请输入路由器的用户名:' SSH_User
+					read -p '请输入路由器的IP地址:' SSH_IP
+					echo "Username=$SSH_User" > ./Configs/SSH
+					echo "IP=$SSH_IP" >> ./Configs/SSH
+					echo " "
+					Say="配置已保存到'$Home/Configs/SSH'" && Color_Y
+				else
+					Say="若要创建配置,请先删除上次的配置文件." && Color_R
+				fi
+				sleep 2
+			;;
+			3)
+				echo " "
+				if [ -f ./Configs/SSH ];then
+					rm $Home/Configs/SSH
+					Say="删除成功!" && Color_Y
+				else
+					Say="未检测到配置文件,无法删除!" && Color_R
+				fi
+				sleep 2
+			;;
+			4)
+				ssh-keygen -R $SSH_IP
+				echo " "
+				Say="重置成功!" && Color_Y
+				sleep 2
+			esac
+		done
 	;;
 	4)
 		echo " "
