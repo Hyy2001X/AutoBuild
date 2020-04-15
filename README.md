@@ -1,6 +1,6 @@
 # AutoBuild/更方便地编译Openwrt
 
-AutoBuild使用方法: 
+使用方法: 
 -
 		1.打开终端，更新系统软件包
 			sudo apt update
