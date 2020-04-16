@@ -2,13 +2,32 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
-Update=2020.04.14
-Version=V2.7.5
+Update=2020.04.16
+Version=V2.8.0-DEV
 
 function Second_Menu() {
+echo ""
+Say="正在检查更新..." && Color_B
+Update_Checked=0
 while :
 do
-	cd $Home
+	if [ $Update_Checked == 0 ];then
+		cd $Home/Projects/$Project
+		git fetch > /dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			Update_Check=$(git branch -v | grep -o 落后 )
+			if [ "$Update_Check" == "落后" ]; then
+				Update_mod="$Red[可更新]$White"
+			else
+				Update_mod="$Yellow[最新]$White"
+			fi
+		else
+			:
+		fi
+	else
+		:
+	fi
+	clear
 	Dir_Check
 	if [ -f "./Projects/$Project/feeds.conf.default" ];then
 		if [ ! $Project == Custom ];then
@@ -30,23 +49,20 @@ do
 		Say="源码文件:未检测到,请前往[高级选项]下载!" && Color_R
 	fi
 	echo " "
-	if [ $Project == Custom ];then
-		echo "1.更新源代码和Feeds"
-	else
-		echo "1.更新$Project源代码和Feeds"
-	fi
+	echo -e "1.更新源代码和Feeds$Update_mod"
 	echo "2.打开固件配置界面"
 	echo "3.备份与恢复"
 	echo "4.执行编译"
 	echo "5.高级选项"
 	echo "q.返回"
 	GET_Choose
+	Update_Checked=1
 	case $Choose in
 	q)
 		break
 	;;
 	1)
-		Sources_Update		
+		Sources_Update
 	;;
 	2)
 		Make_Menuconfig
@@ -374,11 +390,11 @@ do
 	Say="高级选项" && Color_B
 	echo " "
 	if [ $Project == Custom ];then
-		echo "2.强制更新源代码和Feeds"
+		:
 	else
 		echo "1.从$GitSource_Out拉取$Project源代码"
-		echo "2.强制更新$Project源代码和Feeds"
 	fi
+	echo "2.强制更新源代码和Feeds"
 	echo "3.添加第三方主题包"
 	echo "4.磁盘清理"
 	echo "5.删除配置文件"
@@ -1037,6 +1053,7 @@ if [ $? -eq 0 ];then
 	./scripts/feeds install -a
 	echo " "
 	if [ $? -eq 0 ]; then
+		Update_mod="$Yellow[最新]$White"
 		Say="更新成功!" && Color_Y
 	else
 		Say="更新失败!" && Color_R
@@ -1055,10 +1072,11 @@ timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="连接正常,开始强制更新..." && Color_Y
 	sleep 1
+	Branch=`(awk 'NR==1' $Home/Configs/$Project.branch)`
 	cd $Home/Projects/$Project
 	clear
 	git fetch --all
-	git reset --hard origin/master
+	git reset --hard origin/$Branch
 	git pull
 	echo " "
 	if [ $? -eq 0 ]; then
