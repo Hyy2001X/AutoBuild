@@ -3,7 +3,7 @@
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
 Update=2020.04.16
-Version=V2.8.0-DEV
+Version=V2.8.1-DEV
 
 function Second_Menu() {
 echo ""
@@ -413,60 +413,7 @@ do
 		Enforce_Sources_Update
 	;;
 	3)
-		clear
-		cd $Home/Projects
-		if [ -d ./$Project/package/themes ];then
-			:
-		else
-			cd ./$Project/package
-			mkdir themes
-		fi
-		clear
-		if [ $Project == 'Lede' ];then
-			cd $Home/Projects/$Project/package/lean
-			rm -rf luci-theme-argon
-			git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
-			cd $Home/Projects/$Project/package/themes
-			rm -rf luci-theme-rosy
-			git clone https://github.com/rosywrt/luci-theme-rosy luci-theme-rosy
-			cd $Home/Projects/$Project
-			grep "darkmatter" feeds.conf.default > /dev/null
-			if [ $? -eq 0 ]; then
-				:
-			else
-				echo "src-git darkmatter https://github.com/Lienol/luci-theme-darkmatter;luci-18.06" >> feeds.conf.default
-				Say="已添加luci-theme-darkmatter到feeds.conf.default" && Color_Y
-			fi
-			scripts/feeds update darkmatter
-			scripts/feeds install luci-theme-darkmatter
-			echo " "
-			if [ -d ./package/lean/luci-theme-argon ];then
-				Say="已添加主题包 luci-theme-argon" && Color_Y
-			else
-				Say="主题包 luci-theme-argon 添加失败!" && Color_R
-			fi
-			if [ -d ./package/themes/luci-theme-rosy ];then
-				Say="已添加主题包 luci-theme-rosy" && Color_Y
-			else
-				Say="主题包 luci-theme-rosy 添加失败!" && Color_R
-			fi
-			if [ -d ./feeds/darkmatter ];then
-				Say="已添加主题包 luci-theme-darkmatter" && Color_Y
-			else
-				Say="主题包 luci-theme-darkmatter 添加失败!" && Color_R
-			fi	
-		else
-			cd $Home/Projects/$Project/package/themes
-			rm -rf luci-theme-argon
-			git clone https://github.com/jerrykuku/luci-theme-argon luci-theme-argon
-			echo " "
-			if [ -d ./luci-theme-argon ];then
-				Say="已添加主题包 luci-theme-argon" && Color_Y
-			else
-				Say="主题包 luci-theme-argon 添加失败!" && Color_R
-			fi
-		fi
-		Enter
+		ExtraThemes
 	;;
 	4)
 	while :
@@ -478,6 +425,7 @@ do
 		echo "2.make dirclean"
 		echo "3.make distclean"
 		echo "4.删除$Project项目"
+		echo "5.删除临时文件"
 		echo "q.返回"
 		GET_Choose
 		cd $Home/Projects/$Project
@@ -520,6 +468,13 @@ do
 			fi
 			sleep 3
 			break
+		;;
+		5)
+			echo " "
+			Say="正在删除临时文件..." && Color_B
+			rm -rf $Home/Projects/$Project/tmp
+			Say="$Yellow临时文件删除成功!=" && Color_Y
+			sleep 3
 		esac
 	done
 	;;
@@ -1124,7 +1079,7 @@ echo " "
 if [ -f "./Projects/$Project/feeds.conf.default" ];then
 	echo "$Branch" > $Home/Configs/$Project.branch
 	cd $Home
-	if [ -d ./Backups/Projects/$Project ];then
+	if [ -f ./Backups/Projects/$Project/Makefile ];then
 		rm -rf $Home/Backups/Projects/$Project
 	else
 		:
@@ -1348,6 +1303,7 @@ source $Home/Modules/NetworkTest.sh
 source $Home/Modules/Systeminfo.sh
 source $Home/Modules/StorageStat.sh
 source $Home/Modules/ReplaceSourcesList.sh
+source $Home/Modules/ExtraThemes.sh
 Default_Settings
 
 Script_Version=$Version
