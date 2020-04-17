@@ -2,12 +2,12 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
-Update=2020.04.16
-Version=V2.8.1-DEV
+Update=2020.04.17
+Version=V2.8.2-DEV
 
 function Second_Menu() {
 echo ""
-Say="正在检查更新..." && Color_B
+Say="正在获取版本更新..." && Color_B
 Update_Checked=0
 while :
 do
@@ -39,8 +39,8 @@ do
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd ./Projects/$Project/package/lean/default-settings/files
-				Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" zzz-default-settings`
-				Say="版本号:$Version" && Color_Y
+				Lede_Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" zzz-default-settings`
+				Say="版本号:$Lede_Version" && Color_Y
 			else
 				:
 			fi
@@ -95,7 +95,7 @@ do
 				Default_Check=0
 			else
 				Default_Check=1
-				TARGET_PROFILE=编译所有$TARGET_SUBTARGET设备
+				TARGET_PROFILE=Default
 			fi
 			X86_Check=0
 		else
@@ -174,12 +174,12 @@ do
 		Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
 		if [ $Project == Lede ];then
 			read -p '请输入附加信息:' Extra
-			NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
+			NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d-$Extra.bin)`"
 			cd $Home
 			while [ -f "./Packages/$NEW_Firmware_Name" ]
 			do
 				read -p '包含该附加信息的名称已存在!请重新添加:' Extra
-				NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Version`(date +-%Y%m%d-$Extra.bin)`"
+				NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d-$Extra.bin)`"
 			done
 		else
 			read -p '请输入附加信息:' Extra
@@ -202,7 +202,7 @@ do
 	fi
 	if [ $X86_Check == 0 ];then
 		if [ $Default_Check == 0 ];then
-			echo -e "$Yellow预期名称:$Blue$NEW_Firmware_Name$White"
+			echo -e "$Yellow预期固件名称:$Blue$NEW_Firmware_Name$White"
 		else
 			:
 		fi
@@ -267,7 +267,8 @@ if [ -f "./Projects/$Project/Makefile" ];then
 	echo " "
 	if [ -f ./Configs/$Project.branch ];then
 		GET_Branch=`(awk 'NR==1' ./Configs/$Project.branch)`
-		Say="已检测到$Project源码,当前分支:$GET_Branch" && Color_Y
+		Say="已检测到$Project源码,无需下载!当前分支:$GET_Branch" && Color_Y
+		Say="当前分支:$GET_Branch" && Color_Y
 	else
 		Say="已检测到$Project源码,无需下载!" && Color_Y
 	fi
@@ -546,7 +547,7 @@ do
 	;;
 	1)
 		if [ $Project == Lede ];then
-			Config_Name=$Project-$Version-`(date +%m%d_%H:%M)`
+			Config_Name=$Project-$Lede_Version-`(date +%m%d_%H:%M)`
 		else
 			Config_Name=$Project-`(date +%m%d_%H:%M)`
 		fi
@@ -622,7 +623,7 @@ done
 	echo " "
 	cd $Home
 	if [ ! -d ./Backups/dl ];then
-		Say="没有找到'$Home/Backups/dl',无法进行恢复!" && Color_R
+		Say="没有找到'$Home/Backups/dl',无法恢复!" && Color_R
 	else
 		echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 		cp -a $Home/Backups/dl $Home/Projects/$Project
@@ -1003,6 +1004,9 @@ if [ $? -eq 0 ];then
 	sleep 1
 	clear
 	cd $Home/Projects/$Project
+	if [ $Project == Lede ];then
+		sed -i '5s/#src-git/src-git/g' feeds.conf.default
+	fi
 	git pull
 	./scripts/feeds update -a
 	./scripts/feeds install -a
@@ -1076,13 +1080,17 @@ function Decoration() {
 function Sources_Download_Check() {
 cd $Home
 echo " "
-if [ -f "./Projects/$Project/feeds.conf.default" ];then
+if [ -f "./Projects/$Project/Makefile" ];then
 	echo "$Branch" > $Home/Configs/$Project.branch
 	cd $Home
 	if [ -f ./Backups/Projects/$Project/Makefile ];then
 		rm -rf $Home/Backups/Projects/$Project
 	else
 		:
+	fi
+	if [ $Project == Lede ];then
+		cd $Home/Projects/Lede
+		sed -i '5s/#src-git/src-git/g' feeds.conf.default
 	fi
 	cp -r $Home/Projects/$Project $Home/Backups/Projects/$Project
 	Say="$Project源码下载成功,已自动备份到'$Home/Backups/Projects/$Project'" && Color_Y
@@ -1293,7 +1301,7 @@ CustomSources=1
 }
 
 Home=$(cd $(dirname $0); pwd)
-Extra_Packages="ntpdate httping subversion ssh openssh-server openssh-client"
+Extra_Packages="ntpdate httping ssh openssh-server openssh-client"
 
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
@@ -1306,8 +1314,7 @@ source $Home/Modules/ReplaceSourcesList.sh
 source $Home/Modules/ExtraThemes.sh
 Default_Settings
 
-Script_Version=$Version
-Script_info="AutoBuild AIO $Script_Version by Hyy2001"
+Script_info="AutoBuild AIO $Version by Hyy2001"
 
 ################################################################Main code
 while :
