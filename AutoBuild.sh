@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
-Update=2020.04.17
-Version=V2.8.2-DEV
+Update=2020.04.18
+Version=V2.8.3
 
 function Second_Menu() {
 echo ""
@@ -969,8 +969,6 @@ timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="连接正常,开始更新..." && Color_Y
 	cd $Home
-	rm $Home/AutoBuild.sh
-	rm $Home/README.md
 	rm -rf $Home/TEMP
 	rm -rf $Home/Modules
 	rm -rf $Home/Additional
@@ -979,6 +977,7 @@ if [ $? -eq 0 ];then
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		mv ./TEMP/AutoBuild.sh $Home/AutoBuild.sh
 		mv ./TEMP/README.md $Home/README.md
+		mv ./TEMP/LICENSE $Home/LICENSE
 		mv ./TEMP/Modules $Home
 		mv ./TEMP/Additional $Home
 		chmod +x AutoBuild.sh
@@ -988,11 +987,12 @@ if [ $? -eq 0 ];then
 		./AutoBuild.sh
 	else
 		Say="更新失败!" && Color_R
+		sleep 3
 	fi
 else
 	Say="无网络连接,无法更新!" && Color_R
+	sleep 3
 fi
-sleep 3
 }
 
 function Sources_Update() {
