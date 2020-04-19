@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
-Update=2020.04.18
-Version=V2.8.3
+Update=2020.04.19
+Version=V2.8.4
 
 function Second_Menu() {
 echo ""
@@ -213,10 +213,10 @@ do
 	Say="开始编译$Project..." && Color_Y
 	Compile_START=`date +'%Y-%m-%d %H:%M:%S'`
 	cd $Home/Projects/$Project
-	if [ $LogOutput == 0 ];then
+	if [ $SaveCompileLog == 0 ];then
 		$Thread
 	else
-		$Thread 2>&1 | tee $Home/Log/$Project-`(date +%m%d_%H:%M)`.log
+		$Thread 2>&1 | tee $Home/Log/Compile-$Project-`(date +%m%d_%H:%M)`.log
 	fi
 	echo " "
 	if [ $X86_Check == 0 ];then
@@ -1004,12 +1004,19 @@ if [ $? -eq 0 ];then
 	sleep 1
 	clear
 	cd $Home/Projects/$Project
+	if [ $SaveUpdateLog == 0 ];then
+		git pull
+		./scripts/feeds update -a
+		./scripts/feeds install -a
+	else
+		TIME=`(date +%m%d_%H:%M)`
+		git pull 2>&1 | tee $Home/Log/Update-$Project-$TIME.log
+		./scripts/feeds update -a 2>&1 | tee -a $Home/Log/Update-$Project-$TIME.log
+		./scripts/feeds install -a 2>&1 | tee -a $Home/Log/Update-$Project-$TIME.log
+	fi
 	if [ $Project == Lede ];then
 		sed -i '5s/#src-git/src-git/g' feeds.conf.default
 	fi
-	git pull
-	./scripts/feeds update -a
-	./scripts/feeds install -a
 	echo " "
 	if [ $? -eq 0 ]; then
 		Update_mod="$Yellow[最新]$White"
@@ -1224,15 +1231,20 @@ do
 	else
 		Say="4.默认下载源		[Gitee]" && Color_B
 	fi
-	if [ $LogOutput == 0 ];then
-		Say="5.输出编译日志		[OFF]" && Color_R
+	if [ $SaveCompileLog == 0 ];then
+		Say="5.保存编译日志		[OFF]" && Color_R
 	else
-		Say="5.输出编译日志		[ON]" && Color_Y
+		Say="5.保存编译日志		[ON]" && Color_Y
+	fi
+	if [ $SaveUpdateLog == 0 ];then
+		Say="6.保存更新日志		[OFF]" && Color_R
+	else
+		Say="6.保存更新日志		[ON]" && Color_Y
 	fi
 	if [ $CustomSources == 0 ];then
-		Say="6.自定义源码		[OFF]" && Color_R
+		Say="7.自定义源码		[OFF]" && Color_R
 	else
-		Say="6.自定义源码		[ON]" && Color_Y
+		Say="7.自定义源码		[ON]" && Color_Y
 	fi
 	echo " "
 	echo "x.恢复默认设置"
@@ -1274,13 +1286,20 @@ do
 		fi
 	;;
 	5)
-		if [ $LogOutput == 0 ];then
-			LogOutput=1
+		if [ $SaveCompileLog == 0 ];then
+			SaveCompileLog=1
 		else
-			LogOutput=0
+			SaveCompileLog=0
 		fi
 	;;
 	6)
+		if [ $SaveUpdateLog == 0 ];then
+			SaveUpdateLog=1
+		else
+			SaveUpdateLog=0
+		fi
+	;;
+	7)
 		if [ $CustomSources == 0 ];then
 			CustomSources=1
 		else
@@ -1296,7 +1315,8 @@ DeveloperMode=0
 SimpleCompilation=1
 ColorfulUI=1
 GitSource=0
-LogOutput=0
+SaveCompileLog=0
+SaveUpdateLog=1
 CustomSources=1
 }
 
