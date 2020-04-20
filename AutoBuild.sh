@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
-Update=2020.04.19
-Version=V2.8.4
+Update=2020.04.20
+Version=V2.8.5
 
 function Second_Menu() {
 echo ""
@@ -380,6 +380,7 @@ else
 	else 
 		:
 	fi
+	Sources_Download_Check
 fi
 }
 
@@ -425,7 +426,7 @@ do
 		echo "1.make clean"
 		echo "2.make dirclean"
 		echo "3.make distclean"
-		echo "4.删除$Project项目"
+		echo "4.删除[$Project]"
 		echo "5.删除临时文件"
 		echo "q.返回"
 		GET_Choose
@@ -463,9 +464,9 @@ do
 				else
 					:
 				fi
-				Say="[$Project]项目删除成功!" && Color_Y
+				Say="[$Project]删除成功!" && Color_Y
 			else 
-				Say="[$Project]项目删除失败!" && Color_R
+				Say="[$Project]删除失败!" && Color_R
 			fi
 			sleep 3
 			break
@@ -474,7 +475,7 @@ do
 			echo " "
 			Say="正在删除临时文件..." && Color_B
 			rm -rf $Home/Projects/$Project/tmp
-			Say="$Yellow临时文件删除成功!=" && Color_Y
+			Say="$Yellow临时文件删除成功!" && Color_Y
 			sleep 3
 		esac
 	done
