@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
-Update=2020.04.20
-Version=V2.8.5
+Update=2020.04.22
+Version=V2.8.6
 
 function Second_Menu() {
 echo ""
@@ -62,6 +62,7 @@ do
 		break
 	;;
 	1)
+		Enforce_Update=0
 		Sources_Update
 	;;
 	2)
@@ -187,7 +188,7 @@ do
 			cd $Home
 			while [ -f "./Packages/$NEW_Firmware_Name" ]
 			do
-				read -p '包含该附加信息的名称已存在!请重新添加:' Extra
+				read -p '包含该附加信息的名称已存在,请重新添加:' Extra
 				NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
 			done
 		fi
@@ -412,9 +413,11 @@ do
 		Sources_Download
 	;;
 	2)
-		Enforce_Sources_Update
+		Enforce_Update=1
+		Sources_Update
 	;;
 	3)
+		source $Home/Modules/ExtraThemes.sh
 		ExtraThemes
 	;;
 	4)
@@ -1003,8 +1006,15 @@ timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="网络连接正常,开始更新..." && Color_Y
 	sleep 1
-	clear
+	Branch=`(awk 'NR==1' $Home/Configs/$Project.branch)`
 	cd $Home/Projects/$Project
+	clear
+	if [ $Enforce_Update == 1 ];then
+		git fetch --all
+		git reset --hard origin/$Branch
+	else
+		:
+	fi
 	if [ $SaveUpdateLog == 0 ];then
 		git pull
 		./scripts/feeds update -a
@@ -1024,32 +1034,6 @@ if [ $? -eq 0 ];then
 		Say="更新成功!" && Color_Y
 	else
 		Say="更新失败!" && Color_R
-	fi
-else
-	echo " "
-	Say="无网络连接,无法更新!" && Color_R
-fi
-sleep 3
-}
-
-Enforce_Sources_Update() {
-echo " "
-echo -ne "\r$Blue检查网络连接...$White\r"
-timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
-if [ $? -eq 0 ];then
-	Say="连接正常,开始强制更新..." && Color_Y
-	sleep 1
-	Branch=`(awk 'NR==1' $Home/Configs/$Project.branch)`
-	cd $Home/Projects/$Project
-	clear
-	git fetch --all
-	git reset --hard origin/$Branch
-	git pull
-	echo " "
-	if [ $? -eq 0 ]; then
-		Say="强制更新成功!" && Color_Y
-	else
-		Say="强制更新失败!" && Color_R
 	fi
 else
 	echo " "
@@ -1428,6 +1412,5 @@ done
 ;;
 4)
 	Settings
-;;
 esac
 done
