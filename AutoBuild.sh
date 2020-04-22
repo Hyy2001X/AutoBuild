@@ -3,7 +3,7 @@
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
 Update=2020.04.22
-Version=V2.8.6
+Version=V2.9.0
 
 function Second_Menu() {
 echo ""
@@ -11,8 +11,8 @@ Say="正在获取版本更新..." && Color_B
 Update_Checked=0
 while :
 do
+	cd $Home/Projects/$Project
 	if [ $Update_Checked == 0 ];then
-		cd $Home/Projects/$Project
 		git fetch > /dev/null 2>&1
 		if [ $? -eq 0 ]; then
 			Update_Check=$(git branch -v | grep -o 落后 )
@@ -45,6 +45,8 @@ do
 				:
 			fi
 		fi
+		GET_Branch=`cat $Home/Projects/$Project/.git/HEAD`
+		Branch=${GET_Branch#*heads/}
 	else
 		Say="源码文件:未检测到,请前往[高级选项]下载!" && Color_R
 	fi
@@ -266,14 +268,9 @@ function Sources_Download() {
 cd $Home
 if [ -f "./Projects/$Project/Makefile" ];then
 	echo " "
-	if [ -f ./Configs/$Project.branch ];then
-		GET_Branch=`(awk 'NR==1' ./Configs/$Project.branch)`
-		Say="已检测到$Project源码,无需下载!当前分支:$GET_Branch" && Color_Y
-		Say="当前分支:$GET_Branch" && Color_Y
-	else
-		Say="已检测到$Project源码,无需下载!" && Color_Y
-	fi
-	sleep 3
+	Say="已检测到$Project源码,无需下载!" && Color_Y
+	Say="当前分支:$Branch" && Color_Y
+	sleep 2
 else
 	clear
 	cd $Home/Projects
@@ -295,7 +292,6 @@ else
 		1)
 			clear
 			git clone $Lede_git $Project
-			Branch=master
 		esac
 		break
 	done
@@ -323,22 +319,18 @@ else
 		1)
 			clear
 			git clone $Openwrt_git $Project
-			Branch=master
 		;;
 		2)
 			clear
 			git clone -b $Branch_2 $Openwrt_git $Project
-			Branch=$Branch_2
 		;;
 		3)
 			clear
 			git clone -b $Branch_3 $Openwrt_git $Project
-			Branch=$Branch_3
 		;;
 		4)
 			clear
 			git clone -b $Branch_4 $Openwrt_git $Project
-			Branch=$Branch_4
 		esac
 		break
 	done
@@ -364,22 +356,17 @@ else
 		1)
 			clear
 			git clone -b $Branch_1 $Lienol_git $Project
-			Branch=$Branch_1
 		;;
 		2)
 			clear
 			git clone -b $Branch_2 $Lienol_git $Project
-			Branch=$Branch_2
 		;;
 		3)
 			clear
 			git clone -b $Branch_3 $Lienol_git $Project
-			Branch=$Branch_3
 		esac
 		break
 	done
-	else 
-		:
 	fi
 	Sources_Download_Check
 fi
@@ -399,9 +386,9 @@ do
 	fi
 	echo "2.强制更新源代码和Feeds"
 	echo "3.添加第三方主题包"
-	echo "4.磁盘清理"
-	echo "5.删除配置文件"
-	echo "6.添加第三方软件包"
+	echo "4.添加第三方软件包"
+	echo "5.磁盘清理"
+	echo "6.删除配置文件"
 	echo "7.下载[dl]库"
 	echo "q.返回"
 	GET_Choose
@@ -417,10 +404,12 @@ do
 		Sources_Update
 	;;
 	3)
-		source $Home/Modules/ExtraThemes.sh
 		ExtraThemes
 	;;
 	4)
+		ExtraPackages
+	;;
+	5)
 	while :
 	do
 		clear
@@ -460,18 +449,11 @@ do
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
-				cd $Home
-				if [ -f ./Configs/$Project.branch ];then
-					rm ./Configs/$Project.branch
-					Say="已删除'$Home/Configs/$Project.branch'" && Color_Y
-				else
-					:
-				fi
 				Say="[$Project]删除成功!" && Color_Y
 			else 
 				Say="[$Project]删除失败!" && Color_R
 			fi
-			sleep 3
+			sleep 2
 			break
 		;;
 		5)
@@ -479,11 +461,11 @@ do
 			Say="正在删除临时文件..." && Color_B
 			rm -rf $Home/Projects/$Project/tmp
 			Say="$Yellow临时文件删除成功!" && Color_Y
-			sleep 3
+			sleep 2
 		esac
 	done
 	;;
-	5)
+	6)
 		cd $Home/Projects/$Project
 		if [ -f .config ];then
 			rm .config
@@ -495,9 +477,6 @@ do
 		echo " "
 		Say="删除成功!" && Color_Y
 		sleep 3
-	;;
-	6)
-		Add_Packages
 	;;
 	7)
 		clear
@@ -520,11 +499,6 @@ echo "1.备份[.config]"
 echo "2.恢复[.config]"
 echo "3.备份[dl]库"
 echo "4.恢复[dl]库"
-if [ $Project == Custom ];then
-	:
-else
-	echo "5.恢复[$Project]源码"
-fi
 echo "q.返回"
 GET_Choose
 case $Choose in
@@ -640,125 +614,8 @@ done
 	echo " "
 	Enter
 ;;
-5)
-	if [ $Project == Custom ];then
-		:
-	else
-		echo " "
-		Sources_Recover
-	fi
-;;
 esac
 done
-}
-
-function Sources_Recover() {
-cd $Home
-if [ -f ./Backups/Projects/$Project/Makefile ];then
-	echo -ne "\r$Blue恢复中,请耐心等待!$White\r"
-	cp -a $Home/Backups/Projects/$Project $Home/Projects
-	echo " "
-	Say="恢复成功!" && Color_Y
-	Say="[$Project源代码]已恢复到:'$Home/Projects/'" && Color_Y
-else
-	Say="没有找到'$Home/Backups/Projects/$Project',无法恢复!" && Color_R
-fi
-sleep 3
-}
-
-
-function Add_Packages() {
-while :
-do
-	cd $Home/Projects/$Project/package
-	if [ ! -d ./custom ];then
-		mkdir custom
-	else
-		:
-	fi
-	cd ./custom
-	clear
-	Say="手动添加软件包" && Color_B
-	echo " "
-	echo "1.SmartDNS"
-	echo "2.AdGuardHome"
-	echo "3.Clash"
-	echo -e "4.${Yellow}[软件库]${Blue}Lienol's Package Sources${White}"
-	echo -e "5.${Yellow}[软件库]${Blue}Lean's Package Sources${White}"
-	echo "q.返回"
-	GET_Choose
-	case $Choose in
-	q)
-		break	
-	;;
-	1)
-		PKG_NAME=SmartDNS
-		PKG_URL=https://github.com/Hyy2001X/SmartDNS.git
-		Add_Packages_mod
-	;;
-	2)
-		PKG_NAME=luci-app-adguardhome
-		PKG_URL=https://github.com/rufengsuixing/luci-app-adguardhome.git
-		Add_Packages_mod
-	;;
-	3)
-		PKG_NAME=luci-app-clash
-		PKG_URL=https://github.com/frainzy1477/luci-app-clash.git
-		Add_Packages_mod
-	;;
-	4)
-		cd $Home/Projects/$Project
-		grep "lienol" feeds.conf.default > /dev/null
-		if [ $? -eq 0 ]; then
-			echo " "
-			Say="已检测到Lienol's Package Sources,无需添加!" && Color_Y
-		else
-			echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
-			echo " "
-			grep "lienol" feeds.conf.default > /dev/null
-			if [ $? -eq 0 ]; then
-				Say="添加成功!" && Color_Y
-			else
-				Say="添加失败!" && Color_R
-			fi
-		fi
-	;;
-	5)
-		cd $Home/Projects/$Project
-		clear
-		if [ -d ./package/lean ];then
-			rm -rf ./package/lean
-		else
-			:
-		fi
-		svn checkout $Lede_git/trunk/package/lean ./package/lean
-		echo " "
-		if [ $? -eq 0 ]; then
-			Say="下载成功!" && Color_Y
-		else
-			Say="下载失败!" && Color_R
-		fi
-	;;
-	esac
-	sleep 3
-done
-}
-
-function Add_Packages_mod() {
-clear
-if [ ! -d ./$PKG_NAME ];then
-	:
-else
-	rm -rf $PKG_NAME
-	Say="已删除软件包 $PKG_NAME" && Color_Y
-fi
-	git clone $PKG_URL $PKG_NAME
-	echo " "
-	if [ -f ./$PKG_NAME/Makefile ];then
-	Say="已成功添加软件包 $PKG_NAME" && Color_Y
-	else
-	Say="添加软件包 $PKG_NAME 失败,请重试! " && Color_R
-	fi
 }
 
 function Make_Menuconfig() {
@@ -1006,7 +863,6 @@ timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="网络连接正常,开始更新..." && Color_Y
 	sleep 1
-	Branch=`(awk 'NR==1' $Home/Configs/$Project.branch)`
 	cd $Home/Projects/$Project
 	clear
 	if [ $Enforce_Update == 1 ];then
@@ -1073,21 +929,13 @@ function Sources_Download_Check() {
 cd $Home
 echo " "
 if [ -f "./Projects/$Project/Makefile" ];then
-	echo "$Branch" > $Home/Configs/$Project.branch
-	cd $Home
-	if [ -f ./Backups/Projects/$Project/Makefile ];then
-		rm -rf $Home/Backups/Projects/$Project
-	else
-		:
-	fi
 	if [ $Project == Lede ];then
 		cd $Home/Projects/Lede
 		sed -i '5s/#src-git/src-git/g' feeds.conf.default
 	fi
-	cp -r $Home/Projects/$Project $Home/Backups/Projects/$Project
-	Say="$Project源码下载成功,已自动备份到'$Home/Backups/Projects/$Project'" && Color_Y
+	Say="$Project源码下载成功!" && Color_Y
 else
-	Say="$Project源码下载失败,请检查网络后重试!" && Color_R
+	Say="$Project源码下载失败!" && Color_R
 fi
 echo " "
 Enter
@@ -1317,6 +1165,7 @@ source $Home/Modules/Systeminfo.sh
 source $Home/Modules/StorageStat.sh
 source $Home/Modules/ReplaceSourcesList.sh
 source $Home/Modules/ExtraThemes.sh
+source $Home/Modules/ExtraPackages.sh
 Default_Settings
 
 Script_info="AutoBuild AIO $Version by Hyy2001"
@@ -1412,5 +1261,9 @@ done
 ;;
 4)
 	Settings
+;;
+5)
+	ExtraPackages
+;;
 esac
 done
