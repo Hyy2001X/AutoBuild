@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
-Update=2020.04.22
-Version=V2.9.0
+Update=2020.04.25
+Version=V2.9.1
 
 function Second_Menu() {
 echo ""
@@ -669,7 +669,7 @@ do
 		do
 			echo -ne "\r准备执行第$Update_Times次安装...\r"
 			sleep 2
-			sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf
+			sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf
 			sudo apt-get -y install $Extra_Packages
 			Update_Times=$(($Update_Times + 1))
 		done
