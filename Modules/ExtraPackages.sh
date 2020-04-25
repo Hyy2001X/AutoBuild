@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ExtraPackages() {
-Update=2020.04.22
-Module_Version=V2.0-DEV
+Update=2020.04.26
+Module_Version=V2.1-DEV
 PKGHome=$Home/Projects/$Project/package
 
 ExtraPackages_mod_git() {
@@ -40,14 +40,15 @@ do
 	fi
 	cd custom
 	clear
-	Say="Extra Packsges Script $Module_Version by Hyy2001" && Color_B
+	Say="Extra Packages Script $Module_Version by Hyy2001" && Color_B
 	echo -e "$Skyb"
 	echo "1.SmartDNS"
 	echo "2.AdGuardHome"
 	echo "3.OpenClash"
 	echo "4.luci-app-clash"
-	echo -e "${Yellow}5.[软件库]Lienol$White"
-	echo -e "${Yellow}6.[软件库]Lean$White"
+	echo "5.luci-app-passwall"
+	echo -e "${Yellow}w.[软件库]Lienol$White"
+	echo -e "${Yellow}e.[软件库]Lean$White"
 	echo -e "${White}"
 	echo "q.返回"
 	echo " "
@@ -88,6 +89,11 @@ do
 		ExtraPackages_mod_git
 	;;
 	5)
+        PKG_NAME=luci-app-passwall
+        PKG_URL=https://github.com/Hyy2001X/$PKG_NAME
+        ExtraPackages_mod_git
+	;;
+	w)
 		cd $Home/Projects/$Project
 		grep "lienol" feeds.conf.default > /dev/null
 		if [ $? -eq 0 ]; then
@@ -100,7 +106,7 @@ do
 		./scripts/feeds install -a
 		Enter
 	;;
-	6)
+	e)
 		if [ -d $PKGHome/lean ];then
 			rm -rf $PKGHome/lean
 		fi
