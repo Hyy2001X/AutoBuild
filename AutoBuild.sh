@@ -2,13 +2,13 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
-Update=2020.04.25
-Version=V2.9.1
+Update=2020.04.26
+Version=V2.9.2
 
 function Second_Menu() {
 echo ""
-Say="正在获取版本更新..." && Color_B
 Update_Checked=0
+Say="正在获取版本更新..." && Color_B
 while :
 do
 	cd $Home/Projects/$Project
@@ -379,11 +379,7 @@ do
 	clear
 	Say="高级选项" && Color_B
 	echo " "
-	if [ $Project == Custom ];then
-		:
-	else
-		echo "1.从$GitSource_Out拉取$Project源代码"
-	fi
+	echo "1.从$GitSource_Out拉取源代码"
 	echo "2.强制更新源代码和Feeds"
 	echo "3.添加第三方主题包"
 	echo "4.添加第三方软件包"
@@ -397,7 +393,13 @@ do
 		break
 	;;
 	1)
-		Sources_Download
+		if [ $Project == Custom ];then
+			echo " "
+			Say="不适用于自定义源码." && Color_R
+			sleep 3
+		else
+			Sources_Download
+		fi
 	;;
 	2)
 		Enforce_Update=1
@@ -413,12 +415,12 @@ do
 	while :
 	do
 		clear
-		Say="磁盘清理" && Color_R
+		Say="磁盘清理" && Color_B
 		echo " "
 		echo "1.make clean"
 		echo "2.make dirclean"
 		echo "3.make distclean"
-		echo "4.删除[$Project]"
+		Say="4.删除项目" && Color_R
 		echo "5.删除临时文件"
 		echo "q.返回"
 		GET_Choose
@@ -467,16 +469,10 @@ do
 	;;
 	6)
 		cd $Home/Projects/$Project
-		if [ -f .config ];then
-			rm .config
-		elif [ -f .config.old ];then
-			rm .config.old
-		else
-			:
-		fi
+		rm -f ./.config*
 		echo " "
 		Say="删除成功!" && Color_Y
-		sleep 3
+		sleep 2
 	;;
 	7)
 		clear
