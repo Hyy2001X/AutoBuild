@@ -20,4 +20,5 @@
 6.启动脚本
 	`./AutoBuild.sh`
 
-7.Enjoy~
+
+AutoBuild支持的操作系统`Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta`
