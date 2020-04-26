@@ -2,7 +2,7 @@
 
 function ExtraPackages() {
 Update=2020.04.26
-Module_Version=V2.1-DEV
+Module_Version=V2.2-DEV
 PKGHome=$Home/Projects/$Project/package
 
 ExtraPackages_mod_git() {
@@ -89,34 +89,44 @@ do
 		ExtraPackages_mod_git
 	;;
 	5)
-        PKG_NAME=luci-app-passwall
-        PKG_URL=https://github.com/Hyy2001X/$PKG_NAME
-        ExtraPackages_mod_git
+		PKG_NAME=luci-app-passwall
+		PKG_URL=https://github.com/Hyy2001X/$PKG_NAME
+		ExtraPackages_mod_git
 	;;
 	w)
-		cd $Home/Projects/$Project
-		grep "lienol" feeds.conf.default > /dev/null
-		if [ $? -eq 0 ]; then
-			:
-		else
-			echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
+		if [ ! $Project == Lienol ];then
+			cd $Home/Projects/$Project
 			grep "lienol" feeds.conf.default > /dev/null
+			if [ $? -eq 0 ]; then
+				:
+			else
+				echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
+				grep "lienol" feeds.conf.default > /dev/null
+			fi
+			./scripts/feeds update lienol
+			./scripts/feeds install -a
+			echo " "
+			Enter
+		else
+			Say="不适用于[Lienol]项目." && Color_R
+			sleep 3
 		fi
-		./scripts/feeds update lienol
-		./scripts/feeds install -a
-		Enter
 	;;
 	e)
-		if [ -d $PKGHome/lean ];then
-			rm -rf $PKGHome/lean
-		fi
-		svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean/ $PKGHome/lean  > /dev/null 2>&1
-		if [ $? -eq 0 ]; then
-			Say="[软件库]Lean 添加成功!" && Color_Y
+		if [ ! $Project == Lede ];then
+			if [ -d $PKGHome/lean ];then
+				rm -rf $PKGHome/lean
+			fi
+			svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean/ $PKGHome/lean  > /dev/null 2>&1
+			if [ $? -eq 0 ]; then
+				Say="[软件库]Lean 添加成功!" && Color_Y
+			else
+				Say="[软件库]Lean 添加成功!" && Color_Y
+			fi
 		else
-			Say="[软件库]Lean 添加成功!" && Color_Y
+			Say="不适用于[Lede]项目." && Color_R
 		fi
-	sleep 3
+		sleep 3
 	;;
 	esac
 done
