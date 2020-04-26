@@ -2,7 +2,7 @@
 
 function ExtraThemes() {
 Update=2020.04.22
-Module_Version=V2.1-DEV
+Module_Version=V2.2-DEV
 PKGHome=$Home/Projects/$Project/package
 
 ExtraThemes_info() {
@@ -97,10 +97,12 @@ do
 				:
 			fi
 			PKG_URL=" -b 18.06 https://github.com/jerrykuku/luci-theme-argon"
+			cd theme
 			ExtraThemes_mod_git
 			mv $PKGHome/theme/luci-theme-argon $PKGHome/lean/$PKG_NAME
 		else
 			PKG_URL=" -b 19.07_stable https://github.com/jerrykuku/luci-theme-argon"
+			cd theme
 			ExtraThemes_mod_git
 		fi
 
