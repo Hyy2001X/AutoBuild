@@ -2,7 +2,7 @@
 
 function ExtraThemes() {
 Update=2020.04.22
-Module_Version=V2.2-DEV
+Module_Version=V2.3
 PKGHome=$Home/Projects/$Project/package
 
 ExtraThemes_info() {
@@ -29,7 +29,7 @@ if [ -d ./$PKG_NAME ];then
 fi
 git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
 if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
-	Say="$PKG_NAME 添加成功!" && Color_Y
+	Say="已添加主题包 $PKG_NAME" && Color_Y
 else
 	Say="$PKG_NAME 添加失败!" && Color_R
 fi
@@ -42,7 +42,7 @@ if [ -d ./$PKG_NAME ];then
 fi
 svn checkout $PKG_URL $PKG_NAME > /dev/null 2>&1
 if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
-	Say="$PKG_NAME 添加成功!" && Color_Y
+	Say="已添加主题包 $PKG_NAME" && Color_Y
 	rm -rf ./$PKG_NAME/.svn
 else
 	Say="$PKG_NAME 添加失败!" && Color_R
@@ -88,6 +88,7 @@ do
 		ExtraThemes_info
 	;;
 	a)
+		clear
 		PKG_NAME=luci-theme-argon
 		if [ $Project == Lede ];then
 			cd $PKGHome
