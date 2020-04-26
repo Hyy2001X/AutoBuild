@@ -3,7 +3,7 @@
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 19.10[Recommend]、Ubuntu 18.04 LTS
 Update=2020.04.26
-Version=V2.9.2
+Version=V2.9.3
 
 function Second_Menu() {
 echo ""
@@ -284,8 +284,8 @@ else
 		echo "1.$Branch_1[默认]"
 		echo "q.返回"
 		echo " "
-		read -p '请从上方选择一个分支:' Branch
-		case $Branch in
+		read -p '请从上方选择一个分支:' Choose
+		case $Choose in
 		q)
 			break
 		;;
@@ -293,6 +293,7 @@ else
 			clear
 			git clone $Lede_git $Project
 		esac
+		Sources_Download_Check
 		break
 	done
 	elif [ $Project == 'Openwrt' ];then
@@ -311,8 +312,8 @@ else
 		echo "4.$Branch_4"
 		echo "q.返回"
 		echo ""
-		read -p '请从上方选择一个分支:' Branch
-		case $Branch in
+		read -p '请从上方选择一个分支:' Choose
+		case $Choose in
 		q)
 			break
 		;;
@@ -332,6 +333,7 @@ else
 			clear
 			git clone -b $Branch_4 $Openwrt_git $Project
 		esac
+		Sources_Download_Check
 		break
 	done
 	elif [ $Project == 'Lienol' ];then			
@@ -348,27 +350,25 @@ else
 		echo "3.$Branch_3"
 		echo "q.返回"
 		echo ""
-		read -p '请从上方选择一个分支:' Branch
-		case $Branch in
+		read -p '请从上方选择一个分支:' Choose
+		case $Choose in
 		q)
 			break
 		;;
 		1)
-			clear
-			git clone -b $Branch_1 $Lienol_git $Project
+			Branch=$Branch_1
 		;;
 		2)
-			clear
-			git clone -b $Branch_2 $Lienol_git $Project
+			Branch=$Branch_2
 		;;
 		3)
-			clear
-			git clone -b $Branch_3 $Lienol_git $Project
+			Branch=$Branch_3
 		esac
+		git clone -b $Branch $Lienol_git $Project
+		Sources_Download_Check
 		break
 	done
 	fi
-	Sources_Download_Check
 fi
 }
 
@@ -451,6 +451,7 @@ do
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
+				Update_mod=" "
 				Say="[$Project]删除成功!" && Color_Y
 			else 
 				Say="[$Project]删除失败!" && Color_R
