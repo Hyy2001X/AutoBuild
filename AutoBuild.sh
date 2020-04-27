@@ -1,9 +1,9 @@
 #!/bin/bash
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
-# Supported Linux Systems:Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.04.26
-Version=V2.9.3
+# Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
+Update=2020.04.27
+Version=V2.9.4
 
 function Second_Menu() {
 echo ""
