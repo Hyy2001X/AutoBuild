@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ReplaceSourcesList() {
-Update=2020.04.11
-Module_Version=BETA-V1.0
+Update=2020.04.27
+Module_Version=V1.1
 
 ReplaceSources_mod() {
 if [ -f /etc/apt/sources.list ];then
@@ -24,7 +24,7 @@ if [ -f /etc/lsb-release ];then
 	OS_ID=`awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release`
 	OS_Version=`awk -F'[="]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release`
 	if [ $OS_ID == Ubuntu ];then
-		if [ $OS_Version == 19.10 ] || [ $OS_Version == 18.04 ];then
+		if [ $OS_Version == 19.10 ] || [ $OS_Version == 18.04 ] || [ $OS_Version == 20.04 ];then
 		while :
 		do
 			clear
@@ -59,7 +59,7 @@ if [ -f /etc/lsb-release ];then
 		done
 		else
 			echo " "
-			echo -e "$Red当前仅支持:Ubuntu 19.10、Ubuntu 18.04$White"
+			Say="当前仅支持:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04" && Color_R
 			sleep 3
 		fi
 	else
