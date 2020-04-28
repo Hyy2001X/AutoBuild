@@ -1,9 +1,9 @@
 #!/bin/bash
 # AutoBuild Script by Hyy2001
-# Supported Devices:All [Test]
+# Supported Router Devices:All
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.04.28
-Version=V2.9.5
+Version=V2.9.6
 
 function Second_Menu() {
 echo ""
@@ -618,8 +618,8 @@ function Make_Menuconfig() {
 clear
 cd $Home/Projects/$Project
 Say="Loading $Project Configuration..." && Color_B
-make menuconfig
 echo " "
+make menuconfig
 Enter
 }
 
@@ -833,6 +833,8 @@ timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Say="连接正常,开始更新..." && Color_Y
 	cd $Home
+	Old_Version=`awk 'NR==6' ./AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
+	cp ./AutoBuild.sh $Home/Backups/OldVersion/AutoBuild-$Old_Version.sh
 	rm -rf $Home/TEMP
 	rm -rf $Home/Modules
 	rm -rf $Home/Additional
@@ -968,6 +970,11 @@ function Dir_Check() {
 	fi
 	if [ ! -d ./Backups/Projects ];then
 		mkdir Backups/Projects
+	else
+		:
+	fi
+	if [ ! -d ./Backups/OldVersion ];then
+		mkdir Backups/OldVersion
 	else
 		:
 	fi
