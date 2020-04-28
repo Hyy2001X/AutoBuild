@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ReplaceSourcesList() {
-Update=2020.04.27
-Module_Version=V1.1
+Update=2020.04.28
+Module_Version=V1.2
 
 ReplaceSources_mod() {
 if [ -f /etc/apt/sources.list ];then
@@ -32,7 +32,8 @@ if [ -f /etc/lsb-release ];then
 			echo " "
 			echo "1.阿里源"
 			echo "2.清华源"
-			echo "3.恢复默认源"
+			echo "3.Ubuntu 中国服务器"
+			echo "4.恢复默认源"
 			echo "q.返回"
 			GET_Choose
 			case $Choose in
@@ -50,6 +51,11 @@ if [ -f /etc/lsb-release ];then
 				ReplaceSources_mod
 			;;
 			3)
+				Sources_Name="Ubuntu CN"
+				Sources_File="Ubuntu-$OS_Version-CN"
+				ReplaceSources_mod
+			;;
+			4)
 				sudo mv $Home/Backups/sources.list.bak /etc/apt/sources.list
 				echo " "
 				Say="恢复成功!" && Color_Y
