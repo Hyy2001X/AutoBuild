@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Devices:All [Test]
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.04.27
-Version=V2.9.4
+Update=2020.04.28
+Version=V2.9.5
 
 function Second_Menu() {
 echo ""
@@ -17,7 +17,7 @@ do
 		if [ $? -eq 0 ]; then
 			Update_Check=$(git branch -v | grep -o 落后 )
 			if [ "$Update_Check" == "落后" ]; then
-				Update_mod="$Red[可更新]$White"
+				Update_mod="$Blue[可更新]$White"
 			else
 				Update_mod="$Yellow[最新]$White"
 			fi
@@ -52,9 +52,9 @@ do
 	fi
 	echo " "
 	echo -e "1.更新源代码和Feeds$Update_mod"
-	echo "2.打开固件配置界面"
+	echo "2.打开固件配置菜单"
 	echo "3.备份与恢复"
-	echo "4.执行编译"
+	echo "4.编译选项"
 	echo "5.高级选项"
 	echo "q.返回"
 	GET_Choose
@@ -98,7 +98,6 @@ do
 				Default_Check=0
 			else
 				Default_Check=1
-				TARGET_PROFILE=Default
 			fi
 			X86_Check=0
 		else
@@ -116,12 +115,12 @@ do
 		echo -e "用户CPU参数:$Yellow$CPU_Cores核心$CPU_Threads线程$White"
 	else
 		echo " "
-		Say="未检测到配置文件,无法进行编译!" && Color_R
+		Say="未检测到配置文件,无法编译!" && Color_R
 		sleep 3
 		break
 	fi
 	echo " "
-	Say="选择编译参数" && Color_B
+	Say="编译参数" && Color_B
 	echo "1.make -j1"
 	echo "2.make -j1 V=s"
 	echo "3.make -j4"
@@ -278,7 +277,7 @@ else
 	while :
 	do
 		Say="$Project源码下载-分支选择" && Color_B
-		Say="$GitSource_Out仓库:$Lede_git" && Color_Y
+		Say="$GitSource_Stat仓库:$Lede_git" && Color_Y
 		echo " "
 		Branch_1=master
 		echo "1.$Branch_1[默认]"
@@ -300,7 +299,7 @@ else
 	while :
 	do
 		Say="$Project源码下载-分支选择" && Color_B
-		Say="$GitSource_Out仓库:$Openwrt_git" && Color_Y
+		Say="$GitSource_Stat仓库:$Openwrt_git" && Color_Y
 		echo " "
 		Branch_1=master
 		Branch_2=lede-17.01
@@ -340,7 +339,7 @@ else
 	while :
 	do
 		Say="$Project源码下载-分支选择" && Color_B
-		Say="$GitSource_Out仓库:$Openwrt_git" && Color_Y
+		Say="$GitSource_Stat仓库:$Openwrt_git" && Color_Y
 		echo " "
 		Branch_1=dev-19.07
 		Branch_2=dev-lean-lede
@@ -379,7 +378,7 @@ do
 	clear
 	Say="高级选项" && Color_B
 	echo " "
-	echo "1.从$GitSource_Out拉取源代码"
+	echo "1.从$GitSource_Stat拉取源代码"
 	echo "2.强制更新源代码和Feeds"
 	echo "3.添加第三方主题包"
 	echo "4.添加第三方软件包"
@@ -637,7 +636,7 @@ do
 	echo "5.空间占用统计"
 	echo "6.创建快捷启动"
 	echo "7.查看磁盘信息"
-	echo "8.定时关机"
+	echo "8.定时任务"
 	echo "9.系统信息"
 	echo "10.更换软件源"
 	echo " "
@@ -777,12 +776,13 @@ do
 	while :
 	do
 		clear
-		Say="定时关机" && Color_B
+		Say="定时任务" && Color_B
 		echo " "
 		echo "1.立刻关机"
-		echo "2.X分钟后关机"
-		echo "3.立刻重启"
-		echo "4.终止关机/重启任务"
+		echo "2.立刻重启"
+		echo "3.X分钟后关机"
+		echo "4.X分钟后重启"
+		echo "5.取消所有定时关机/重启任务"
 		echo "q.返回"
 		GET_Choose
 		case $Choose in
@@ -793,18 +793,24 @@ do
 			shutdown -h now
 		;;
 		2)
+			shutdown -r now
+		;;
+		3)
 			read -p '请输入时间X[X分钟后关机]:' Time_wait
 			echo " "
 			shutdown -h $Time_wait
 			Say="已设置$Time_wait分钟后自动关机." && Color_Y
 		;;
-		3)
-			shutdown -r now
-		;;
 		4)
+			read -p '请输入时间X[X分钟后重启]:' Time_wait
+			echo " "
+			shutdown -rh $Time_wait
+			Say="已设置$Time_wait分钟后自动重启." && Color_Y
+		;;
+		5)
 			shutdown -c
 			echo " "
-			Say="已取消定时关机/重启任务." && Color_Y
+			Say="已取消所有定时关机/重启任务." && Color_Y
 		;;
 		esac
 		sleep 3
@@ -1024,13 +1030,13 @@ if [ $GitSource == 1 ];then
 	Openwrt_git=https://gitee.com/Hyy2001X/Openwrt
 	Lienol_git=https://gitee.com/Hyy2001X/Lienol
 	AutoBuild_git=https://gitee.com/Hyy2001X/AutoBuild
-	GitSource_Out=Gitee
+	GitSource_Stat=Gitee
 else
 	Lede_git=https://github.com/coolsnowwolf/lede
 	Openwrt_git=https://github.com/openwrt/openwrt
 	Lienol_git=https://github.com/lienol/openwrt
 	AutoBuild_git=https://github.com/Hyy2001X/AutoBuild
-	GitSource_Out=Github
+	GitSource_Stat=Github
 fi
 }
 
@@ -1039,7 +1045,7 @@ while :
 do
 	ColorfulUI_Check
 	clear
-	Say="设置[实验性]" && Color_B
+	Say="脚本设置[临时]" && Color_B
 	echo " "
 	if [ $DeveloperMode == 0 ];then
 		Say="1.调试模式		[OFF]" && Color_R
@@ -1057,9 +1063,9 @@ do
 		Say="3.彩色UI		[ON]" && Color_Y
 	fi
 	if [ $GitSource == 0 ];then
-		Say="4.默认下载源		[Github]" && Color_Y
+		Say="4.源码下载源		[Github]" && Color_Y
 	else
-		Say="4.默认下载源		[Gitee]" && Color_B
+		Say="4.源码下载源		[Gitee]" && Color_B
 	fi
 	if [ $SaveCompileLog == 0 ];then
 		Say="5.保存编译日志		[OFF]" && Color_R
@@ -1077,7 +1083,7 @@ do
 		Say="7.自定义源码		[ON]" && Color_Y
 	fi
 	echo " "
-	echo "x.恢复默认设置"
+	echo "x.恢复所有默认设置"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -1152,7 +1158,7 @@ CustomSources=1
 
 Home=$(cd $(dirname $0); pwd)
 Extra_Packages="ntpdate httping ssh openssh-server openssh-client"
-
+Script_info="AutoBuild AIO $Version by Hyy2001"
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 
@@ -1163,11 +1169,9 @@ source $Home/Modules/StorageStat.sh
 source $Home/Modules/ReplaceSourcesList.sh
 source $Home/Modules/ExtraThemes.sh
 source $Home/Modules/ExtraPackages.sh
+
 Default_Settings
 
-Script_info="AutoBuild AIO $Version by Hyy2001"
-
-################################################################Main code
 while :
 do
 Dir_Check
@@ -1193,33 +1197,36 @@ while :
 do
 	clear
 	Say="$Script_info" && Color_B
-	echo " "
+	Decoration
 	cd $Home
+	echo -e "$Skyb项目名称		[项目状态]	主要作者/维护$White"
+	echo " "
 	if [ -f ./Projects/Lede/Makefile ];then
-		echo -e "1.Lede			$Yellow[已检测到]$White"
+		echo -e "${White}1.Lede			$Yellow[已检测到]$Blue	Lean[coolsnowwolf]"
 	else
-		echo -e "1.Lede			$Red[未检测到]$White"
+		echo -e "${White}1.Lede			$Red[未检测到]$Blue	Lean[coolsnowwolfLean]"
 	fi
 	if [ -f ./Projects/Openwrt/Makefile ];then
-		echo -e "2.Openwrt_Offical	$Yellow[已检测到]$White"
+		echo -e "${White}2.Openwrt_Offical	$Yellow[已检测到]$Blue	Openwrt官方团队"
 	else
-		echo -e "2.Openwrt_Offical	$Red[未检测到]$White"
+		echo -e "${White}2.Openwrt_Offical	$Red[未检测到]$Blue	Openwrt官方团队"
 	fi
 	if [ -f ./Projects/Lienol/Makefile ];then
-		echo -e "3.Lienol		$Yellow[已检测到]$White"
+		echo -e "${White}3.Lienol		$Yellow[已检测到]$Blue	Lienol"
 	else
-		echo -e "3.Lienol		$Red[未检测到]$White"
+		echo -e "${White}3.Lienol		$Red[未检测到]$Blue	Lienol"
 	fi
 	if [ $CustomSources == 1 ];then
 		if [ -f ./Projects/Custom/Makefile ];then
-			echo -e "4.自定义源码		$Blue[已检测到]$White"
+			echo -e "${White}4.自定义源码		$Blue[已检测到]$White"
 		else
-			echo -e "4.自定义源码		$Red[未检测到]$White"
+			echo -e "${White}4.自定义源码		$Red[未检测到]$White"
 		fi
 	else
 		:
 	fi
 	echo "q.返回"
+	Decoration
 	GET_Choose
 	case $Choose in
 	q)
@@ -1243,7 +1250,7 @@ do
 			Second_Menu
 		else
 			echo " "
-			Say="请将源码文件放置到'$Home/Projects/Custom'" && Color_R
+			Say="请将自定义源码文件放置到'$Home/Projects/Custom'" && Color_B
 			sleep 3
 		fi
 	;;
