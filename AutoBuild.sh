@@ -3,7 +3,7 @@
 # Supported Router Devices:All
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.04.29
-Version=V2.9.9
+Version=V2.9.9.1
 
 function Second_Menu() {
 echo ""
@@ -833,12 +833,13 @@ if [ $? -eq 0 ];then
 	echo " "
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		mv ./TEMP/* $Home
-		chmod +x -R $Home
-		Say="更新成功!" && Color_Y
+		chmod +x -R $Home/AutoBuild.sh
+		chmod +x -R $Home/Modules
+		Say="AutoBuild 更新成功!" && Color_Y
 		sleep 3
 		./AutoBuild.sh
 	else
-		Say="更新失败!" && Color_R
+		Say="AutoBuild 更新失败!" && Color_R
 		sleep 3
 	fi
 else
