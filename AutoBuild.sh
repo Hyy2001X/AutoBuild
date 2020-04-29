@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Router Devices:All
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.04.28
-Version=V2.9.6
+Update=2020.04.29
+Version=V2.9.7
 
 function Second_Menu() {
 echo ""
@@ -56,12 +56,17 @@ do
 	echo "3.备份与恢复"
 	echo "4.编译选项"
 	echo "5.高级选项"
+	echo " "
+	echo "m.返回主菜单"
 	echo "q.返回"
 	GET_Choose
 	Update_Checked=1
 	case $Choose in
 	q)
 		break
+	;;
+	m)
+		AutoBuild_Core
 	;;
 	1)
 		Enforce_Update=0
@@ -1163,9 +1168,109 @@ SaveUpdateLog=1
 CustomSources=1
 }
 
+function AutoBuild_Core() {
+while :
+do
+	Dir_Check
+	ColorfulUI_Check
+	GitSource_Check
+	clear
+	Say="$Script_info" && Color_B
+	echo ""
+	echo -e "1.${Yellow}Get Started!$White"
+	echo "2.网络测试"
+	echo "3.高级选项"
+	echo "4.设置"
+	echo "q.退出"
+	GET_Choose
+	case $Choose in
+	q)
+		rm -rf $Home/TEMP
+		clear
+		break
+	;;
+	1)
+	while :
+	do
+		clear
+		Say="$Script_info" && Color_B
+		Decoration
+		cd $Home
+		echo -e "$Skyb项目名称		[项目状态]	作者/维护者$White"
+		echo " "
+		if [ -f ./Projects/Lede/Makefile ];then
+			echo -e "${White}1.Lede			$Yellow[已检测到]$Blue	Lean[coolsnowwolf]"
+		else
+			echo -e "${White}1.Lede			$Red[未检测到]$Blue	Lean[coolsnowwolfLean]"
+		fi
+		if [ -f ./Projects/Openwrt/Makefile ];then
+			echo -e "${White}2.Openwrt_Offical	$Yellow[已检测到]$Blue	Openwrt官方团队"
+		else
+			echo -e "${White}2.Openwrt_Offical	$Red[未检测到]$Blue	Openwrt官方团队"
+		fi
+		if [ -f ./Projects/Lienol/Makefile ];then
+			echo -e "${White}3.Lienol		$Yellow[已检测到]$Blue	Lienol"
+		else
+			echo -e "${White}3.Lienol		$Red[未检测到]$Blue	Lienol"
+		fi
+		if [ $CustomSources == 1 ];then
+			if [ -f ./Projects/Custom/Makefile ];then
+				echo -e "${White}4.自定义源码		$Blue[已检测到]$White"
+			else
+				echo -e "${White}4.自定义源码		$Red[未检测到]$White"
+			fi
+		fi
+		echo "q.返回"
+		Decoration
+		GET_Choose
+		case $Choose in
+		q)
+			break
+		;;
+		1)
+			Project=Lede
+			Second_Menu_Check
+		;;
+		2)
+			Project=Openwrt
+			Second_Menu_Check
+		;;
+		3)
+			Project=Lienol
+			Second_Menu_Check
+		;;
+		4)
+			Project=Custom
+			if [ -f ./Projects/Custom/Makefile ];then
+				Second_Menu
+			else
+				echo " "
+				Say="请将自定义源码文件放置到'$Home/Projects/Custom'" && Color_B
+				sleep 3
+			fi
+		;;
+		esac
+	done
+	;;
+	2)
+		Network_Test
+	;;
+	3)
+		Advanced_Options_1
+	;;
+	4)
+		Settings
+	;;
+	5)
+		ExtraPackages
+	;;
+	esac
+done
+}
+
 Home=$(cd $(dirname $0); pwd)
 Extra_Packages="ntpdate httping ssh openssh-server openssh-client"
-Script_info="AutoBuild AIO $Version by Hyy2001"
+Script_info="AutoBuild Core Script $Version"
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 
@@ -1178,103 +1283,4 @@ source $Home/Modules/ExtraThemes.sh
 source $Home/Modules/ExtraPackages.sh
 
 Default_Settings
-
-while :
-do
-Dir_Check
-ColorfulUI_Check
-GitSource_Check
-clear
-Say="$Script_info" && Color_B
-echo ""
-echo -e "1.${Yellow}Get Started!$White"
-echo "2.网络测试"
-echo "3.高级选项"
-echo "4.设置"
-echo "q.退出"
-GET_Choose
-case $Choose in
-q)
-	rm -rf $Home/TEMP
-	clear
-	break
-;;
-1)
-while :
-do
-	clear
-	Say="$Script_info" && Color_B
-	Decoration
-	cd $Home
-	echo -e "$Skyb项目名称		[项目状态]	主要作者/维护$White"
-	echo " "
-	if [ -f ./Projects/Lede/Makefile ];then
-		echo -e "${White}1.Lede			$Yellow[已检测到]$Blue	Lean[coolsnowwolf]"
-	else
-		echo -e "${White}1.Lede			$Red[未检测到]$Blue	Lean[coolsnowwolfLean]"
-	fi
-	if [ -f ./Projects/Openwrt/Makefile ];then
-		echo -e "${White}2.Openwrt_Offical	$Yellow[已检测到]$Blue	Openwrt官方团队"
-	else
-		echo -e "${White}2.Openwrt_Offical	$Red[未检测到]$Blue	Openwrt官方团队"
-	fi
-	if [ -f ./Projects/Lienol/Makefile ];then
-		echo -e "${White}3.Lienol		$Yellow[已检测到]$Blue	Lienol"
-	else
-		echo -e "${White}3.Lienol		$Red[未检测到]$Blue	Lienol"
-	fi
-	if [ $CustomSources == 1 ];then
-		if [ -f ./Projects/Custom/Makefile ];then
-			echo -e "${White}4.自定义源码		$Blue[已检测到]$White"
-		else
-			echo -e "${White}4.自定义源码		$Red[未检测到]$White"
-		fi
-	else
-		:
-	fi
-	echo "q.返回"
-	Decoration
-	GET_Choose
-	case $Choose in
-	q)
-		break
-	;;
-	1)
-		Project=Lede
-		Second_Menu_Check
-	;;
-	2)
-		Project=Openwrt
-		Second_Menu_Check
-	;;
-	3)
-		Project=Lienol
-		Second_Menu_Check
-	;;
-	4)
-		Project=Custom
-		if [ -f ./Projects/Custom/Makefile ];then
-			Second_Menu
-		else
-			echo " "
-			Say="请将自定义源码文件放置到'$Home/Projects/Custom'" && Color_B
-			sleep 3
-		fi
-	;;
-	esac
-done
-;;
-2)
-	Network_Test
-;;
-3)
-	Advanced_Options_1
-;;
-4)
-	Settings
-;;
-5)
-	ExtraPackages
-;;
-esac
-done
+AutoBuild_Core
