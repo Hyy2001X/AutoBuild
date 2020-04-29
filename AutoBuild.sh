@@ -3,7 +3,7 @@
 # Supported Router Devices:All
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.04.29
-Version=V2.9.8
+Version=V2.9.9
 
 function Second_Menu() {
 echo ""
@@ -622,7 +622,7 @@ do
 	echo " "
 	echo "1.更新系统软件包"
 	echo -e "2.$Skyb安装编译环境$White"
-	echo "3.通过SSH访问路由器"
+	echo "3.SSH服务"
 	echo "4.同步网络时间"
 	echo "5.空间占用统计"
 	echo "6.创建快捷启动"
@@ -826,19 +826,14 @@ if [ $? -eq 0 ];then
 	cd $Home
 	Old_Version=`awk 'NR==6' ./AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
 	cp ./AutoBuild.sh $Home/Backups/OldVersion/AutoBuild-$Old_Version.sh
-	rm -rf $Home/TEMP
-	rm -rf $Home/Modules
-	rm -rf $Home/Additional
+	rm -rf TEMP
+	rm -rf Modules
+	rm -rf Additional
 	svn checkout $AutoBuild_git/trunk ./TEMP
 	echo " "
 	if [ -f ./TEMP/AutoBuild.sh ];then
-		mv ./TEMP/AutoBuild.sh $Home/AutoBuild.sh
-		mv ./TEMP/README.md $Home/README.md
-		mv ./TEMP/LICENSE $Home/LICENSE
-		mv ./TEMP/Modules $Home
-		mv ./TEMP/Additional $Home
-		chmod +x AutoBuild.sh
-		chmod +x -R $Home/Modules
+		mv ./TEMP/* $Home
+		chmod +x -R $Home
 		Say="更新成功!" && Color_Y
 		sleep 3
 		./AutoBuild.sh
@@ -1243,12 +1238,10 @@ CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 
 chmod +x -R $Home/Modules
-source $Home/Modules/NetworkTest.sh
-source $Home/Modules/Systeminfo.sh
-source $Home/Modules/StorageStat.sh
-source $Home/Modules/ReplaceSourcesList.sh
-source $Home/Modules/ExtraThemes.sh
-source $Home/Modules/ExtraPackages.sh
+for Module in $Home/Modules/*
+do
+	source $Module
+done
 
 Default_Settings
 AutoBuild_Core
