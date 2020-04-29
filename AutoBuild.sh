@@ -3,7 +3,7 @@
 # Supported Router Devices:All
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.04.29
-Version=V2.9.7
+Version=V2.9.8
 
 function Second_Menu() {
 echo ""
@@ -16,16 +16,12 @@ do
 		git fetch > /dev/null 2>&1
 		if [ $? -eq 0 ]; then
 			Update_Check=$(git branch -v | grep -o 落后 )
-			if [ "$Update_Check" == "落后" ]; then
+			if [ $Update_Check == 落后 ]; then
 				Update_mod="$Blue[可更新]$White"
 			else
 				Update_mod="$Yellow[最新]$White"
 			fi
-		else
-			:
 		fi
-	else
-		:
 	fi
 	clear
 	Dir_Check
@@ -41,8 +37,6 @@ do
 				cd ./Projects/$Project/package/lean/default-settings/files
 				Lede_Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" zzz-default-settings`
 				Say="版本号:$Lede_Version" && Color_Y
-			else
-				:
 			fi
 		fi
 		GET_Branch=`cat $Home/Projects/$Project/.git/HEAD`
@@ -198,20 +192,14 @@ do
 				NEW_Firmware_Name="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
 			done
 		fi
-	else
-		:
 	fi
 	clear
 	if [ ! $Choose == 6 ];then
 		echo -e "$Yellow$Compile_Say$White"
-	else
-		:
 	fi
 	if [ $X86_Check == 0 ];then
 		if [ $Default_Check == 0 ];then
 			echo -e "$Yellow预期固件名称:$Blue$NEW_Firmware_Name$White"
-		else
-			:
 		fi
 	else
 		:
@@ -564,8 +552,6 @@ do
 		Config_PATH_NAME=./Projects/$Project/.config
 		if [ -f $Config_PATH_NAME ];then
 			rm $Config_PATH_NAME
-		else
-			:
 		fi
 		cp ./Backups/$Config_Recovery $Config_PATH_NAME
 		if [ -f $Config_PATH_NAME ];then
@@ -878,8 +864,6 @@ if [ $? -eq 0 ];then
 	if [ $Enforce_Update == 1 ];then
 		git fetch --all
 		git reset --hard origin/$Branch
-	else
-		:
 	fi
 	if [ $SaveUpdateLog == 0 ];then
 		git pull
@@ -955,43 +939,27 @@ function Dir_Check() {
 	cd $Home
 	if [ ! -d ./Projects ];then
 		mkdir Projects
-	else
-		:
 	fi
 	if [ ! -d ./TEMP ];then
 		mkdir TEMP
-	else
-		:
 	fi
 	if [ ! -d ./Packages ];then
 		mkdir Packages
-	else
-		:
 	fi
 	if [ ! -d ./Backups ];then
 		mkdir Backups
-	else
-		:
 	fi
 	if [ ! -d ./Backups/Projects ];then
 		mkdir Backups/Projects
-	else
-		:
 	fi
 	if [ ! -d ./Backups/OldVersion ];then
 		mkdir Backups/OldVersion
-	else
-		:
 	fi
 	if [ ! -d ./Configs ];then
 		mkdir Configs
-	else
-		:
 	fi
 	if [ ! -d ./Log ];then
 		mkdir Log
-	else
-		:
 	fi
 	clear
 }
