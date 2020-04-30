@@ -3,7 +3,7 @@
 # Supported Router Devices:All
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.04.29
-Version=V2.9.9.1
+Version=V2.9.9.2
 
 function Second_Menu() {
 echo ""
@@ -413,7 +413,9 @@ do
 		echo "2.make dirclean"
 		echo "3.make distclean"
 		Say="4.删除项目" && Color_R
-		echo "5.删除临时文件"
+		echo "5.删除[临时文件]"
+		echo "6.删除[源码更新日志]"
+		echo "7.删除[编译日志]"
 		echo "q.返回"
 		GET_Choose
 		cd $Home/Projects/$Project
@@ -439,7 +441,7 @@ do
 		4)
 			cd $Home/Projects
 			echo " "
-			Say="正在删除$Project项目,请耐心等待..." && Color_B
+			Say="正在删除$Project,请耐心等待..." && Color_B
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
@@ -453,10 +455,22 @@ do
 		;;
 		5)
 			echo " "
-			Say="正在删除临时文件..." && Color_B
 			rm -rf $Home/Projects/$Project/tmp
-			Say="$Yellow临时文件删除成功!" && Color_Y
+			Say="$Yellow[临时文件]删除成功!" && Color_Y
 			sleep 2
+		;;
+		6)
+			echo " "
+			rm -f $Home/Log/Update-$Project-*
+			Say="$Yellow[源码更新日志]删除成功!" && Color_Y
+			sleep 2
+		;;
+		7)
+			echo " "
+			rm -f $Home/Log/Compile-$Project-*
+			Say="$Yellow[编译日志]删除成功!" && Color_Y
+			sleep 2
+		;;
 		esac
 	done
 	;;
@@ -514,20 +528,20 @@ do
 	;;
 	1)
 		if [ $Project == Lede ];then
-			Config_Name=$Project-$Lede_Version-`(date +%m%d_%H:%M)`
+			Backup_Name=$Project-$Lede_Version-`(date +%m%d_%H:%M)`
 		else
-			Config_Name=$Project-`(date +%m%d_%H:%M)`
+			Backup_Name=$Project-`(date +%m%d_%H:%M)`
 		fi
-		cp $Home/Projects/$Project/.config $Home/Backups/$Config_Name
+		cp $Home/Projects/$Project/.config $Home/Backups/Configs/$Backup_Name
 	;;
 	2)
-		read -p '请输入你想要的文件名:' Config_Name
+		read -p '请输入配置名称:' Backup_Name
 		echo " "
-		cp $Home/Projects/$Project/.config $Home/Backups/$Config_Name
+		cp $Home/Projects/$Project/.config $Home/Backups/Configs/$Backup_Name
 	;;	
 	esac
-	Say="备份成功!备份文件存放于:$Home/Backups" && Color_Y
-	Say="文件名称:$Config_Name" && Color_Y
+	Say="备份成功!备份文件存放于:'$Home/Backups/Configs'" && Color_Y
+	Say="配置名称:$Backup_Name" && Color_Y
 	sleep 2
 done
 ;;
@@ -536,33 +550,28 @@ while :
 do
 	clear
 	Say="当前操作:恢复[.config]" && Color_B && echo " "
-	cd $Home/Backups
+	cd $Home/Backups/Configs
 	echo -n "备份文件"
 	ls -lh -u -o
 	echo " "
-	read -p '请从上方选出你想要恢复的文件[q.返回]:' Config_Recovery
+	read -p '请从上方选出你想要恢复的配置文件[q.返回]:' Recover_NAME
 	echo " "
-	if [ ! $Config_Recovery == q ];then
+	if [ ! $Recover_NAME == q ];then
 		:
 	else
 		break
 	fi
-	if [ -f ./$Config_Recovery ];then
-		cd $Home
-		Config_PATH_NAME=./Projects/$Project/.config
-		if [ -f $Config_PATH_NAME ];then
-			rm $Config_PATH_NAME
+	if [ -f $Recover_NAME ];then
+		Recover_PATH=$Home/Projects/$Project/.config
+		if [ -f $Recover_PATH ];then
+			rm $Recover_PATH
 		fi
-		cp ./Backups/$Config_Recovery $Config_PATH_NAME
-		if [ -f $Config_PATH_NAME ];then
-			Say="恢复成功!" && Color_Y
-		else
-			Say="恢复失败!" && Color_R
-		fi
+		cp $Recover_NAME $Recover_PATH
+		Say="[$Recover_NAME]恢复成功!" && Color_Y
 		sleep 2
 		break
 	else
-		Say="未找到'$Config_Recovery',请检查是否输入正确!" && Color_R
+		Say="未找到[$Recover_NAME],请检查是否输入正确!" && Color_R
 		sleep 2
 	fi
 done
@@ -571,7 +580,7 @@ done
 	echo " "
 	cd $Home/Projects
 	if [ ! -d ./$Project/dl ];then
-		Say="没有找到'$Home/Projects/$Project/dl',无法备份!" && Color_R
+		Say="未找到'$Home/Projects/$Project/dl',无法备份!" && Color_R
 	else
 		echo -ne "\r$Blue正在备份[dl]库...$White\r"
 		cp -a $Home/Projects/$Project/dl $Home/Backups/
@@ -588,7 +597,7 @@ done
 	echo " "
 	cd $Home
 	if [ ! -d ./Backups/dl ];then
-		Say="没有找到'$Home/Backups/dl',无法恢复!" && Color_R
+		Say="未找到'$Home/Backups/dl',无法恢复!" && Color_R
 	else
 		echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 		cp -a $Home/Backups/dl $Home/Projects/$Project
@@ -951,13 +960,15 @@ function Dir_Check() {
 	if [ ! -d ./Backups/OldVersion ];then
 		mkdir Backups/OldVersion
 	fi
+	if [ ! -d ./Backups/Configs ];then
+		mkdir Backups/Configs
+	fi
 	if [ ! -d ./Configs ];then
 		mkdir Configs
 	fi
 	if [ ! -d ./Log ];then
 		mkdir Log
 	fi
-	clear
 }
 
 function Second_Menu_Check() {
