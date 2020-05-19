@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ExtraPackages() {
-Update=2020.04.26
-Module_Version=V2.2-DEV
+Update=2020.05.19
+Module_Version=V2.3
 PKGHome=$Home/Projects/$Project/package
 
 ExtraPackages_mod_git() {
@@ -48,7 +48,6 @@ do
 	echo "4.luci-app-clash"
 	echo "5.luci-app-passwall"
 	echo -e "${Yellow}w.[软件库]Lienol$White"
-	echo -e "${Yellow}e.[软件库]Lean$White"
 	echo -e "${White}"
 	echo "q.返回"
 	echo " "
@@ -94,39 +93,19 @@ do
 		ExtraPackages_mod_git
 	;;
 	w)
-		if [ ! $Project == Lienol ];then
-			cd $Home/Projects/$Project
-			grep "lienol" feeds.conf.default > /dev/null
-			if [ $? -eq 0 ]; then
-				:
-			else
-				echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
-				grep "lienol" feeds.conf.default > /dev/null
-			fi
+		cd $Home/Projects/$Project
+		grep "lienol" feeds.conf.default > /dev/null
+		if [ $? -ne 0 ]; then
+			clear
+			echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
 			./scripts/feeds update lienol
 			./scripts/feeds install -a
 			echo " "
 			Enter
 		else
-			Say="不适用于[Lienol]项目." && Color_R
-			sleep 3
+			Say="无法重复添加[Lienol]软件库!" && Color_Y
+			sleep 2
 		fi
-	;;
-	e)
-		if [ ! $Project == Lede ];then
-			if [ -d $PKGHome/lean ];then
-				rm -rf $PKGHome/lean
-			fi
-			svn checkout https://github.com/coolsnowwolf/lede/trunk/package/lean/ $PKGHome/lean  > /dev/null 2>&1
-			if [ $? -eq 0 ]; then
-				Say="[软件库]Lean 添加成功!" && Color_Y
-			else
-				Say="[软件库]Lean 添加成功!" && Color_Y
-			fi
-		else
-			Say="不适用于[Lede]项目." && Color_R
-		fi
-		sleep 3
 	;;
 	esac
 done
