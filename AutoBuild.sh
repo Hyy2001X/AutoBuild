@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Router Devices:All
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.05.02
-Version=V3.0
+Update=2020.05.19
+Version=V3.0.5
 
 function Second_Menu() {
 echo ""
@@ -26,12 +26,10 @@ do
 	clear
 	Dir_Check
 	if [ -f "./Projects/$Project/feeds.conf.default" ];then
+		Say="项目位置:$Home/Projects/$Project" && Color_Y
 		if [ ! $Project == Custom ];then
-			Say="源码文件:已检测到,当前项目:$Project" && Color_Y
-		else
-			Say="源码文件:已检测到,使用自定义源码." && Color_B
+			Say="项目名称:$Project" && Color_Y
 		fi
-		Say="项目位置:'$Home/Projects/$Project'" && Color_Y
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd ./Projects/$Project/package/lean/default-settings/files
@@ -199,8 +197,8 @@ do
 	echo " "
 	echo "1.从$GitSource_Stat拉取源代码"
 	echo "2.强制更新源代码和Feeds"
-	echo "3.添加第三方主题包"
-	echo "4.添加第三方软件包"
+	echo "3.添加主题"
+	echo "4.添加软件包"
 	echo "5.磁盘清理"
 	echo "6.删除配置文件"
 	echo "7.下载[dl]库"
@@ -478,8 +476,8 @@ do
 	;;
 	1)
 		clear
-		sudo apt update
-		sudo apt upgrade
+		sudo apt-get update
+		sudo apt-get upgrade
 		echo " "
 		Enter
 	;;
@@ -606,11 +604,12 @@ do
 		echo " "
 		echo "1.立刻关机"
 		echo "2.立刻重启"
-		echo "3.X分钟后关机"
-		echo "4.X分钟后重启"
-		echo "5.取消所有定时关机/重启任务"
+		echo "3.定时关机"
+		echo "4.定时重启"
+		echo "5.取消所有定时任务"
 		echo "q.返回"
 		GET_Choose
+		echo " "
 		case $Choose in
 		q)
 			break
@@ -622,21 +621,20 @@ do
 			shutdown -r now
 		;;
 		3)
-			read -p '请输入时间X[X分钟后关机]:' Time_wait
+			read -p '请输入关机等待时间:' Time_wait
 			echo " "
 			shutdown -h $Time_wait
-			Say="已设置$Time_wait分钟后自动关机." && Color_Y
+			Say="系统将在 $Time_wait 分钟后自动关机." && Color_Y
 		;;
 		4)
-			read -p '请输入时间X[X分钟后重启]:' Time_wait
+			read -p '请输入重启等待时间:' Time_wait
 			echo " "
 			shutdown -rh $Time_wait
-			Say="已设置$Time_wait分钟后自动重启." && Color_Y
+			Say="系统将在 $Time_wait 分钟后自动重启." && Color_Y
 		;;
 		5)
 			shutdown -c
-			echo " "
-			Say="已取消所有定时关机/重启任务." && Color_Y
+			Say="已取消所有定时任务." && Color_Y
 		;;
 		esac
 		sleep 3
@@ -675,7 +673,7 @@ if [ $? -eq 0 ];then
 		./AutoBuild.sh
 	else
 		Say="AutoBuild 更新失败!" && Color_R
-		sleep 3
+		sleep 2
 	fi
 else
 	Say="无网络连接,无法更新!" && Color_R
@@ -747,16 +745,16 @@ function Decoration() {
 }
 
 function Sources_Download_Check() {
-cd $Home
 echo " "
-if [ -f "./Projects/$Project/Makefile" ];then
+cd $Home
+if [ -f ./Projects/$Project/Makefile ];then
 	if [ $Project == Lede ];then
 		cd $Home/Projects/Lede
 		sed -i '5s/#src-git/src-git/g' feeds.conf.default
 	fi
-	Say="$Project源码下载成功!" && Color_Y
+	Say="[$Project]源码下载成功!" && Color_Y
 else
-	Say="$Project源码下载失败!" && Color_R
+	Say="[$Project]源码下载失败!" && Color_R
 fi
 echo " "
 Enter
