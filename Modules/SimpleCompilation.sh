@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.05.2
-Module_Version=V1.0
+Update=2020.05.19
+Module_Version=V1.1
 
 while :
 do
@@ -32,7 +32,7 @@ do
 		echo -e "Arch架构:$Yellow$TARGET_ARCH_PACKAGES$White"
 		echo -e "设备名称:$Yellow$TARGET_PROFILE$White"
 		echo ""
-		echo -e "用户CPU参数:$Yellow$CPU_Cores核心$CPU_Threads线程$White"
+		echo -e "计算机处理器信息:$Yellow$CPU_Cores核心$CPU_Threads线程$White"
 	else
 		echo " "
 		Say="未检测到配置文件,无法编译!" && Color_R
