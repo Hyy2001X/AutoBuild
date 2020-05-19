@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ExtraThemes() {
-Update=2020.04.22
-Module_Version=V2.3
+Update=2020.05.19
+Module_Version=V2.4
 PKGHome=$Home/Projects/$Project/package
 
 ExtraThemes_info() {
@@ -17,6 +17,8 @@ echo "https://github.com/Lienol"
 echo "https://github.com/openwrt-develop"
 echo "https://github.com/Leo-Jo-My"
 echo -e "https://github.com/rosywrt$White"
+echo " "
+echo -e "${Skyb}感谢以上作者的贡献!"
 Decoration
 echo " "
 Enter
@@ -59,7 +61,7 @@ do
 	cd theme
 	clear
 	echo -e "${Blue}Extra Themes Script $Module_Version by Hyy2001${White}"
-	echo -e "$Skyb"
+	echo -e "$Yellow"
 	echo "1.luci-theme-argon"
 	echo "2.luci-theme-argon-mc"
 	echo "3.luci-theme-argon-dark-mod"
@@ -74,8 +76,7 @@ do
 	echo "12.luci-theme-Butterfly-dark"
 	echo "13.luci-theme-netgearv2"
 	echo -e "${White}"
-	echo "a.添加所有主题"
-	echo "x.关于"
+	echo "x.关于主题"
 	echo "q.返回"
 	echo " "
 	read -p '请从上方选择一个主题包:' Choose
@@ -86,74 +87,6 @@ do
 	;;
 	x)
 		ExtraThemes_info
-	;;
-	a)
-		clear
-		PKG_NAME=luci-theme-argon
-		if [ $Project == Lede ];then
-			cd $PKGHome
-			if [ -f ./lean/luci-theme-argon ];then
-				rm -rf ./lean/luci-theme-argon
-			else
-				:
-			fi
-			PKG_URL=" -b 18.06 https://github.com/jerrykuku/luci-theme-argon"
-			cd theme
-			ExtraThemes_mod_git
-			mv $PKGHome/theme/luci-theme-argon $PKGHome/lean/$PKG_NAME
-		else
-			PKG_URL=" -b 19.07_stable https://github.com/jerrykuku/luci-theme-argon"
-			cd theme
-			ExtraThemes_mod_git
-		fi
-
-		PKG_NAME=luci-theme-argon-mc
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/$PKG_NAME
-		ExtraThemes_mod_svn
-
-		PKG_NAME=luci-theme-argon-dark-mod
-		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/$PKG_NAME
-		ExtraThemes_mod_svn
-
-		PKG_NAME=luci-theme-argon-light-mod
-		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/$PKG_NAME
-		ExtraThemes_mod_svn
-
-		PKG_NAME=luci-theme-bootstrap-mod
-		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/$PKG_NAME
-		ExtraThemes_mod_svn
-
-		PKG_NAME=luci-theme-rosy
-		PKG_URL=https://github.com/rosywrt/$PKG_NAME/trunk/
-		ExtraThemes_mod_svn
-
-		PKG_NAME=luci-theme-atmaterial
-		PKG_URL=https://github.com/openwrt-develop/$PKG_NAME
-		ExtraThemes_mod_git
-
-		PKG_NAME=luci-theme-darkmatter
-		PKG_URL=https://github.com/Lienol/$PKG_NAME/trunk/
-		ExtraThemes_mod_svn
-
-		PKG_NAME=luci-theme-opentomcat
-		PKG_URL=https://github.com/Leo-Jo-My/$PKG_NAME
-		ExtraThemes_mod_git
-
-		PKG_NAME=luci-theme-opentomato
-		PKG_URL=https://github.com/Leo-Jo-My/$PKG_NAME
-		ExtraThemes_mod_git
-
-		PKG_NAME=luci-theme-Butterfly
-		PKG_URL=https://github.com/Leo-Jo-My/$PKG_NAME
-		ExtraThemes_mod_git
-
-		PKG_NAME=luci-theme-Butterfly-dark
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/$PKG_NAME
-		ExtraThemes_mod_svn
-
-		PKG_NAME=luci-theme-netgearv2
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/$PKG_NAME
-		ExtraThemes_mod_svn
 	;;
 	1)
 		PKG_NAME=luci-theme-argon
