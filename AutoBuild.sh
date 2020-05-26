@@ -2,8 +2,8 @@
 # AutoBuild Script by Hyy2001
 # Supported Router Devices:All
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.05.19
-Version=V3.0.5
+Update=2020.05.26
+Version=V3.0.6
 
 function Second_Menu() {
 echo ""
@@ -27,14 +27,11 @@ do
 	Dir_Check
 	if [ -f "./Projects/$Project/feeds.conf.default" ];then
 		Say="项目位置:$Home/Projects/$Project" && Color_Y
-		if [ ! $Project == Custom ];then
-			Say="项目名称:$Project" && Color_Y
-		fi
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd ./Projects/$Project/package/lean/default-settings/files
 				Lede_Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" zzz-default-settings`
-				Say="版本号:$Lede_Version" && Color_Y
+				Say="源码版本:$Lede_Version" && Color_Y
 			fi
 		fi
 		GET_Branch=`cat $Home/Projects/$Project/.git/HEAD`
@@ -265,7 +262,7 @@ do
 		4)
 			cd $Home/Projects
 			echo " "
-			Say="正在删除$Project,请耐心等待..." && Color_B
+			Say="正在删除项目,请耐心等待..." && Color_B
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
@@ -274,7 +271,7 @@ do
 			else 
 				Say="[$Project]删除失败!" && Color_R
 			fi
-			sleep 2
+			sleep 3
 			break
 		;;
 		5)
@@ -285,13 +282,13 @@ do
 		;;
 		6)
 			echo " "
-			rm -f $Home/Log/Update-$Project-*
+			rm -f $Home/Log/Update_${Project}_*
 			Say="$Yellow[源码更新日志]删除成功!" && Color_Y
 			sleep 2
 		;;
 		7)
 			echo " "
-			rm -f $Home/Log/Compile-$Project-*
+			rm -f $Home/Log/Compile_${Project}_*
 			Say="$Yellow[编译日志]删除成功!" && Color_Y
 			sleep 2
 		;;
@@ -489,8 +486,8 @@ do
 		do
 			echo -ne "\r准备执行第$Update_Times次安装...\r"
 			sleep 2
-			sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf
-			sudo apt-get -y install $Extra_Packages
+			sudo apt-get -y install $Dependency
+			sudo apt-get -y install $Extra_Dependency
 			Update_Times=$(($Update_Times + 1))
 		done
 		echo " "
@@ -669,7 +666,7 @@ if [ $? -eq 0 ];then
 		chmod +x -R $Home/AutoBuild.sh
 		chmod +x -R $Home/Modules
 		Say="AutoBuild 更新成功!" && Color_Y
-		sleep 3
+		sleep 2
 		./AutoBuild.sh
 	else
 		Say="AutoBuild 更新失败!" && Color_R
@@ -694,27 +691,29 @@ if [ $? -eq 0 ];then
 		git fetch --all
 		git reset --hard origin/$Branch
 	fi
-	if [ $SaveUpdateLog == 0 ];then
-		git pull
-		./scripts/feeds update -a
-		./scripts/feeds install -a
+	Update_File=$Home/Log/Update_${Project}_`(date +%Y%m%d_%H:%M)`.log
+	git pull 2>&1 | tee $Update_File
+	./scripts/feeds update -a 2>&1 | tee -a $Update_File
+	./scripts/feeds install -a 2>&1 | tee -a $Update_File
+	echo " "
+	Updated_Check=$(cat $Update_File | grep -o error )
+	if [ "$Updated_Check" == "error" ]; then
+		Say="部分源代码和Feeds更新失败!" && Color_R
+		Update_mod="$Red[未知]$White"
 	else
-		Update_Date=`(date +%Y%m%d_%H:%M)`
-		git pull 2>&1 | tee $Home/Log/Update-$Project-$Update_Date.log
-		./scripts/feeds update -a 2>&1 | tee -a $Home/Log/Update-$Project-$Update_Date.log
-		./scripts/feeds install -a 2>&1 | tee -a $Home/Log/Update-$Project-$Update_Date.log
+		Say="源代码和Feeds更新成功!" && Color_Y
+		Update_mod="$Yellow[最新]$White"
 	fi
 	if [ $Project == Lede ];then
 		sed -i '5s/#src-git/src-git/g' feeds.conf.default
 	fi
 	echo " "
-	Update_mod="$Yellow[最新]$White"
-	Say="源代码和Feeds更新结束." && Color_Y
+	Enter
 else
 	echo " "
 	Say="无网络连接,无法更新!" && Color_R
+	sleep 3
 fi
-sleep 3
 }
 
 function GET_Choose() {
@@ -842,7 +841,7 @@ do
 	ColorfulUI_Check
 	GitSource_Check
 	clear
-	Say="$Script_info" && Color_B
+	Say="AutoBuild Core Script $Version" && Color_B
 	echo ""
 	echo -e "1.${Yellow}Get Started!$White"
 	echo "2.网络测试"
@@ -860,7 +859,7 @@ do
 	while :
 	do
 		clear
-		Say="$Script_info" && Color_B
+		Say="AutoBuild Core Script $Version" && Color_B
 		Decoration
 		cd $Home
 		echo -e "$Skyb项目名称		[项目状态]	作者/维护者$White"
@@ -937,8 +936,9 @@ done
 }
 
 Home=$(cd $(dirname $0); pwd)
-Extra_Packages="ntpdate httping ssh openssh-server openssh-client"
-Script_info="AutoBuild Core Script $Version"
+
+Dependency="build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget"
+Extra_Dependency="ntpdate httping ssh openssh-server openssh-client"
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 
