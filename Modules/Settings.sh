@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.05.2
-Module_Version=V1.0
+Update=2020.05.26
+Module_Version=V1.1
 
 while :
 do
@@ -35,15 +35,10 @@ do
 	else
 		Say="5.保存编译日志		[ON]" && Color_Y
 	fi
-	if [ $SaveUpdateLog == 0 ];then
-		Say="6.保存更新日志		[OFF]" && Color_R
-	else
-		Say="6.保存更新日志		[ON]" && Color_Y
-	fi
 	if [ $CustomSources == 0 ];then
-		Say="7.自定义源码		[OFF]" && Color_R
+		Say="6.自定义源码		[OFF]" && Color_R
 	else
-		Say="7.自定义源码		[ON]" && Color_Y
+		Say="6.自定义源码		[ON]" && Color_Y
 	fi
 	echo " "
 	echo "x.恢复所有默认设置"
@@ -92,13 +87,6 @@ do
 		fi
 	;;
 	6)
-		if [ $SaveUpdateLog == 0 ];then
-			SaveUpdateLog=1
-		else
-			SaveUpdateLog=0
-		fi
-	;;
-	7)
 		if [ $CustomSources == 0 ];then
 			CustomSources=1
 		else
@@ -115,6 +103,5 @@ SimpleCompilation=1
 ColorfulUI=1
 GitSource=0
 SaveCompileLog=0
-SaveUpdateLog=1
 CustomSources=1
 }
