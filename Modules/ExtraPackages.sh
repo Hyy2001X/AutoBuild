@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ExtraPackages() {
-Update=2020.05.19
-Module_Version=V2.3
+Update=2020.06.10
+Module_Version=V2.4
 PKGHome=$Home/Projects/$Project/package
 
 ExtraPackages_mod_git() {
@@ -79,7 +79,7 @@ do
 	;;
 	3)
 		PKG_NAME=luci-app-openclash
-		PKG_URL=https://github.com/vernesong/OpenClash/trunk/$PKG_NAME
+		PKG_URL=https://github.com/vernesong/OpenClash/branches/master/$PKG_NAME
 		ExtraPackages_mod_svn
 	;;
 	4)
