@@ -1,25 +1,26 @@
 #!/bin/bash
-# AutoBuild Script by Hyy2001
-# Supported Router Devices:All
+# AutoBuild Script
+# https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.05.26
-Version=V3.0.6
+Update=2020.06.10
+Version=V3.0.7
 
-function Second_Menu() {
-echo ""
+Second_Menu() {
 Update_Checked=0
-Say="正在获取版本更新..." && Color_B
+echo " "
+Say="正在获取源码更新..." && Color_B
+Update_Status=" "
 while :
 do
 	cd $Home/Projects/$Project
 	if [ $Update_Checked == 0 ];then
-		git fetch > /dev/null 2>&1
+		timeout 3 git fetch > /dev/null 2>&1
 		if [ $? -eq 0 ]; then
 			Update_Check=$(git branch -v | grep -o 落后 )
 			if [ $Update_Check == 落后 ]; then
-				Update_mod="$Blue[可更新]$White"
+				Update_Status="$Blue[可更新]$White"
 			else
-				Update_mod="$Yellow[最新]$White"
+				Update_Status="$Yellow[最新]$White"
 			fi
 		fi
 	fi
@@ -37,10 +38,10 @@ do
 		GET_Branch=`cat $Home/Projects/$Project/.git/HEAD`
 		Branch=${GET_Branch#*heads/}
 	else
-		Say="源码文件:未检测到,请前往[高级选项]下载!" && Color_R
+		Say="未检测到[$Project]源码,请前往[高级选项]下载!" && Color_R
 	fi
 	echo " "
-	echo -e "1.更新源代码和Feeds$Update_mod"
+	echo -e "1.更新源代码和Feeds$Update_Status"
 	echo "2.打开固件配置菜单"
 	echo "3.备份与恢复"
 	echo "4.编译选项"
@@ -77,7 +78,7 @@ do
 done
 }
 
-function Sources_Download() {
+Sources_Download() {
 cd $Home
 if [ -f "./Projects/$Project/Makefile" ];then
 	echo " "
@@ -185,7 +186,7 @@ else
 fi
 }
 
-function Advanced_Options_2() {
+Advanced_Options_2() {
 while :
 do
 	cd $Home/Projects/$Project
@@ -266,7 +267,7 @@ do
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
-				Update_mod=" "
+				Update_Status=" "
 				Say="[$Project]删除成功!" && Color_Y
 			else 
 				Say="[$Project]删除失败!" && Color_R
@@ -313,7 +314,7 @@ do
 done
 }
 
-function Backup_Recovery() {
+Backup_Recovery() {
 while :
 do
 clear
@@ -435,11 +436,10 @@ esac
 done
 }
 
-function Make_Menuconfig() {
+Make_Menuconfig() {
 clear
 cd $Home/Projects/$Project
 Say="Loading $Project Configuration..." && Color_B
-echo " "
 make menuconfig
 Enter
 }
@@ -647,7 +647,7 @@ do
 done
 }
 
-function Script_Update() {
+Script_Update() {
 echo " "
 echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
@@ -678,7 +678,7 @@ else
 fi
 }
 
-function Sources_Update() {
+Sources_Update() {
 echo " "
 echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
@@ -699,10 +699,10 @@ if [ $? -eq 0 ];then
 	Updated_Check=$(cat $Update_File | grep -o error )
 	if [ "$Updated_Check" == "error" ]; then
 		Say="部分源代码和Feeds更新失败!" && Color_R
-		Update_mod="$Red[未知]$White"
+		Update_Status="$Red[未知]$White"
 	else
 		Say="源代码和Feeds更新成功!" && Color_Y
-		Update_mod="$Yellow[最新]$White"
+		Update_Status="$Yellow[最新]$White"
 	fi
 	if [ $Project == Lede ];then
 		sed -i '5s/#src-git/src-git/g' feeds.conf.default
@@ -716,34 +716,34 @@ else
 fi
 }
 
-function GET_Choose() {
+GET_Choose() {
 echo " "
 read -p '请从上方选择一个操作:' Choose
 }
 
-function Enter() {
+Enter() {
 read -p "按下[回车]键以继续..." Key
 }
 
-function Color_Y() {
+Color_Y() {
 echo -e "$Yellow$Say$White"
 }
 
-function Color_R() {
+Color_R() {
 echo -e "$Red$Say$White"
 }
 
-function Color_B() {
+Color_B() {
 echo -e "$Blue$Say$White"
 }
 
-function Decoration() {
+Decoration() {
 	echo -ne "$Skyb"
 	printf "%-70s\n" "-" | sed 's/\s/-/g'
 	echo -ne "$White"
 }
 
-function Sources_Download_Check() {
+Sources_Download_Check() {
 echo " "
 cd $Home
 if [ -f ./Projects/$Project/Makefile ];then
@@ -759,7 +759,7 @@ echo " "
 Enter
 }
 
-function Dir_Check() {
+Dir_Check() {
 	cd $Home
 	if [ ! -d ./Projects ];then
 		mkdir Projects
@@ -790,7 +790,7 @@ function Dir_Check() {
 	fi
 }
 
-function Second_Menu_Check() {
+Second_Menu_Check() {
 if [ -f ./Projects/$Project/Makefile ];then
 	Second_Menu
 else
@@ -802,7 +802,7 @@ else
 fi
 }
 
-function ColorfulUI_Check() {
+ColorfulUI_Check() {
 if [ $ColorfulUI == 1 ];then
 	White="\e[0m"
 	Yellow="\e[33m"
@@ -818,7 +818,7 @@ else
 fi
 }
 
-function GitSource_Check() {
+GitSource_Check() {
 if [ $GitSource == 1 ];then
 	Lede_git=https://gitee.com/Hyy2001X/Lede
 	Openwrt_git=https://gitee.com/Hyy2001X/Openwrt
@@ -834,7 +834,7 @@ else
 fi
 }
 
-function AutoBuild_Core() {
+AutoBuild_Core() {
 while :
 do
 	Dir_Check
