@@ -2,8 +2,8 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.06.10
-Version=V3.0.7
+Update=2020.06.16
+Version=V3.1
 
 Second_Menu() {
 Update_Checked=0
@@ -927,9 +927,6 @@ do
 	;;
 	4)
 		Settings
-	;;
-	5)
-		ExtraPackages
 	;;
 	esac
 done
