@@ -2,7 +2,7 @@
 
 function ExtraPackages() {
 Update=2020.06.16
-Module_Version=V2.5
+Module_Version=V3.0-BETA
 
 ExtraPackages_mod_git() {
 if [ -d ./$PKG_NAME ];then
@@ -32,6 +32,22 @@ fi
 sleep 2
 }
 
+ExtraPackages_Check1() {
+if [ -f ./$PKG_NAME/Makefile ];then
+	Package_Stat=$Yellow已检测到$Yellow
+else
+	Package_Stat=$Red未检测到$Yellow
+fi
+}
+
+ExtraPackages_Check2() {
+if [ -f ./$PKG_NAME/Makefile ] && [ -f ./luci-app-$PKG_NAME/Makefile ];then
+	Package_Stat=$Yellow已检测到$Yellow
+else
+	Package_Stat=$Red未检测到$Yellow
+fi
+}
+
 while :
 do
 	cd $Home/Projects/$Project/package
@@ -41,15 +57,30 @@ do
 	cd custom
 	clear
 	Say="Extra Packages Script $Module_Version by Hyy2001" && Color_B
-	echo -e "$Skyb"
-	echo "1.SmartDNS"
-	echo "2.AdGuardHome"
-	echo "3.OpenClash"
-	echo "4.luci-app-clash"
-	echo "5.luci-app-passwall"
-	echo -e "${Yellow}w.[软件库]Lienol$White"
-	echo -e "${White}"
+	Decoration
+	echo -e "$Skyb软件包			状态$Yellow"
+	PKG_NAME=smartdns
+	ExtraPackages_Check2
+	echo -e "1.SmartDNS		$Package_Stat"
+	PKG_NAME=adguardhome
+	ExtraPackages_Check2
+	if [ $Project == Lienol ];then
+		Package_Stat=$Yellow已检测到$Yellow
+	fi
+	echo -e "2.AdGuardHome		$Package_Stat"
+	PKG_NAME=luci-app-openclash
+	ExtraPackages_Check1
+	echo -e "3.$PKG_NAME	$Package_Stat"
+	PKG_NAME=luci-app-clash
+	ExtraPackages_Check1
+	echo -e "4.$PKG_NAME	$Package_Stat"
+	PKG_NAME=luci-app-passwall
+	ExtraPackages_Check1
+	echo -e "5.$PKG_NAME	$Package_Stat"
+	echo -e "${Blue}w.[软件库]Lienol$White"
+	echo " "
 	echo "q.返回"
+	Decoration
 	echo " "
 	read -p '请从上方选择一个软件包:' Choose
 	echo " "
@@ -61,6 +92,7 @@ do
 		PKG_NAME=openwrt-smartdns
 		PKG_URL=https://github.com/pymumu/openwrt-smartdns
 		ExtraPackages_mod_git
+		mv ./openwrt-smartdns smartdns
 		PKG_NAME=luci-app-smartdns
 		if [ $Project == Lede ];then
 			PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
