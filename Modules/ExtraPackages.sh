@@ -1,9 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ExtraPackages() {
-Update=2020.06.10
-Module_Version=V2.4
-PKGHome=$Home/Projects/$Project/package
+Update=2020.06.16
+Module_Version=V2.5
 
 ExtraPackages_mod_git() {
 if [ -d ./$PKG_NAME ];then
@@ -12,6 +11,7 @@ fi
 git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
 if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
 	Say="$PKG_NAME 添加成功!" && Color_Y
+	rm -rf ./$PKG_NAME/.git
 else
 	Say="$PKG_NAME 添加失败!" && Color_R
 fi
@@ -59,37 +59,37 @@ do
 	;;
 	1)
 		PKG_NAME=openwrt-smartdns
-		PKG_URL=https://github.com/pymumu/$PKG_NAME
+		PKG_URL=https://github.com/pymumu/openwrt-smartdns
 		ExtraPackages_mod_git
 		PKG_NAME=luci-app-smartdns
 		if [ $Project == Lede ];then
-			PKG_URL="-b lede https://github.com/pymumu/$PKG_NAME"
+			PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
 		else
-			PKG_URL="https://github.com/pymumu/$PKG_NAME"
+			PKG_URL="https://github.com/pymumu/luci-app-smartdns"
 		fi
 		ExtraPackages_mod_git
 	;;
 	2)
 		PKG_NAME=luci-app-adguardhome
-		PKG_URL=https://github.com/Lienol/openwrt/trunk/package/diy/$PKG_NAME
+		PKG_URL=https://github.com/Lienol/openwrt/branches/dev-master/package/diy/luci-app-adguardhome
 		ExtraPackages_mod_svn
 		PKG_NAME=adguardhome
-		PKG_URL=https://github.com/Lienol/openwrt/trunk/package/diy/$PKG_NAME
+		PKG_URL=https://github.com/Lienol/openwrt/branches/dev-master/package/diy/adguardhome
 		ExtraPackages_mod_svn
 	;;
 	3)
 		PKG_NAME=luci-app-openclash
-		PKG_URL=https://github.com/vernesong/OpenClash/branches/master/$PKG_NAME
+		PKG_URL=https://github.com/vernesong/OpenClash/branches/master/luci-app-openclash
 		ExtraPackages_mod_svn
 	;;
 	4)
 		PKG_NAME=luci-app-clash
-		PKG_URL=https://github.com/frainzy1477/$PKG_NAME
+		PKG_URL=https://github.com/frainzy1477/luci-app-clash
 		ExtraPackages_mod_git
 	;;
 	5)
 		PKG_NAME=luci-app-passwall
-		PKG_URL=https://github.com/Hyy2001X/$PKG_NAME
+		PKG_URL=https://github.com/Hyy2001X/luci-app-passwall
 		ExtraPackages_mod_git
 	;;
 	w)
