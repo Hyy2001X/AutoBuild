@@ -1,44 +1,44 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.05.26
-Module_Version=V1.1
+Update=2020.06.19
+Module_Version=V1.2
 
 while :
 do
 	ColorfulUI_Check
 	clear
-	Say="脚本设置[临时]" && Color_B
+	Say="脚本设置[实验性]" && Color_B
 	echo " "
-	if [ $DeveloperMode == 0 ];then
-		Say="1.调试模式		[OFF]" && Color_R
+	if [ $GitSource == 0 ];then
+		Say="1.源码下载源		[Github]" && Color_Y
 	else
-		Say="1.调试模式		[ON]" && Color_Y
+		Say="1.源码下载源		[Gitee]" && Color_B
 	fi
 	if [ $SimpleCompilation == 0 ];then
-		Say="2.轻松编译		[OFF]" && Color_R
+		Say="2.高级编译		[关闭]" && Color_R
 	else
-		Say="2.轻松编译		[ON]" && Color_Y
+		Say="2.高级编译		[打开]" && Color_Y
 	fi
 	if [ $ColorfulUI == 0 ];then
-		Say="3.彩色UI		[OFF]" && Color_R
+		Say="3.高亮显示		[关闭]" && Color_R
 	else
-		Say="3.彩色UI		[ON]" && Color_Y
+		Say="3.高亮显示		[打开]" && Color_Y
 	fi
-	if [ $GitSource == 0 ];then
-		Say="4.源码下载源		[Github]" && Color_Y
+	if [ $DeveloperMode == 0 ];then
+		Say="4.调试模式		[关闭]" && Color_R
 	else
-		Say="4.源码下载源		[Gitee]" && Color_B
+		Say="4.调试模式		[打开]" && Color_Y
 	fi
 	if [ $SaveCompileLog == 0 ];then
-		Say="5.保存编译日志		[OFF]" && Color_R
+		Say="5.自动保存编译日志	[关闭]" && Color_R
 	else
-		Say="5.保存编译日志		[ON]" && Color_Y
+		Say="5.自动保存编译日志	[打开]" && Color_Y
 	fi
 	if [ $CustomSources == 0 ];then
-		Say="6.自定义源码		[OFF]" && Color_R
+		Say="6.自定义源码		[关闭]" && Color_R
 	else
-		Say="6.自定义源码		[ON]" && Color_Y
+		Say="6.自定义源码		[打开]" && Color_Y
 	fi
 	echo " "
 	echo "x.恢复所有默认设置"
@@ -51,7 +51,7 @@ do
 	x)
 		Default_Settings
 	;;
-	1)
+	4)
 		if [ $DeveloperMode == 0 ];then
 			DeveloperMode=1
 		else
@@ -72,7 +72,7 @@ do
 			ColorfulUI=0
 		fi
 	;;
-	4)
+	1)
 		if [ $GitSource == 0 ];then
 			GitSource=1
 		else
