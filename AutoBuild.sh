@@ -2,8 +2,8 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.06.16
-Version=V3.1
+Update=2020.06.19
+Version=V3.2
 
 Second_Menu() {
 Update_Checked=0
@@ -652,13 +652,17 @@ echo " "
 echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	Say="连接正常,开始更新..." && Color_Y
 	cd $Home
 	Old_Version=`awk 'NR==6' ./AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
-	cp ./AutoBuild.sh $Home/Backups/OldVersion/AutoBuild-$Old_Version.sh
-	rm -rf TEMP
+	mkdir $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version
+	cp $Home/AutoBuild.sh $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/AutoBuild.sh
+	cp $Home/README.md $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/README.md
+	cp $Home/LICENSE $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/LICENSE
+	cp -a $Home/Additional $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/Additional
+	cp -a $Home/Modules $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/Modules
 	rm -rf Modules
 	rm -rf Additional
+	rm -rf TEMP
 	svn checkout $AutoBuild_git/trunk ./TEMP
 	echo " "
 	if [ -f ./TEMP/AutoBuild.sh ];then
@@ -683,7 +687,6 @@ echo " "
 echo -ne "\r$Blue检查网络连接...$White\r"
 timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	Say="网络连接正常,开始更新..." && Color_Y
 	sleep 1
 	cd $Home/Projects/$Project
 	clear
@@ -843,10 +846,10 @@ do
 	clear
 	Say="AutoBuild Core Script $Version" && Color_B
 	echo ""
-	echo -e "1.${Yellow}Get Started!$White"
+	Say="1.Get Started!" && Color_Y
 	echo "2.网络测试"
 	echo "3.高级选项"
-	echo "4.设置"
+	echo -e "4.脚本设置$Blue[实验性]$White"
 	echo "q.退出"
 	GET_Choose
 	case $Choose in
