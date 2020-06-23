@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.05.26
-Module_Version=V1.2
+Update=2020.06.23
+Module_Version=V1.3
 
 while :
 do
@@ -103,6 +103,7 @@ do
 				read -p '包含该附加信息的名称已存在!请重新添加:' Extra
 				AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d-$Extra.bin)`"
 			done
+			Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d-$Extra.detail)`"
 		else
 			read -p '请输入附加信息:' Extra
 			AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
@@ -112,6 +113,7 @@ do
 				read -p '包含该附加信息的名称已存在,请重新添加:' Extra
 				AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
 			done
+			Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.detail)`"
 		fi
 	fi
 	clear
@@ -141,12 +143,24 @@ do
 			if [ -f ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name ];then
 				Compile_Time_End
 				mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Packages/$AutoBuild_Firmware
-				Say="$Project编译成功!固件已自动移动到'$Home/Packages' " && Color_Y
+				echo " "
+				Say="固件位置:$Home/Packages" && Color_Y
 				echo -e "$Yellow固件名称:$Blue$AutoBuild_Firmware$White"
 				cd $Home/Packages
 				Firmware_Size=`ls -l $AutoBuild_Firmware | awk '{print $5}'`
 				Firmware_Size_MB=`awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'`
+				Firmware_MD5=`md5sum $AutoBuild_Firmware | cut -d ' ' -f1`
+				Firmware_SHA256=`sha256sum $AutoBuild_Firmware | cut -d ' ' -f1`
 				Say="$Firmware_Size_MB" && Color_Y
+				echo " "
+				Say="MD5:$Firmware_MD5" && Color_B
+				Say="SHA256:$Firmware_SHA256" && Color_B
+				echo "固件名称:$AutoBuild_Firmware" > ./Details/$Firmware_Detail
+				echo "$Firmware_Size_MB" >> ./Details/$Firmware_Detail
+				echo "$Compile_TIME" >> ./Details/$Firmware_Detail
+				echo "" >> ./Details/$Firmware_Detail
+				echo "MD5:$Firmware_MD5" >> ./Details/$Firmware_Detail
+				echo "SHA256:$Firmware_SHA256" >> ./Details/$Firmware_Detail
 			else
 				echo " "
 				Compile_Time_End
@@ -183,7 +197,7 @@ Compile_End=`date +'%Y-%m-%d %H:%M:%S'`
 Start_Seconds=$(date --date="$Compile_Start" +%s);
 End_Seconds=$(date --date="$Compile_End" +%s);
 echo -ne "$Skyb$Compile_Start --> $Compile_End "
-Compile_TIME=`awk 'BEGIN{printf "本次编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'`
+Compile_TIME=`awk 'BEGIN{printf "编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'`
 echo -ne "$Compile_TIME$White"
 echo " "
 }
