@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function Network_Test() {
-Update=2020.04.16
-Module_Version=V2.3
+Update=2020.06.23
+Module_Version=V2.5
 
 function Network_Test_Mod() {
 echo -ne "\r$Blue检测中...$White\r"
@@ -19,15 +19,12 @@ fi
 }
 
 clear
-Say="Network Test Script $Module_Version by Hyy2001" && Color_B
+Say="Network Test Script $Module_Version" && Color_B
 Decoration
-echo -e "$Skyb网址			IP地址			连接状态	延迟$White"
+echo -e "$Skyb网址			IP地址			状态		延迟$White"
 echo " "
 
 Net_URL=www.baidu.com
-Network_Test_Mod
-
-Net_URL=www.gitee.com
 Network_Test_Mod
 
 Net_URL=www.github.com
