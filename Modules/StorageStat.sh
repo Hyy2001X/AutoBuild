@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function StorageStat() {
-Update=2020.04.11
-Module_Version=V1.1
+Update=2020.06.23
+Module_Version=V1.2
 
 clear
 Say="Loading Configuration..." && Color_Y
@@ -40,50 +40,49 @@ else
 fi
 
 clear
-Say="Storage Statistics Script $Module_Version by Hyy2001" && Color_B
+Say="Storage Statistics $Module_Version" && Color_B
 Decoration
-echo -e "$Skyb项目名称	位置				存储占用$White"
+echo -e "$Skyb项目名称	存储位置				存储占用$White"
 echo " "
 if [ $Lede_Check == 1 ];then
 	echo -ne "${Yellow}"
-	awk 'BEGIN{printf "Lede		/Projects/Lede			%.2fGB\n",'$((Lede_Size))'/1048576}'
+	awk 'BEGIN{printf "Lede		./Projects/Lede				%.2fGB\n",'$((Lede_Size))'/1048576}'
 	echo -ne "${White}"
 else
-	echo -e "${Red}Lede		未检测到			0KB${White}"
+	echo -e "${Red}Lede		未检测到				0KB${White}"
 fi
 
 if [ $Openwrt_Check == 1 ];then
 	echo -ne "${Yellow}"
-	awk 'BEGIN{printf "Openwrt		/Projects/Openwrt		%.2fGB\n",'$((Openwrt_Size))'/1048576}'
+	awk 'BEGIN{printf "Openwrt		./Projects/Openwrt			%.2fGB\n",'$((Openwrt_Size))'/1048576}'
 	echo -ne "${White}"
 else
-	echo -e "${Red}Openwrt		未检测到			0KB${White}"
+	echo -e "${Red}Openwrt		未检测到				0KB${White}"
 fi
 
 if [ $Lienol_Check == 1 ];then
 	echo -ne "${Yellow}"
-	awk 'BEGIN{printf "Lienol		/Projects/Lienol		%.2fGB\n",'$((Lienol_Size))'/1048576}'
+	awk 'BEGIN{printf "Lienol		./Projects/Lienol			%.2fGB\n",'$((Lienol_Size))'/1048576}'
 	echo -ne "${White}"
 else
-	echo -e "${Red}Lienol		未检测到			0KB${White}"
+	echo -e "${Red}Lienol		未检测到				0KB${White}"
 fi
 echo " "
 if [ $Backups_Check == 1 ];then
 	echo -ne "${Yellow}"
-	awk 'BEGIN{printf "Backups		/Backups			%.2fMB\n",'$((Backups_Size))'/1024}'
+	awk 'BEGIN{printf "备份		./Backups				%.2fMB\n",'$((Backups_Size))'/1024}'
 	echo -ne "${White}"
 else
-	echo -e "${Red}Backups		未检测到			0KB${White}"
+	echo -e "${Red}备份		未检测到				0KB${White}"
 fi
 
 if [ $Packages_Check == 1 ];then
 	echo -ne "${Yellow}"
-	awk 'BEGIN{printf "Packages	/Packages			%.2fMB\n",'$((Packages_Size))'/1024}'
+	awk 'BEGIN{printf "生成的固件	./Packages				%.2fMB\n",'$((Packages_Size))'/1024}'
 	echo -ne "${White}"
 else
-	echo -e "${Red}Packages	未检测到			0KB${White}"
+	echo -e "${Red}生成的固件	未检测到				0KB${White}"
 fi
-echo " "
 Decoration
 echo " "
 Enter
