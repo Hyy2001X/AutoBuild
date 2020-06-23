@@ -2,19 +2,19 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.06.19
-Version=V3.2
+Update=2020.06.23
+Version=V3.3
 
 Second_Menu() {
 Update_Checked=0
+Update_Status=" "
 echo " "
 Say="正在获取源码更新..." && Color_B
-Update_Status=" "
 while :
 do
 	cd $Home/Projects/$Project
 	if [ $Update_Checked == 0 ];then
-		timeout 3 git fetch > /dev/null 2>&1
+		timeout 5 git fetch > /dev/null 2>&1
 		if [ $? -eq 0 ]; then
 			Update_Check=$(git branch -v | grep -o 落后 )
 			if [ $Update_Check == 落后 ]; then
@@ -234,9 +234,9 @@ do
 		echo "1.make clean"
 		echo "2.make dirclean"
 		echo "3.make distclean"
-		Say="4.删除项目" && Color_R
-		echo "5.删除[临时文件]"
-		echo "6.删除[源码更新日志]"
+		Say="4.删除[$Project]项目" && Color_R
+		echo "5.删除[临时文件/编译缓存]"
+		echo "6.删除[更新日志]"
 		echo "7.删除[编译日志]"
 		echo "q.返回"
 		GET_Choose
@@ -268,9 +268,9 @@ do
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
 				Update_Status=" "
-				Say="[$Project]删除成功!" && Color_Y
+				Say="[$Project] 删除成功!" && Color_Y
 			else 
-				Say="[$Project]删除失败!" && Color_R
+				Say="[$Project] 删除失败!" && Color_R
 			fi
 			sleep 3
 			break
@@ -278,19 +278,19 @@ do
 		5)
 			echo " "
 			rm -rf $Home/Projects/$Project/tmp
-			Say="$Yellow[临时文件]删除成功!" && Color_Y
+			Say="$Yellow[临时文件/编译缓存] 删除成功!" && Color_Y
 			sleep 2
 		;;
 		6)
 			echo " "
 			rm -f $Home/Log/Update_${Project}_*
-			Say="$Yellow[源码更新日志]删除成功!" && Color_Y
+			Say="$Yellow[源码更新日志] 删除成功!" && Color_Y
 			sleep 2
 		;;
 		7)
 			echo " "
 			rm -f $Home/Log/Compile_${Project}_*
-			Say="$Yellow[编译日志]删除成功!" && Color_Y
+			Say="$Yellow[编译日志] 删除成功!" && Color_Y
 			sleep 2
 		;;
 		esac
@@ -320,10 +320,10 @@ do
 clear
 Say="备份与恢复" && Color_B
 echo " "
-echo "1.备份[.config]"
-echo "2.恢复[.config]"
-echo "3.备份[dl]库"
-echo "4.恢复[dl]库"
+Say="1.备份[.config]" && Color_Y
+Say="2.恢复[.config]" && Color_B
+Say="3.备份[dl]库" && Color_Y
+Say="4.恢复[dl]库" && Color_B
 echo "q.返回"
 GET_Choose
 case $Choose in
@@ -334,11 +334,11 @@ q)
 while :
 do
 	clear
-	Say="当前操作:备份[.config]" && Color_B && echo " "
+	Say="当前操作:备份[.config]" && Color_Y && echo " "
 	if [ $Project == Lede ];then
-		echo "1.标准名称/文件格式:[$Project-版本号-日期_时间]"
+		echo -e "1.标准名称/$Yellow文件格式:[$Project-版本号-日期_时间]$White"
 	else
-		echo "1.标准名称/文件格式:[$Project-日期_时间]"
+		echo "1.标准名称文件格式:[$Project-日期_时间]"
 	fi
 	echo "2.自定义文件名称"
 	echo "q.返回"
@@ -362,8 +362,7 @@ do
 		cp $Home/Projects/$Project/.config $Home/Backups/Configs/$Backup_Name
 	;;	
 	esac
-	Say="备份成功!备份文件存放于:'$Home/Backups/Configs'" && Color_Y
-	Say="配置名称:$Backup_Name" && Color_Y
+	Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Name'" && Color_Y
 	sleep 2
 done
 ;;
@@ -404,7 +403,7 @@ done
 	if [ ! -d ./$Project/dl ];then
 		Say="未找到'$Home/Projects/$Project/dl',无法备份!" && Color_R
 	else
-		echo -ne "\r$Blue正在备份[dl]库...$White\r"
+		echo -ne "\r$Yellow正在备份[dl]库...$White\r"
 		cp -a $Home/Projects/$Project/dl $Home/Backups/
 		Say="备份成功![dl]库已备份到:'$Home/Backups/dl'" && Color_Y
 		cd $Home/Backups
@@ -423,11 +422,11 @@ done
 	else
 		echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 		cp -a $Home/Backups/dl $Home/Projects/$Project
-		Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_Y
+		Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_B
 		cd $Home/Projects/$Project
 		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
 		dl_Size_MB=`awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'`
-		Say="$dl_Size_MB" && Color_Y
+		Say="$dl_Size_MB" && Color_B
 	fi
 	echo " "
 	Enter
