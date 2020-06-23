@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.06.23
-Version=V3.3
+Version=V3.3.1
 
 Second_Menu() {
 Update_Checked=0
@@ -771,6 +771,9 @@ Dir_Check() {
 	fi
 	if [ ! -d ./Packages ];then
 		mkdir Packages
+	fi
+	if [ ! -d ./Packages/Details ];then
+		mkdir Packages/Details
 	fi
 	if [ ! -d ./Backups ];then
 		mkdir Backups
