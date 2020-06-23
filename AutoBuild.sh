@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.06.23
-Version=V3.3.1
+Version=V3.3.2
 
 Second_Menu() {
 Update_Checked=0
@@ -47,7 +47,7 @@ do
 	echo "4.编译选项"
 	echo "5.高级选项"
 	echo " "
-	echo "m.返回主菜单"
+	echo "m.主菜单"
 	echo "q.返回"
 	GET_Choose
 	Update_Checked=1
@@ -200,16 +200,21 @@ do
 	echo "5.磁盘清理"
 	echo "6.删除配置文件"
 	echo "7.下载[dl]库"
+	echo " "
+	echo "m.主菜单"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
 	q)
 		break
 	;;
+	m)
+		AutoBuild_Core
+	;;
 	1)
 		if [ $Project == Custom ];then
 			echo " "
-			Say="不适用于自定义源码." && Color_R
+			Say="自定义源码无法使用该功能!" && Color_R
 			sleep 3
 		else
 			Sources_Download
@@ -401,7 +406,7 @@ done
 	echo " "
 	cd $Home/Projects
 	if [ ! -d ./$Project/dl ];then
-		Say="未找到'$Home/Projects/$Project/dl',无法备份!" && Color_R
+		Say="未找到'$Home/Projects/$Project/dl',备份失败!" && Color_R
 	else
 		echo -ne "\r$Yellow正在备份[dl]库...$White\r"
 		cp -a $Home/Projects/$Project/dl $Home/Backups/
@@ -418,7 +423,7 @@ done
 	echo " "
 	cd $Home
 	if [ ! -d ./Backups/dl ];then
-		Say="未找到'$Home/Backups/dl',无法恢复!" && Color_R
+		Say="未找到'$Home/Backups/dl',恢复失败!" && Color_R
 	else
 		echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 		cp -a $Home/Backups/dl $Home/Projects/$Project
@@ -438,7 +443,7 @@ done
 Make_Menuconfig() {
 clear
 cd $Home/Projects/$Project
-Say="Loading $Project Configuration..." && Color_B
+Say="Loading $Project Configuration..." && Color_Y
 make menuconfig
 Enter
 }
@@ -453,8 +458,8 @@ do
 	echo -e "2.$Skyb安装编译环境$White"
 	echo "3.SSH服务"
 	echo "4.同步网络时间"
-	echo "5.空间占用统计"
-	echo "6.创建快捷启动"
+	echo "5.存储空间占用统计"
+	echo "6.创建快捷启动指令"
 	echo "7.查看磁盘信息"
 	echo "8.定时任务"
 	echo "9.系统信息"
@@ -483,6 +488,7 @@ do
 		sudo apt-get update
 		while [ $Update_Times -le 3 ];
 		do
+			clear
 			echo -ne "\r准备执行第$Update_Times次安装...\r"
 			sleep 2
 			sudo apt-get -y install $Dependency
@@ -513,11 +519,11 @@ do
 		while :
 		do
 			clear
-			Say="通过SSH访问路由器" && Color_B
+			Say="SSH连接路由器" && Color_B
 			echo " "
 			echo "1.使用上次保存的配置连接"
-			echo "2.创建配置文件"
-			echo "3.删除配置文件"
+			echo "2.创建新的配置文件"
+			echo "3.删除现有配置文件"
 			echo "4.重置[RSA Key Fingerprint]"
 			echo "q.返回"
 			GET_Choose
@@ -539,7 +545,7 @@ do
 					echo " "
 					Say="配置已保存到'$Home/Configs/SSH'" && Color_Y
 				else
-					Say="若要创建配置,请先删除上次的配置文件." && Color_R
+					Say="若要创建新的配置文件,请先删除旧配置文件." && Color_R
 				fi
 				sleep 2
 			;;
@@ -576,13 +582,13 @@ do
 		echo " "
 		cd ~
 		if [ -f .bashrc ];then
-			read -p '请创建一个快捷启动的名称:' FastOpen		
+			read -p '请输入快捷启动指令的名称:' FastOpen		
 			echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
 			source ~/.bashrc
 			echo " "
-			Say="创建成功!下次在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
+			Say="创建成功!在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
 		else
-			Say="无法创建快捷启动!" && Color_R
+			Say="无法创建快捷启动指令!" && Color_R
 		fi
 		sleep 3
 	;;
@@ -620,13 +626,13 @@ do
 			read -p '请输入关机等待时间:' Time_wait
 			echo " "
 			shutdown -h $Time_wait
-			Say="系统将在 $Time_wait 分钟后自动关机." && Color_Y
+			Say="系统将在 $Time_wait 分钟后关机." && Color_Y
 		;;
 		4)
 			read -p '请输入重启等待时间:' Time_wait
 			echo " "
 			shutdown -rh $Time_wait
-			Say="系统将在 $Time_wait 分钟后自动重启." && Color_Y
+			Say="系统将在 $Time_wait 分钟后重启." && Color_Y
 		;;
 		5)
 			shutdown -c
@@ -676,8 +682,8 @@ if [ $? -eq 0 ];then
 		sleep 2
 	fi
 else
-	Say="无网络连接,无法更新!" && Color_R
-	sleep 3
+	Say="网络连接错误,更新失败!" && Color_R
+	sleep 2
 fi
 }
 
@@ -713,8 +719,8 @@ if [ $? -eq 0 ];then
 	Enter
 else
 	echo " "
-	Say="无网络连接,无法更新!" && Color_R
-	sleep 3
+	Say="网络连接错误,更新失败!" && Color_R
+	sleep 2
 fi
 }
 
