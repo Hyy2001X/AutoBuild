@@ -2,8 +2,8 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.06.23
-Version=V3.3.2
+Update=2020.06.24
+Version=V3.3.3
 
 Second_Menu() {
 Update_Checked=0
@@ -338,14 +338,15 @@ q)
 1)
 while :
 do
+	cd $Home
 	clear
-	Say="当前操作:备份[.config]" && Color_Y && echo " "
+	Say="备份[.config]" && Color_Y && echo " "
 	if [ $Project == Lede ];then
 		echo -e "1.标准名称/$Yellow文件格式:[$Project-版本号-日期_时间]$White"
 	else
 		echo "1.标准名称文件格式:[$Project-日期_时间]"
 	fi
-	echo "2.自定义文件名称"
+	echo "2.自定义名称"
 	echo "q.返回"
 	GET_Choose
 	echo " "
@@ -358,16 +359,24 @@ do
 			Backup_Name=$Project-$Lede_Version-`(date +%m%d_%H:%M)`
 		else
 			Backup_Name=$Project-`(date +%m%d_%H:%M)`
+		fi	
+		if [ -f ./Projects/$Project/.config ];then
+			cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Name
+			Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Name'" && Color_Y
+		else
+			Say="备份失败!" && Color_R
 		fi
-		cp $Home/Projects/$Project/.config $Home/Backups/Configs/$Backup_Name
 	;;
 	2)
-		read -p '请输入配置名称:' Backup_Name
+		read -p '请输入自定义名称:' Backup_Name
 		echo " "
-		cp $Home/Projects/$Project/.config $Home/Backups/Configs/$Backup_Name
+		if [ -f ./Projects/$Project/.config ];then
+			cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Name
+		else
+			Say="备份失败!" && Color_R
+		fi
 	;;	
 	esac
-	Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Name'" && Color_Y
 	sleep 2
 done
 ;;
@@ -375,7 +384,7 @@ done
 while :
 do
 	clear
-	Say="当前操作:恢复[.config]" && Color_B && echo " "
+	Say="恢复[.config]" && Color_B && echo " "
 	cd $Home/Backups/Configs
 	echo -n "备份文件"
 	ls -lh -u -o
@@ -397,7 +406,7 @@ do
 		sleep 2
 		break
 	else
-		Say="未找到[$Recover_NAME],请检查是否输入正确!" && Color_R
+		Say="未找到[$Recover_NAME],请检查输入是否正确!" && Color_R
 		sleep 2
 	fi
 done
@@ -421,7 +430,6 @@ done
 ;;
 4)
 	echo " "
-	cd $Home
 	if [ ! -d ./Backups/dl ];then
 		Say="未找到'$Home/Backups/dl',恢复失败!" && Color_R
 	else
@@ -455,7 +463,7 @@ do
 	Say="高级选项" && Color_B
 	echo " "
 	echo "1.更新系统软件包"
-	echo -e "2.$Skyb安装编译环境$White"
+	Say="2.安装编译环境" && Color_G
 	echo "3.SSH服务"
 	echo "4.同步网络时间"
 	echo "5.存储空间占用统计"
@@ -733,18 +741,6 @@ Enter() {
 read -p "按下[回车]键以继续..." Key
 }
 
-Color_Y() {
-echo -e "$Yellow$Say$White"
-}
-
-Color_R() {
-echo -e "$Red$Say$White"
-}
-
-Color_B() {
-echo -e "$Blue$Say$White"
-}
-
 Decoration() {
 	echo -ne "$Skyb"
 	printf "%-70s\n" "-" | sed 's/\s/-/g'
@@ -813,22 +809,6 @@ else
 fi
 }
 
-ColorfulUI_Check() {
-if [ $ColorfulUI == 1 ];then
-	White="\e[0m"
-	Yellow="\e[33m"
-	Red="\e[31m"
-	Blue="\e[34m"
-	Skyb="\e[36m"
-else
-	White="\e[0m"
-	Yellow="\e[0m"
-	Red="\e[0m"
-	Blue="\e[0m"
-	Skyb="\e[0m"
-fi
-}
-
 GitSource_Check() {
 if [ $GitSource == 1 ];then
 	Lede_git=https://gitee.com/Hyy2001X/Lede
@@ -857,7 +837,7 @@ do
 	Say="1.Get Started!" && Color_Y
 	echo "2.网络测试"
 	echo "3.高级选项"
-	echo -e "4.脚本设置$Blue[实验性]$White"
+	echo -e "4.脚本设置"
 	echo "q.退出"
 	GET_Choose
 	case $Choose in
@@ -873,7 +853,7 @@ do
 		Say="AutoBuild Core Script $Version" && Color_B
 		Decoration
 		cd $Home
-		echo -e "$Skyb项目名称		[项目状态]	作者/维护者$White"
+		Say="项目名称		[项目状态]	作者/维护者" && Color_G
 		echo " "
 		if [ -f ./Projects/Lede/Makefile ];then
 			echo -e "${White}1.Lede			$Yellow[已检测到]$Blue	Lean[coolsnowwolf]"
