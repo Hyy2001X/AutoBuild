@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.06.19
-Module_Version=V1.2
+Update=2020.06.24
+Module_Version=V1.3
 
 while :
 do
@@ -104,4 +104,36 @@ ColorfulUI=1
 GitSource=0
 SaveCompileLog=0
 CustomSources=1
+}
+
+ColorfulUI_Check() {
+if [ $ColorfulUI == 1 ];then
+	White="\e[0m"
+	Yellow="\e[33m"
+	Red="\e[31m"
+	Blue="\e[34m"
+	Skyb="\e[36m"
+else
+	White="\e[0m"
+	Yellow="\e[0m"
+	Red="\e[0m"
+	Blue="\e[0m"
+	Skyb="\e[0m"
+fi
+}
+
+Color_Y() {
+echo -e "$Yellow$Say$White"
+}
+
+Color_R() {
+echo -e "$Red$Say$White"
+}
+
+Color_B() {
+echo -e "$Blue$Say$White"
+}
+
+Color_G() {
+echo -e "$Skyb$Say$White"
 }
