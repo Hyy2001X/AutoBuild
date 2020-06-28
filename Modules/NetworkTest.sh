@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function Network_Test() {
-Update=2020.06.23
-Module_Version=V2.5
+Update=2020.06.28
+Module_Version=V2.5.1
 
 function Network_Test_Mod() {
 echo -ne "\r$Blue检测中...$White\r"
@@ -31,6 +31,9 @@ Net_URL=www.github.com
 Network_Test_Mod
 
 Net_URL=www.google.com
+Network_Test_Mod
+
+Net_URL=www.github.io
 Network_Test_Mod
 
 Net_URL=dl.google.com
