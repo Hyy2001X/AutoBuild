@@ -2,8 +2,8 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.06.24
-Version=V3.3.3
+Update=2020.07.03
+Version=V3.3.4
 
 Second_Menu() {
 Update_Checked=0
@@ -430,6 +430,7 @@ done
 ;;
 4)
 	echo " "
+	cd $Home
 	if [ ! -d ./Backups/dl ];then
 		Say="未找到'$Home/Backups/dl',恢复失败!" && Color_R
 	else
@@ -721,7 +722,7 @@ if [ $? -eq 0 ];then
 		Update_Status="$Yellow[最新]$White"
 	fi
 	if [ $Project == Lede ];then
-		sed -i '5s/#src-git/src-git/g' feeds.conf.default
+		sed -i '11s/#src-git/src-git/g' feeds.conf.default
 	fi
 	echo " "
 	Enter
@@ -753,7 +754,7 @@ cd $Home
 if [ -f ./Projects/$Project/Makefile ];then
 	if [ $Project == Lede ];then
 		cd $Home/Projects/Lede
-		sed -i '5s/#src-git/src-git/g' feeds.conf.default
+		sed -i '11s/#src-git/src-git/g' feeds.conf.default
 	fi
 	Say="[$Project]源码下载成功!" && Color_Y
 else
