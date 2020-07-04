@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.06.24
-Module_Version=V1.3
+Update=2020.07.04
+Module_Version=V1.3.5
 
 while :
 do
@@ -119,6 +119,22 @@ else
 	Red="\e[0m"
 	Blue="\e[0m"
 	Skyb="\e[0m"
+fi
+}
+
+GitSource_Check() {
+if [ $GitSource == 1 ];then
+	Lede_git=https://gitee.com/Hyy2001X/Lede
+	Openwrt_git=https://gitee.com/Hyy2001X/Openwrt
+	Lienol_git=https://gitee.com/Hyy2001X/Lienol
+	AutoBuild_git=https://gitee.com/Hyy2001X/AutoBuild
+	GitSource_Stat=Gitee
+else
+	Lede_git=https://github.com/coolsnowwolf/lede
+	Openwrt_git=https://github.com/openwrt/openwrt
+	Lienol_git=https://github.com/lienol/openwrt
+	AutoBuild_git=https://github.com/Hyy2001X/AutoBuild
+	GitSource_Stat=Github
 fi
 }
 
