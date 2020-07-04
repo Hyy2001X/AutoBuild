@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ExtraThemes() {
-Update=2020.05.19
-Module_Version=V2.4
+Update=2020.07.04
+Module_Version=V2.4.5
 PKGHome=$Home/Projects/$Project/package
 
 ExtraThemes_info() {
@@ -100,7 +100,7 @@ do
 			ExtraThemes_mod_git
 			mv $PKGHome/theme/luci-theme-argon $PKGHome/lean/$PKG_NAME
 		else
-			PKG_URL=" -b 19.07_stable https://github.com/jerrykuku/luci-theme-argon"
+			PKG_URL="https://github.com/jerrykuku/luci-theme-argon"
 			ExtraThemes_mod_git
 		fi
 	;;
