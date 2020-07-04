@@ -2,28 +2,12 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.03
-Version=V3.3.4
+Update=2020.07.04
+Version=V3.4.0
 
 Second_Menu() {
-Update_Checked=0
-Update_Status=" "
-echo " "
-Say="正在获取源码更新..." && Color_B
 while :
 do
-	cd $Home/Projects/$Project
-	if [ $Update_Checked == 0 ];then
-		timeout 5 git fetch > /dev/null 2>&1
-		if [ $? -eq 0 ]; then
-			Update_Check=$(git branch -v | grep -o 落后 )
-			if [ $Update_Check == 落后 ]; then
-				Update_Status="$Blue[可更新]$White"
-			else
-				Update_Status="$Yellow[最新]$White"
-			fi
-		fi
-	fi
 	clear
 	Dir_Check
 	if [ -f "./Projects/$Project/feeds.conf.default" ];then
@@ -41,7 +25,7 @@ do
 		Say="未检测到[$Project]源码,请前往[高级选项]下载!" && Color_R
 	fi
 	echo " "
-	echo -e "1.更新源代码和Feeds$Update_Status"
+	echo "1.更新源代码和Feeds"
 	echo "2.打开固件配置菜单"
 	echo "3.备份与恢复"
 	echo "4.编译选项"
@@ -50,7 +34,6 @@ do
 	echo "m.主菜单"
 	echo "q.返回"
 	GET_Choose
-	Update_Checked=1
 	case $Choose in
 	q)
 		break
@@ -272,7 +255,6 @@ do
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
-				Update_Status=" "
 				Say="[$Project] 删除成功!" && Color_Y
 			else 
 				Say="[$Project] 删除失败!" && Color_R
@@ -372,6 +354,7 @@ do
 		echo " "
 		if [ -f ./Projects/$Project/.config ];then
 			cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Name
+			Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Name'" && Color_Y
 		else
 			Say="备份失败!" && Color_R
 		fi
@@ -468,7 +451,7 @@ do
 	echo "3.SSH服务"
 	echo "4.同步网络时间"
 	echo "5.存储空间占用统计"
-	echo "6.创建快捷启动指令"
+	echo "6.创建快捷启动"
 	echo "7.查看磁盘信息"
 	echo "8.定时任务"
 	echo "9.系统信息"
@@ -498,7 +481,7 @@ do
 		while [ $Update_Times -le 3 ];
 		do
 			clear
-			echo -ne "\r准备执行第$Update_Times次安装...\r"
+			echo -ne "\r准备进行第$Update_Times次安装...\r"
 			sleep 2
 			sudo apt-get -y install $Dependency
 			sudo apt-get -y install $Extra_Dependency
@@ -591,13 +574,13 @@ do
 		echo " "
 		cd ~
 		if [ -f .bashrc ];then
-			read -p '请输入快捷启动指令的名称:' FastOpen		
+			read -p '请输入快捷启动的名称:' FastOpen		
 			echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
 			source ~/.bashrc
 			echo " "
 			Say="创建成功!在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
 		else
-			Say="无法创建快捷启动指令!" && Color_R
+			Say="无法创建快捷启动!" && Color_R
 		fi
 		sleep 3
 	;;
@@ -715,11 +698,9 @@ if [ $? -eq 0 ];then
 	echo " "
 	Updated_Check=$(cat $Update_File | grep -o error )
 	if [ "$Updated_Check" == "error" ]; then
-		Say="部分源代码和Feeds更新失败!" && Color_R
-		Update_Status="$Red[未知]$White"
+		Say="源代码和Feeds更新失败!" && Color_R
 	else
 		Say="源代码和Feeds更新成功!" && Color_Y
-		Update_Status="$Yellow[最新]$White"
 	fi
 	if [ $Project == Lede ];then
 		sed -i '11s/#src-git/src-git/g' feeds.conf.default
@@ -756,9 +737,9 @@ if [ -f ./Projects/$Project/Makefile ];then
 		cd $Home/Projects/Lede
 		sed -i '11s/#src-git/src-git/g' feeds.conf.default
 	fi
-	Say="[$Project]源码下载成功!" && Color_Y
+	Say="[$Project]源代码 下载成功!" && Color_Y
 else
-	Say="[$Project]源码下载失败!" && Color_R
+	Say="[$Project]源代码 下载失败!" && Color_R
 fi
 echo " "
 Enter
@@ -807,22 +788,6 @@ else
 	else
 		Sources_Download
 	fi
-fi
-}
-
-GitSource_Check() {
-if [ $GitSource == 1 ];then
-	Lede_git=https://gitee.com/Hyy2001X/Lede
-	Openwrt_git=https://gitee.com/Hyy2001X/Openwrt
-	Lienol_git=https://gitee.com/Hyy2001X/Lienol
-	AutoBuild_git=https://gitee.com/Hyy2001X/AutoBuild
-	GitSource_Stat=Gitee
-else
-	Lede_git=https://github.com/coolsnowwolf/lede
-	Openwrt_git=https://github.com/openwrt/openwrt
-	Lienol_git=https://github.com/lienol/openwrt
-	AutoBuild_git=https://github.com/Hyy2001X/AutoBuild
-	GitSource_Stat=Github
 fi
 }
 
