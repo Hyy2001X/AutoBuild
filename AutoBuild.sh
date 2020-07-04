@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.04
-Version=V3.4.0
+Version=V3.4.1
 
 Second_Menu() {
 while :
@@ -139,9 +139,9 @@ else
 		Say="$Project源码下载-分支选择" && Color_B
 		Say="$GitSource_Stat仓库:$Openwrt_git" && Color_Y
 		echo " "
-		Branch_1=dev-19.07
-		Branch_2=dev-lean-lede
-		Branch_3=dev-master
+		Branch_1=dev-master
+		Branch_2=dev
+		Branch_3=dev-19.07
 		echo "1.$Branch_1[默认]"
 		echo "2.$Branch_2"
 		echo "3.$Branch_3"
