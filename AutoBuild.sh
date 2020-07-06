@@ -2,8 +2,8 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.05
-Version=V3.4.2
+Update=2020.07.06
+Version=V3.4.3
 
 Second_Menu() {
 while :
@@ -291,11 +291,18 @@ do
 		sleep 2
 	;;
 	7)
-		clear
-		Say="开始下载[dl]库,线程数:$CPU_Threads" && Color_Y
-		make -j$CPU_Threads download V=s
 		echo " "
-		Enter
+		timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
+		if [ $? -eq 0 ];then
+			clear
+			Say="开始下载[dl]库,线程数:$CPU_Threads" && Color_Y
+			make -j$CPU_Threads download V=s
+			echo " "
+			Enter
+		else
+			Say="网络连接错误,[dl]库下载失败!" && Color_R
+			sleep 2
+		fi
 	;;
 	esac
 done
@@ -645,18 +652,17 @@ done
 }
 
 Script_Update() {
-echo " "
-echo -ne "\r$Blue检查网络连接...$White\r"
-timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
+timeout 3 ping -c 1 www.github.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	cd $Home
 	Old_Version=`awk 'NR==6' ./AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
-	mkdir $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version
-	cp $Home/AutoBuild.sh $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/AutoBuild.sh
-	cp $Home/README.md $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/README.md
-	cp $Home/LICENSE $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/LICENSE
-	cp -a $Home/Additional $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/Additional
-	cp -a $Home/Modules $Home/Backups/OldVersion/AutoBuild-Core-$Old_Version/Modules
+	Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version
+	mkdir $Backups_Dir
+	cp $Home/AutoBuild.sh $Backups_Dir/AutoBuild.sh
+	cp $Home/README.md $Backups_Dir/README.md
+	cp $Home/LICENSE $Backups_Dir/LICENSE
+	cp -a $Home/Additional $Backups_Dir/Additional
+	cp -a $Home/Modules $Backups_Dir/Modules
 	rm -rf Modules
 	rm -rf Additional
 	rm -rf TEMP
@@ -680,13 +686,16 @@ fi
 }
 
 Sources_Update() {
-echo " "
-echo -ne "\r$Blue检查网络连接...$White\r"
-timeout 3 httping -c 1 www.baidu.com > /dev/null 2>&1
+timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	sleep 1
-	cd $Home/Projects/$Project
+	if [ $Project == Lede ];then
+		cd $Home
+		if [ -f ./Backups/feeds.conf.default ];then
+			mv ./Backups/feeds.conf.default ./Projects/$Project/feeds.conf.default
+		fi
+	fi
 	clear
+	cd $Home/Projects/$Project
 	if [ $Enforce_Update == 1 ];then
 		git fetch --all
 		git reset --hard origin/$Branch
@@ -695,15 +704,17 @@ if [ $? -eq 0 ];then
 	git pull 2>&1 | tee $Update_File
 	./scripts/feeds update -a 2>&1 | tee -a $Update_File
 	./scripts/feeds install -a 2>&1 | tee -a $Update_File
+	if [ $Project == Lede ];then
+		cd $Home
+		cp ./Projects/$Project/feeds.conf.default ./Backups/feeds.conf.default
+		sed -i '11s/#src-git/src-git/g' ./Projects/$Project/feeds.conf.default
+	fi
 	echo " "
 	Updated_Check=$(cat $Update_File | grep -o error )
 	if [ "$Updated_Check" == "error" ]; then
 		Say="源代码和Feeds更新失败!" && Color_R
 	else
 		Say="源代码和Feeds更新成功!" && Color_Y
-	fi
-	if [ $Project == Lede ];then
-		sed -i '11s/#src-git/src-git/g' feeds.conf.default
 	fi
 	echo " "
 	Enter
@@ -731,52 +742,52 @@ Decoration() {
 
 Sources_Download_Check() {
 echo " "
-cd $Home
-if [ -f ./Projects/$Project/Makefile ];then
+cd $Home/Projects/$Project
+if [ -f ./Makefile ];then
 	if [ $Project == Lede ];then
-		cd $Home/Projects/Lede
+		cp ./feeds.conf.default $Home/Backups/feeds.conf.default
 		sed -i '11s/#src-git/src-git/g' feeds.conf.default
 	fi
-	Say="[$Project]源代码 下载成功!" && Color_Y
+	Say="$Project源码下载成功!" && Color_Y
 else
-	Say="[$Project]源代码 下载失败!" && Color_R
+	Say="$Project源码下载失败!" && Color_R
 fi
 echo " "
 Enter
 }
 
 Dir_Check() {
-	cd $Home
-	if [ ! -d ./Projects ];then
-		mkdir Projects
-	fi
-	if [ ! -d ./TEMP ];then
-		mkdir TEMP
-	fi
-	if [ ! -d ./Packages ];then
-		mkdir Packages
-	fi
-	if [ ! -d ./Packages/Details ];then
-		mkdir Packages/Details
-	fi
-	if [ ! -d ./Backups ];then
-		mkdir Backups
-	fi
-	if [ ! -d ./Backups/Projects ];then
-		mkdir Backups/Projects
-	fi
-	if [ ! -d ./Backups/OldVersion ];then
-		mkdir Backups/OldVersion
-	fi
-	if [ ! -d ./Backups/Configs ];then
-		mkdir Backups/Configs
-	fi
-	if [ ! -d ./Configs ];then
-		mkdir Configs
-	fi
-	if [ ! -d ./Log ];then
-		mkdir Log
-	fi
+cd $Home
+if [ ! -d ./Projects ];then
+	mkdir Projects
+fi
+if [ ! -d ./TEMP ];then
+	mkdir TEMP
+fi
+if [ ! -d ./Packages ];then
+	mkdir Packages
+fi
+if [ ! -d ./Packages/Details ];then
+	mkdir Packages/Details
+fi
+if [ ! -d ./Backups ];then
+	mkdir Backups
+fi
+if [ ! -d ./Backups/Projects ];then
+	mkdir Backups/Projects
+fi
+if [ ! -d ./Backups/OldVersion ];then
+	mkdir Backups/OldVersion
+fi
+if [ ! -d ./Backups/Configs ];then
+	mkdir Backups/Configs
+fi
+if [ ! -d ./Configs ];then
+	mkdir Configs
+fi
+if [ ! -d ./Log ];then
+	mkdir Log
+fi
 }
 
 Second_Menu_Check() {
