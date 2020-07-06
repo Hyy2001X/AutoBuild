@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.06
-Version=V3.4.3
+Version=V3.4.4
 
 Second_Menu() {
 while :
@@ -652,8 +652,9 @@ done
 }
 
 Script_Update() {
-timeout 3 ping -c 1 www.github.com > /dev/null 2>&1
+timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
+	clear
 	cd $Home
 	Old_Version=`awk 'NR==6' ./AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
 	Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version
@@ -672,11 +673,12 @@ if [ $? -eq 0 ];then
 		mv ./TEMP/* $Home
 		chmod +x -R $Home/AutoBuild.sh
 		chmod +x -R $Home/Modules
-		Say="AutoBuild 更新成功!" && Color_Y
+		rm -rf TEMP
+		Say="AutoBuild Script更新成功!" && Color_Y
 		sleep 2
 		./AutoBuild.sh
 	else
-		Say="AutoBuild 更新失败!" && Color_R
+		Say="AutoBuild  Script更新失败!" && Color_R
 		sleep 2
 	fi
 else
