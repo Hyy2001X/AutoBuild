@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.06
-Version=V3.4.4
+Version=V3.4.5
 
 Second_Menu() {
 while :
@@ -658,6 +658,9 @@ if [ $? -eq 0 ];then
 	cd $Home
 	Old_Version=`awk 'NR==6' ./AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
 	Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version
+	if [ -d $Backups_Dir ];then
+		rm -rf $Backups_Dir
+	fi
 	mkdir $Backups_Dir
 	cp $Home/AutoBuild.sh $Backups_Dir/AutoBuild.sh
 	cp $Home/README.md $Backups_Dir/README.md
