@@ -6,7 +6,7 @@
 	`sudo apt-get update`
 
 2.安装 AutoBuild 依赖
-	`sudo apt install git httping ntpdate subversion ssh openssh-server openssh-client`
+	`sudo apt install git httping ntpdate subversion openssh-client lm-sensors`
 
 3.克隆此项目到任意目录
 	`git clone https://github.com/Hyy2001X/AutoBuild.git AutoBuild`
