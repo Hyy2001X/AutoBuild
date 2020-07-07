@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.07
-Version=V3.4.7
+Version=V3.4.8
 
 Second_Menu() {
 while :
@@ -108,7 +108,7 @@ else
 		echo "3.$Branch_3"
 		echo "4.$Branch_4"
 		echo "q.返回"
-		echo ""
+		echo " "
 		read -p '请从上方选择一个分支:' Choose
 		case $Choose in
 		q)
@@ -146,7 +146,7 @@ else
 		echo "2.$Branch_2"
 		echo "3.$Branch_3"
 		echo "q.返回"
-		echo ""
+		echo " "
 		read -p '请从上方选择一个分支:' Choose
 		case $Choose in
 		q)
@@ -816,7 +816,7 @@ do
 	GitSource_Check
 	clear
 	Say="AutoBuild Core Script $Version" && Color_B
-	echo ""
+	echo " "
 	Say="1.Get Started!" && Color_Y
 	echo "2.网络测试"
 	echo "3.高级选项"
