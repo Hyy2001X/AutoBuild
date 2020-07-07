@@ -1,13 +1,13 @@
 # AutoBuild Script Module by Hyy2001
 
 function Systeminfo() {
-Update=2020.06.23
-Module_Version=V1.2
+Update=2020.07.07
+Module_Version=V1.3
 
 clear
 CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
-CPU_Freq=` awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
-Current_Freq=$( awk -F'[ :]' '/cpu MHz/ {print $4;exit}' /proc/cpuinfo )
+CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
+Current_Freq=`awk -F'[ :]' '/cpu MHz/ {print $4;exit}' /proc/cpuinfo`
 CPU_Cores=`cat /proc/cpuinfo| grep "processor"| wc -l`
 CPU_Physical_Cores=`cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l`
 CPU_Base=`uname -m`
