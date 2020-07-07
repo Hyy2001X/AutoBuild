@@ -2,8 +2,8 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.06
-Version=V3.4.5
+Update=2020.07.07
+Version=V3.4.6
 
 Second_Menu() {
 while :
@@ -707,13 +707,14 @@ if [ $? -eq 0 ];then
 	fi
 	Update_File=$Home/Log/Update_${Project}_`(date +%Y%m%d_%H:%M)`.log
 	git pull 2>&1 | tee $Update_File
-	./scripts/feeds update -a 2>&1 | tee -a $Update_File
-	./scripts/feeds install -a 2>&1 | tee -a $Update_File
 	if [ $Project == Lede ];then
 		cd $Home
 		cp ./Projects/$Project/feeds.conf.default ./Backups/feeds.conf.default
 		sed -i '11s/#src-git/src-git/g' ./Projects/$Project/feeds.conf.default
 	fi
+	cd $Home/Projects/$Project
+	./scripts/feeds update -a 2>&1 | tee -a $Update_File
+	./scripts/feeds install -a 2>&1 | tee -a $Update_File
 	echo " "
 	Updated_Check=$(cat $Update_File | grep -o error )
 	if [ "$Updated_Check" == "error" ]; then
