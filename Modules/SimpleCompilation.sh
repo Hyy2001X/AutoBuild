@@ -2,7 +2,7 @@
 
 SimpleCompilation() {
 Update=2020.07.07
-Module_Version=V1.4
+Module_Version=V1.4.1
 
 while :
 do
@@ -28,7 +28,7 @@ do
 		Say="Simple Compilation Script $Module_Version" && Color_B
 		CPU_TEMP=`sensors | grep 'Core 0' | cut -c17-24`
 		echo " "
-		Say="CPU信息:$CPU_MHz$CPU_Cores核心$CPU_Threads线程 $CPU_TEMP" && Color_Y
+		Say="CPU信息:$CPU_Freq $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP" && Color_Y
 		Decoration
 		echo " "
 		echo -e "设备名称:$Yellow$TARGET_PROFILE$White"
