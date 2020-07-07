@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 function ExtraThemes() {
-Update=2020.07.04
-Module_Version=V2.4.5
+Update=2020.07.07
+Module_Version=V2.4.6
 PKGHome=$Home/Projects/$Project/package
 
 ExtraThemes_info() {
@@ -91,14 +91,12 @@ do
 	1)
 		PKG_NAME=luci-theme-argon
 		if [ $Project == Lede ];then
-			if [ -f ./lean/luci-theme-argon ];then
-				rm -rf ./lean/luci-theme-argon
-			else
-				:
+			if [ -d ../lean/luci-theme-argon ];then
+				rm -rf ../lean/luci-theme-argon
 			fi
 			PKG_URL=" -b 18.06 https://github.com/jerrykuku/luci-theme-argon"
 			ExtraThemes_mod_git
-			mv $PKGHome/theme/luci-theme-argon $PKGHome/lean/$PKG_NAME
+			mv $PKGHome/theme/luci-theme-argon $PKGHome/lean/luci-theme-argon
 		else
 			PKG_URL="https://github.com/jerrykuku/luci-theme-argon"
 			ExtraThemes_mod_git
