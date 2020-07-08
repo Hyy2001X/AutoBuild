@@ -2,8 +2,8 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.08
-Version=V3.6
+Update=2020.07.09
+Version=V3.6.1
 
 Second_Menu() {
 while :
@@ -409,7 +409,7 @@ do
 			echo -ne "\r$Yellow正在备份[dl]库...$White\r"
 			cp -a $Home/Projects/$Project/dl $Home/Backups/
 			Say="备份成功![dl]库已备份到:'$Home/Backups/dl'" && Color_Y
-			Say="存储占用:$(du -csm $Home/Backups/dl | awk '{print $1}' | head -1)MB" && Color_B
+			Say="存储占用:$(du -sh $Home/Backups/dl | awk '{print $1}')B" && Color_B
 		fi
 		echo " "
 		Enter
@@ -423,7 +423,7 @@ do
 			echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 			cp -a $Home/Backups/dl $Home/Projects/$Project
 			Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_B
-			Say="存储占用:$(du -csm $Home/Projects/$Project/dl | awk '{print $1}' | head -1)MB" && Color_B
+			Say="存储占用:$(du -sh $Home/Projects/$Project/dl | awk '{print $1}')B" && Color_B
 		fi
 		echo " "
 		Enter
@@ -431,9 +431,9 @@ do
 	5)
 		echo " "
 		echo -ne "\r$Yellow正在备份[$Project]源代码...$White\r"
-		cp -a $Home/Projects/$Project $Home/Backups/Projects
+		sudo cp -a $Home/Projects/$Project $Home/Backups/Projects
 		Say="备份成功![$Project]源代码已备份到:'$Home/Backups/Projects/$Project'" && Color_Y
-		Say="存储占用:$(du -csm $Home/Backups/Projects/$Project | awk '{print $1}' | head -1)MB" && Color_B
+		Say="存储占用:$(du -sh $Home/Backups/Projects/$Project | awk '{print $1}')B" && Color_B
 		echo " "
 		Enter
 	;;
@@ -442,7 +442,7 @@ do
 		echo -ne "\r$Yellow正在恢复[$Project]源代码...$White\r"
 		sudo cp -a $Home/Backups/Projects/$Project $Home/Projects/
 		Say="恢复成功![$Project]源代码已恢复到:'$Home/Projects/$Project'" && Color_Y
-		Say="存储占用:$(du -csm $Home/Projects/$Project | awk '{print $1}' | head -1)MB" && Color_B
+		Say="存储占用:$(du -sh $Home/Projects/$Project | awk '{print $1}')B" && Color_B
 		echo " "
 		Enter
 	;;
