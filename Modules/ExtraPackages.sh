@@ -1,52 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
-function ExtraPackages() {
-Update=2020.06.16
-Module_Version=V3.0-BETA
-
-ExtraPackages_mod_git() {
-if [ -d ./$PKG_NAME ];then
-	rm -rf ./$PKG_NAME
-fi
-git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
-	Say="$PKG_NAME 添加成功!" && Color_Y
-	rm -rf ./$PKG_NAME/.git
-else
-	Say="$PKG_NAME 添加失败!" && Color_R
-fi
-sleep 2
-}
-
-ExtraPackages_mod_svn() {
-if [ -d ./$PKG_NAME ];then
-	rm -rf ./$PKG_NAME
-fi
-svn checkout $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
-	Say="$PKG_NAME 添加成功!" && Color_Y
-	rm -rf ./$PKG_NAME/.svn
-else
-	Say="$PKG_NAME 添加失败!" && Color_R
-fi
-sleep 2
-}
-
-ExtraPackages_Check1() {
-if [ -f ./$PKG_NAME/Makefile ];then
-	Package_Stat=$Yellow已检测到$Yellow
-else
-	Package_Stat=$Red未检测到$Yellow
-fi
-}
-
-ExtraPackages_Check2() {
-if [ -f ./$PKG_NAME/Makefile ] && [ -f ./luci-app-$PKG_NAME/Makefile ];then
-	Package_Stat=$Yellow已检测到$Yellow
-else
-	Package_Stat=$Red未检测到$Yellow
-fi
-}
+ExtraPackages() {
+Update=2020.07.08
+Module_Version=V4.0-BETA
 
 while :
 do
@@ -57,30 +13,14 @@ do
 	cd custom
 	clear
 	Say="Extra Packages Script $Module_Version by Hyy2001" && Color_B
-	Decoration
-	echo -e "$Skyb软件包			状态$Yellow"
-	PKG_NAME=smartdns
-	ExtraPackages_Check2
-	echo -e "1.SmartDNS		$Package_Stat"
-	PKG_NAME=adguardhome
-	ExtraPackages_Check2
-	if [ $Project == Lienol ];then
-		Package_Stat=$Yellow已检测到$Yellow
-	fi
-	echo -e "2.AdGuardHome		$Package_Stat"
-	PKG_NAME=luci-app-openclash
-	ExtraPackages_Check1
-	echo -e "3.$PKG_NAME	$Package_Stat"
-	PKG_NAME=luci-app-clash
-	ExtraPackages_Check1
-	echo -e "4.$PKG_NAME	$Package_Stat"
-	PKG_NAME=luci-app-passwall
-	ExtraPackages_Check1
-	echo -e "5.$PKG_NAME	$Package_Stat"
-	echo -e "${Blue}w.[软件库]Lienol$White"
+	echo " "
+	echo -e "1.SmartDNS"
+	echo -e "2.AdGuardHome"
+	echo -e "3.Openclash"
+	echo -e "4.Clash"
+	Say="w.[软件库]Lienol" && Color_B
 	echo " "
 	echo "q.返回"
-	Decoration
 	echo " "
 	read -p '请从上方选择一个软件包:' Choose
 	echo " "
@@ -91,7 +31,7 @@ do
 	1)
 		PKG_NAME=openwrt-smartdns
 		PKG_URL=https://github.com/pymumu/openwrt-smartdns
-		ExtraPackages_mod_git
+		ExtraPackages_git
 		mv ./openwrt-smartdns smartdns
 		PKG_NAME=luci-app-smartdns
 		if [ $Project == Lede ];then
@@ -99,46 +39,241 @@ do
 		else
 			PKG_URL="https://github.com/pymumu/luci-app-smartdns"
 		fi
-		ExtraPackages_mod_git
+		ExtraPackages_git
+		rm -rf ../../tmp
 	;;
 	2)
 		PKG_NAME=luci-app-adguardhome
 		PKG_URL=https://github.com/Lienol/openwrt/branches/dev-master/package/diy/luci-app-adguardhome
-		ExtraPackages_mod_svn
+		ExtraPackages_svn
 		PKG_NAME=adguardhome
 		PKG_URL=https://github.com/Lienol/openwrt/branches/dev-master/package/diy/adguardhome
-		ExtraPackages_mod_svn
+		ExtraPackages_svn
 	;;
 	3)
-		PKG_NAME=luci-app-openclash
-		PKG_URL=https://github.com/vernesong/OpenClash/branches/master/luci-app-openclash
-		ExtraPackages_mod_svn
+		SRC_NAME=Openclash
+		SRC_URL=https://github.com/vernesong/OpenClash;master
+		ExtraPackages_src-git
 	;;
 	4)
 		PKG_NAME=luci-app-clash
 		PKG_URL=https://github.com/frainzy1477/luci-app-clash
-		ExtraPackages_mod_git
-	;;
-	5)
-		PKG_NAME=luci-app-passwall
-		PKG_URL=https://github.com/Hyy2001X/luci-app-passwall
-		ExtraPackages_mod_git
+		ExtraPackages_git
 	;;
 	w)
-		cd $Home/Projects/$Project
-		grep "lienol" feeds.conf.default > /dev/null
-		if [ $? -ne 0 ]; then
-			clear
-			echo "src-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default
-			./scripts/feeds update lienol
-			./scripts/feeds install -a
-			echo " "
-			Enter
-		else
-			Say="无法重复添加[Lienol]软件库!" && Color_Y
-			sleep 2
-		fi
+		SRC_NAME=lienol
+		SRC_URL=https://github.com/Lienol/openwrt-package
+		ExtraPackages_src-git
 	;;
 	esac
 done
+}
+
+ExtraThemes() {
+Update=2020.07.07
+Module_Version=V2.5
+PKGHome=$Home/Projects/$Project/package
+
+while :
+do
+	cd $Home/Projects/$Project/package
+	if [ ! -d ./theme ];then
+		mkdir theme
+	fi
+	cd theme
+	clear
+	echo -e "${Blue}Extra Themes Script $Module_Version by Hyy2001${White}"
+	echo -e "$Skyb"
+	echo "1.luci-theme-argon"
+	echo "2.luci-theme-argon-mc"
+	echo "3.luci-theme-argon-dark-mod"
+	echo "4.luci-theme-argon-light-mod"
+	echo "5.luci-theme-bootstrap-mod"
+	echo "6.luci-theme-rosy"
+	echo "7.luci-theme-atmaterial"
+	echo "8.luci-theme-darkmatter"
+	echo "9.luci-theme-opentomcat"
+	echo "10.luci-theme-opentomato"
+	echo "11.luci-theme-Butterfly"
+	echo "12.luci-theme-Butterfly-dark"
+	echo "13.luci-theme-netgearv2"
+	echo -e "${White}"
+	echo "x.关于主题"
+	echo "q.返回"
+	echo " "
+	read -p '请从上方选择一个主题包:' Choose
+	echo " "
+	case $Choose in
+	q)
+		break
+	;;
+	x)
+		ExtraThemes_info
+	;;
+	1)
+		PKG_NAME=luci-theme-argon
+		if [ $Project == Lede ];then
+			if [ -d ../lean/luci-theme-argon ];then
+				rm -rf ../lean/luci-theme-argon
+			fi
+			PKG_URL=" -b 18.06 https://github.com/jerrykuku/luci-theme-argon"
+			ExtraThemes_git
+			mv $PKGHome/theme/luci-theme-argon $PKGHome/lean/luci-theme-argon
+		else
+			PKG_URL="https://github.com/jerrykuku/luci-theme-argon"
+			ExtraThemes_git
+		fi
+	;;
+	2)
+		PKG_NAME=luci-theme-argon-mc
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/$PKG_NAME
+		ExtraThemes_svn
+	;;
+	3)
+		PKG_NAME=luci-theme-argon-dark-mod
+		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/$PKG_NAME
+		ExtraThemes_svn
+	;;
+	4)
+		PKG_NAME=luci-theme-argon-light-mod
+		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/$PKG_NAME
+		ExtraThemes_svn
+	;;
+	5)
+		PKG_NAME=luci-theme-bootstrap-mod
+		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/$PKG_NAME
+		ExtraThemes_svn
+	;;
+	6)
+		PKG_NAME=luci-theme-rosy
+		PKG_URL=https://github.com/rosywrt/$PKG_NAME/trunk/
+		ExtraThemes_svn
+	;;
+	7)
+		PKG_NAME=luci-theme-atmaterial
+		PKG_URL=https://github.com/openwrt-develop/$PKG_NAME
+		ExtraThemes_git
+	;;
+	8)
+		PKG_NAME=luci-theme-darkmatter
+		PKG_URL=https://github.com/Lienol/$PKG_NAME/trunk/
+		ExtraThemes_svn
+	;;
+	9)
+		PKG_NAME=luci-theme-opentomcat
+		PKG_URL=https://github.com/Leo-Jo-My/$PKG_NAME
+		ExtraThemes_git
+	;;
+	10)
+		PKG_NAME=luci-theme-opentomato
+		PKG_URL=https://github.com/Leo-Jo-My/$PKG_NAME
+		ExtraThemes_git
+	;;
+	11)
+		PKG_NAME=luci-theme-Butterfly
+		PKG_URL=https://github.com/Leo-Jo-My/$PKG_NAME
+		ExtraThemes_git
+	;;
+	12)
+		PKG_NAME=luci-theme-Butterfly-dark
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/$PKG_NAME
+		ExtraThemes_svn
+	;;
+	13)
+		PKG_NAME=luci-theme-netgearv2
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/$PKG_NAME
+		ExtraThemes_svn
+	;;
+	esac
+done
+}
+
+ExtraPackages_git() {
+if [ -d ./$PKG_NAME ];then
+	rm -rf ./$PKG_NAME
+fi
+git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
+if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
+	Say="已添加软件包 $PKG_NAME" && Color_Y
+	rm -rf ./$PKG_NAME/.git
+else
+	Say="未添加软件包 $PKG_NAME" && Color_R
+fi
+sleep 2
+}
+
+ExtraPackages_svn() {
+if [ -d ./$PKG_NAME ];then
+	rm -rf ./$PKG_NAME
+fi
+svn checkout $PKG_URL $PKG_NAME > /dev/null 2>&1
+if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
+	Say="已添加软件包 $PKG_NAME" && Color_Y
+	rm -rf ./$PKG_NAME/.svn
+else
+	Say="未添加软件包 $PKG_NAME" && Color_R
+fi
+sleep 2
+}
+
+ExtraPackages_src-git() {
+cd $Home/Projects/$Project
+grep "$SRC_NAME" feeds.conf.default > /dev/null
+if [ $? -ne 0 ]; then
+	clear
+	echo "src-git $SRC_NAME $SRC_URL" >> feeds.conf.default
+	./scripts/feeds update $SRC_NAME
+	./scripts/feeds install -a
+	echo " "
+	Enter
+else
+	Say="添加失败,无法重复添加!" && Color_Y
+	sleep 2
+fi
+}
+
+ExtraThemes_git() {
+if [ -d ./$PKG_NAME ];then
+	rm -rf ./$PKG_NAME
+fi
+git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
+if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
+	Say="已添加主题包 $PKG_NAME" && Color_Y
+else
+	Say="未添加主题包 $PKG_NAME" && Color_R
+fi
+sleep 3
+}
+
+ExtraThemes_svn() {
+if [ -d ./$PKG_NAME ];then
+	rm -rf ./$PKG_NAME
+fi
+svn checkout $PKG_URL $PKG_NAME > /dev/null 2>&1
+if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
+	Say="已添加主题包 $PKG_NAME" && Color_Y
+	rm -rf ./$PKG_NAME/.svn
+else
+	Say="未添加主题包 $PKG_NAME" && Color_R
+fi
+sleep 2
+}
+
+ExtraThemes_info() {
+clear
+echo -e "${Blue}Extra Themes Script $Module_Version by Hyy2001${White}"
+Decoration
+echo -e "${Skyb}主题源码来自以下作者:$Yellow"
+echo " "
+echo "https://github.com/jerrykuku"
+echo "https://github.com/project-openwrt"
+echo "https://github.com/Lienol"
+echo "https://github.com/openwrt-develop"
+echo "https://github.com/Leo-Jo-My"
+echo -e "https://github.com/rosywrt$White"
+echo " "
+echo -e "${Skyb}感谢以上作者的贡献!"
+Decoration
+echo " "
+Enter
 }
