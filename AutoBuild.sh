@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.08
-Version=V3.4.9
+Version=V3.5.0
 
 Second_Menu() {
 while :
@@ -487,7 +487,7 @@ do
 		while [ $Update_Times -le 3 ];
 		do
 			clear
-			echo -ne "\r准备进行第$Update_Times次安装...\r"
+			echo -ne "\r开始第$Update_Times次安装...\r"
 			sleep 2
 			sudo apt-get -y install $Dependency
 			sudo apt-get -y install $Extra_Dependency
@@ -733,9 +733,9 @@ read -p "按下[回车]键以继续..." Key
 }
 
 Decoration() {
-	echo -ne "$Skyb"
-	printf "%-70s\n" "-" | sed 's/\s/-/g'
-	echo -ne "$White"
+echo -ne "$Skyb"
+printf "%-70s\n" "-" | sed 's/\s/-/g'
+echo -ne "$White"
 }
 
 Sources_Download_Check() {
@@ -808,10 +808,10 @@ do
 	clear
 	Say="AutoBuild Core Script $Version" && Color_B
 	echo " "
-	Say="1.Get Started!" && Color_Y
+	Say="1.Get Started!" && Color_G
 	echo "2.网络测试"
 	echo "3.高级选项"
-	echo -e "4.脚本设置"
+	echo "4.脚本设置"
 	echo "q.退出"
 	GET_Choose
 	case $Choose in
@@ -830,14 +830,14 @@ do
 		Say="项目名称		[项目状态]	作者/维护者" && Color_G
 		echo " "
 		if [ -f ./Projects/Lede/Makefile ];then
-			echo -e "${White}1.Lede			$Yellow[已检测到]$Blue	Lean[coolsnowwolf]"
+			echo -e "${White}1.Lede			$Yellow[已检测到]$Blue	coolsnowwolf"
 		else
-			echo -e "${White}1.Lede			$Red[未检测到]$Blue	Lean[coolsnowwolfLean]"
+			echo -e "${White}1.Lede			$Red[未检测到]$Blue	coolsnowwolf"
 		fi
 		if [ -f ./Projects/Openwrt/Makefile ];then
-			echo -e "${White}2.Openwrt_Offical	$Yellow[已检测到]$Blue	Openwrt官方团队"
+			echo -e "${White}2.Openwrt		$Yellow[已检测到]$Blue	Openwrt_Team"
 		else
-			echo -e "${White}2.Openwrt_Offical	$Red[未检测到]$Blue	Openwrt官方团队"
+			echo -e "${White}2.Openwrt		$Red[未检测到]$Blue	Openwrt_Team"
 		fi
 		if [ -f ./Projects/Lienol/Makefile ];then
 			echo -e "${White}3.Lienol		$Yellow[已检测到]$Blue	Lienol"
