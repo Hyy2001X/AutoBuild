@@ -1,24 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
-function ReplaceSourcesList() {
-Update=2020.04.28
-Module_Version=V1.2
-
-ReplaceSources_mod() {
-if [ -f /etc/apt/sources.list ];then
-	if [ ! -f $Home/Backups/sources.list.bak ];then
-		sudo cp /etc/apt/sources.list $Home/Backups/sources.list.bak
-		sudo chmod 777 $Home/Backups/sources.list.bak
-	else
-		:
-	fi
-else
-	:
-fi
-sudo cp $Home/Additional/$Sources_File /etc/apt/sources.list
-echo " "
-Say="已切换到$Sources_Name." && Color_Y
-}
+ReplaceSourcesList() {
+Update=2020.07.08
+Module_Version=V1.3
 
 if [ -f /etc/lsb-release ];then
 	OS_ID=`awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release`
@@ -28,7 +12,7 @@ if [ -f /etc/lsb-release ];then
 		while :
 		do
 			clear
-			echo -e "$Skyb操作系统$Yellow:$OS_ID $OS_Version$White"
+			echo -e "$Skyb当前操作系统$Yellow:$OS_ID $OS_Version$White"
 			echo " "
 			echo "1.阿里源"
 			echo "2.清华源"
@@ -61,22 +45,33 @@ if [ -f /etc/lsb-release ];then
 				Say="恢复成功!" && Color_Y
 			;;
 			esac
-			sleep 3
+			sleep 2
 		done
 		else
 			echo " "
-			Say="当前仅支持:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04" && Color_R
-			sleep 3
+			Say="当前支持的操作系统:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04" && Color_R
+			sleep 2
 		fi
 	else
-	echo " "
-	echo -e "$Red暂不支持您的操作系统!$White"
-	sleep 3
+		echo " "
+		Say="暂不支持此操作系统!" && Color_R
+		sleep 2
 	fi
 else
-echo " "
-echo -e "$Red暂不支持您的操作系统!$White"
-sleep 3
+	echo " "
+	Say="暂不支持此操作系统!" && Color_R
+	sleep 2
 fi
+}
 
+ReplaceSources_mod() {
+if [ -f /etc/apt/sources.list ];then
+	if [ ! -f $Home/Backups/sources.list.bak ];then
+		sudo cp /etc/apt/sources.list $Home/Backups/sources.list.bak
+		sudo chmod 777 $Home/Backups/sources.list.bak
+	fi
+fi
+sudo cp $Home/Additional/$Sources_File /etc/apt/sources.list
+echo " "
+Say="已切换到$Sources_Name." && Color_Y
 }
