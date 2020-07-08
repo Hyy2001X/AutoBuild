@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.08
-Version=V3.5.1
+Version=V3.6
 
 Second_Menu() {
 while :
@@ -313,10 +313,12 @@ do
 	clear
 	Say="备份与恢复" && Color_B
 	echo " "
-	Say="1.备份[.config]" && Color_G
-	Say="2.恢复[.config]" && Color_G
-	Say="3.备份[dl]库" && Color_G
-	Say="4.恢复[dl]库" && Color_G
+	Say="1.备份[.config]" && Color_Y
+	Say="2.恢复[.config]" && Color_Y
+	Say="3.备份[dl]库" && Color_B
+	Say="4.恢复[dl]库" && Color_B
+	Say="5.备份[$Project]源代码" && Color_G
+	Say="5.恢复[$Project]源代码" && Color_G
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -380,9 +382,7 @@ do
 		echo " "
 		read -p '请从上方选出你想要恢复的配置文件[q.返回]:' Recover_Config
 		echo " "
-		if [ ! $Recover_Config == q ];then
-			:
-		else
+		if [ $Recover_Config == q ];then
 			break
 		fi
 		if [ -f $Recover_Config ];then
@@ -409,10 +409,7 @@ do
 			echo -ne "\r$Yellow正在备份[dl]库...$White\r"
 			cp -a $Home/Projects/$Project/dl $Home/Backups/
 			Say="备份成功![dl]库已备份到:'$Home/Backups/dl'" && Color_Y
-			cd $Home/Backups
-			dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
-			dl_Size_MB=`awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'`
-			Say="$dl_Size_MB" && Color_Y
+			Say="存储占用:$(du -csm $Home/Backups/dl | awk '{print $1}' | head -1)MB" && Color_B
 		fi
 		echo " "
 		Enter
@@ -426,11 +423,26 @@ do
 			echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 			cp -a $Home/Backups/dl $Home/Projects/$Project
 			Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_B
-			cd $Home/Projects/$Project
-			dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
-			dl_Size_MB=`awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'`
-			Say="$dl_Size_MB" && Color_B
+			Say="存储占用:$(du -csm $Home/Projects/$Project/dl | awk '{print $1}' | head -1)MB" && Color_B
 		fi
+		echo " "
+		Enter
+	;;
+	5)
+		echo " "
+		echo -ne "\r$Yellow正在备份[$Project]源代码...$White\r"
+		cp -a $Home/Projects/$Project $Home/Backups/Projects
+		Say="备份成功![$Project]源代码已备份到:'$Home/Backups/Projects/$Project'" && Color_Y
+		Say="存储占用:$(du -csm $Home/Backups/Projects/$Project | awk '{print $1}' | head -1)MB" && Color_B
+		echo " "
+		Enter
+	;;
+	6)
+		echo " "
+		echo -ne "\r$Yellow正在恢复[$Project]源代码...$White\r"
+		sudo cp -a $Home/Backups/Projects/$Project $Home/Projects/
+		Say="恢复成功![$Project]源代码已恢复到:'$Home/Projects/$Project'" && Color_Y
+		Say="存储占用:$(du -csm $Home/Projects/$Project | awk '{print $1}' | head -1)MB" && Color_B
 		echo " "
 		Enter
 	;;
