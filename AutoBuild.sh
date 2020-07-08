@@ -2,8 +2,8 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.07
-Version=V3.4.8
+Update=2020.07.08
+Version=V3.4.9
 
 Second_Menu() {
 while :
@@ -176,11 +176,11 @@ do
 	clear
 	Say="高级选项" && Color_B
 	echo " "
-	echo "1.从$GitSource_Stat拉取源代码"
+	echo "1.从$GitSource_Stat下载源代码"
 	echo "2.强制更新源代码和Feeds"
-	echo "3.添加主题"
+	echo "3.添加第三方主题"
 	echo "4.添加软件包"
-	echo "5.磁盘清理"
+	echo "5.空间清理"
 	echo "6.删除配置文件"
 	echo "7.下载[dl]库"
 	echo " "
@@ -217,15 +217,15 @@ do
 	while :
 	do
 		clear
-		Say="磁盘清理" && Color_B
+		Say="空间清理" && Color_B
 		echo " "
 		echo "1.make clean"
 		echo "2.make dirclean"
 		echo "3.make distclean"
 		Say="4.删除[$Project]项目" && Color_R
-		echo "5.删除[临时文件/编译缓存]"
-		echo "6.删除[更新日志]"
-		echo "7.删除[编译日志]"
+		echo "5.清理[临时文件/编译缓存]"
+		echo "6.清理[更新日志]"
+		echo "7.清理[编译日志]"
 		echo "q.返回"
 		GET_Choose
 		cd $Home/Projects/$Project
@@ -251,33 +251,33 @@ do
 		4)
 			cd $Home/Projects
 			echo " "
-			Say="正在删除项目,请耐心等待..." && Color_B
+			Say="正在删除,请耐心等待..." && Color_B
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
-				Say="[$Project] 删除成功!" && Color_Y
+				Say="删除成功!" && Color_Y
 			else 
-				Say="[$Project] 删除失败!" && Color_R
+				Say="删除失败!" && Color_R
 			fi
-			sleep 3
+			sleep 2
 			break
 		;;
 		5)
 			echo " "
 			rm -rf $Home/Projects/$Project/tmp
-			Say="$Yellow[临时文件/编译缓存] 删除成功!" && Color_Y
+			Say="$Yellow[临时文件/编译缓存]删除成功!" && Color_Y
 			sleep 2
 		;;
 		6)
 			echo " "
 			rm -f $Home/Log/Update_${Project}_*
-			Say="$Yellow[源码更新日志] 删除成功!" && Color_Y
+			Say="$Yellow[更新日志]删除成功!" && Color_Y
 			sleep 2
 		;;
 		7)
 			echo " "
 			rm -f $Home/Log/Compile_${Project}_*
-			Say="$Yellow[编译日志] 删除成功!" && Color_Y
+			Say="$Yellow[编译日志]删除成功!" && Color_Y
 			sleep 2
 		;;
 		esac
@@ -295,7 +295,6 @@ do
 		timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 		if [ $? -eq 0 ];then
 			clear
-			Say="开始下载[dl]库,线程数:$CPU_Threads" && Color_Y
 			make -j$CPU_Threads download V=s
 			echo " "
 			Enter
@@ -311,131 +310,131 @@ done
 Backup_Recovery() {
 while :
 do
-clear
-Say="备份与恢复" && Color_B
-echo " "
-Say="1.备份[.config]" && Color_Y
-Say="2.恢复[.config]" && Color_B
-Say="3.备份[dl]库" && Color_Y
-Say="4.恢复[dl]库" && Color_B
-echo "q.返回"
-GET_Choose
-case $Choose in
-q)
-	break
-;;
-1)
-while :
-do
-	cd $Home
 	clear
-	Say="备份[.config]" && Color_Y && echo " "
-	if [ $Project == Lede ];then
-		echo -e "1.标准名称/$Yellow文件格式:[$Project-版本号-日期_时间]$White"
-	else
-		echo "1.标准名称文件格式:[$Project-日期_时间]"
-	fi
-	echo "2.自定义名称"
+	Say="备份与恢复" && Color_B
+	echo " "
+	Say="1.备份[.config]" && Color_G
+	Say="2.恢复[.config]" && Color_G
+	Say="3.备份[dl]库" && Color_G
+	Say="4.恢复[dl]库" && Color_G
 	echo "q.返回"
 	GET_Choose
-	echo " "
 	case $Choose in
 	q)
 		break
 	;;
 	1)
+	while :
+	do
+		cd $Home
+		clear
+		Say="备份[.config]" && Color_Y && echo " "
 		if [ $Project == Lede ];then
-			Backup_Name=$Project-$Lede_Version-`(date +%m%d_%H:%M)`
+			echo -e "1.标准名称/$Yellow文件格式:[$Project-版本号-日期_时间]$White"
 		else
-			Backup_Name=$Project-`(date +%m%d_%H:%M)`
-		fi	
-		if [ -f ./Projects/$Project/.config ];then
-			cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Name
-			Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Name'" && Color_Y
-		else
-			Say="备份失败!" && Color_R
+			echo "1.标准名称文件格式:[$Project-日期_时间]"
 		fi
+		echo "2.自定义名称"
+		echo "q.返回"
+		GET_Choose
+		echo " "
+		case $Choose in
+		q)
+			break
+		;;
+		1)
+			if [ $Project == Lede ];then
+				Backup_Config=$Project-$Lede_Version-`(date +%m%d_%H:%M)`
+			else
+				Backup_Config=$Project-`(date +%m%d_%H:%M)`
+			fi	
+			if [ -f ./Projects/$Project/.config ];then
+				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
+				Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Config'" && Color_Y
+			else
+				Say="备份失败!" && Color_R
+			fi
+		;;
+		2)
+			read -p '请输入自定义名称:' Backup_Config
+			echo " "
+			if [ -f ./Projects/$Project/.config ];then
+				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
+				Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Config'" && Color_Y
+			else
+				Say="备份失败!" && Color_R
+			fi
+		;;	
+		esac
+		sleep 2
+	done
 	;;
 	2)
-		read -p '请输入自定义名称:' Backup_Name
+	while :
+	do
+		clear
+		Say="恢复[.config]" && Color_B && echo " "
+		cd $Home/Backups/Configs
+		echo -n "备份文件"
+		ls -lh -u -o
 		echo " "
-		if [ -f ./Projects/$Project/.config ];then
-			cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Name
-			Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Name'" && Color_Y
+		read -p '请从上方选出你想要恢复的配置文件[q.返回]:' Recover_Config
+		echo " "
+		if [ ! $Recover_Config == q ];then
+			:
 		else
-			Say="备份失败!" && Color_R
+			break
 		fi
-	;;	
+		if [ -f $Recover_Config ];then
+			Recover_PATH=$Home/Projects/$Project/.config
+			if [ -f $Recover_PATH ];then
+				rm $Recover_PATH
+			fi
+			cp $Recover_Config $Recover_PATH
+			Say="[$Recover_Config]恢复成功!" && Color_Y
+			sleep 2
+			break
+		else
+			Say="未找到[$Recover_Config],恢复失败!" && Color_R
+			sleep 2
+		fi
+	done
+	;;
+	3)
+		echo " "
+		cd $Home/Projects
+		if [ ! -d ./$Project/dl ];then
+			Say="未找到'$Home/Projects/$Project/dl',备份失败!" && Color_R
+		else
+			echo -ne "\r$Yellow正在备份[dl]库...$White\r"
+			cp -a $Home/Projects/$Project/dl $Home/Backups/
+			Say="备份成功![dl]库已备份到:'$Home/Backups/dl'" && Color_Y
+			cd $Home/Backups
+			dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
+			dl_Size_MB=`awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'`
+			Say="$dl_Size_MB" && Color_Y
+		fi
+		echo " "
+		Enter
+	;;
+	4)
+		echo " "
+		cd $Home
+		if [ ! -d ./Backups/dl ];then
+			Say="未找到'$Home/Backups/dl',恢复失败!" && Color_R
+		else
+			echo -ne "\r$Blue正在恢复[dl]库...$White\r"
+			cp -a $Home/Backups/dl $Home/Projects/$Project
+			Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_B
+			cd $Home/Projects/$Project
+			dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
+			dl_Size_MB=`awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'`
+			Say="$dl_Size_MB" && Color_B
+		fi
+		echo " "
+		Enter
+	;;
 	esac
-	sleep 2
-done
-;;
-2)
-while :
-do
-	clear
-	Say="恢复[.config]" && Color_B && echo " "
-	cd $Home/Backups/Configs
-	echo -n "备份文件"
-	ls -lh -u -o
-	echo " "
-	read -p '请从上方选出你想要恢复的配置文件[q.返回]:' Recover_NAME
-	echo " "
-	if [ ! $Recover_NAME == q ];then
-		:
-	else
-		break
-	fi
-	if [ -f $Recover_NAME ];then
-		Recover_PATH=$Home/Projects/$Project/.config
-		if [ -f $Recover_PATH ];then
-			rm $Recover_PATH
-		fi
-		cp $Recover_NAME $Recover_PATH
-		Say="[$Recover_NAME]恢复成功!" && Color_Y
-		sleep 2
-		break
-	else
-		Say="未找到[$Recover_NAME],请检查输入是否正确!" && Color_R
-		sleep 2
-	fi
-done
-;;
-3)
-	echo " "
-	cd $Home/Projects
-	if [ ! -d ./$Project/dl ];then
-		Say="未找到'$Home/Projects/$Project/dl',备份失败!" && Color_R
-	else
-		echo -ne "\r$Yellow正在备份[dl]库...$White\r"
-		cp -a $Home/Projects/$Project/dl $Home/Backups/
-		Say="备份成功![dl]库已备份到:'$Home/Backups/dl'" && Color_Y
-		cd $Home/Backups
-		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
-		dl_Size_MB=`awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'`
-		Say="$dl_Size_MB" && Color_Y
-	fi
-	echo " "
-	Enter
-;;
-4)
-	echo " "
-	cd $Home
-	if [ ! -d ./Backups/dl ];then
-		Say="未找到'$Home/Backups/dl',恢复失败!" && Color_R
-	else
-		echo -ne "\r$Blue正在恢复[dl]库...$White\r"
-		cp -a $Home/Backups/dl $Home/Projects/$Project
-		Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_B
-		cd $Home/Projects/$Project
-		dl_Size=$((`du --max-depth=1 dl |awk '{print $1}'`))
-		dl_Size_MB=`awk 'BEGIN{printf "存储占用:%.2fMB\n",'$((dl_Size))'/1000}'`
-		Say="$dl_Size_MB" && Color_B
-	fi
-	echo " "
-	Enter
-;;
-esac
 done
 }
 
@@ -554,7 +553,7 @@ do
 					rm $Home/Configs/SSH
 					Say="删除成功!" && Color_Y
 				else
-					Say="未检测到配置文件,无法删除!" && Color_R
+					Say="删除失败!" && Color_R
 				fi
 				sleep 2
 			;;
@@ -568,10 +567,9 @@ do
 	;;
 	4)
 		echo " "
-		echo -ne "\r$Yellow正在同步网络时间...$White\r"
 		sudo ntpdate ntp1.aliyun.com
 		sudo hwclock --systohc
-		Say="同步完成!" && Color_Y
+		Say="时间同步完成!" && Color_Y
 		sleep 2
 	;;
 	5)
@@ -587,7 +585,7 @@ do
 			echo " "
 			Say="创建成功!在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
 		else
-			Say="无法创建快捷启动!" && Color_R
+			Say="创建失败!" && Color_R
 		fi
 		sleep 3
 	;;
@@ -677,11 +675,11 @@ if [ $? -eq 0 ];then
 		chmod +x -R $Home/AutoBuild.sh
 		chmod +x -R $Home/Modules
 		rm -rf TEMP
-		Say="AutoBuild Script更新成功!" && Color_Y
+		Say="更新成功!" && Color_Y
 		sleep 2
 		./AutoBuild.sh
 	else
-		Say="AutoBuild  Script更新失败!" && Color_R
+		Say="更新失败!" && Color_R
 		sleep 2
 	fi
 else
@@ -705,22 +703,16 @@ if [ $? -eq 0 ];then
 		git fetch --all
 		git reset --hard origin/$Branch
 	fi
-	Update_File=$Home/Log/Update_${Project}_`(date +%Y%m%d_%H:%M)`.log
-	git pull 2>&1 | tee $Update_File
-	if [ $Project == Lede ];then
-		cd $Home
-		cp ./Projects/$Project/feeds.conf.default ./Backups/feeds.conf.default
-		sed -i '11s/#src-git/src-git/g' ./Projects/$Project/feeds.conf.default
-	fi
-	cd $Home/Projects/$Project
-	./scripts/feeds update -a 2>&1 | tee -a $Update_File
-	./scripts/feeds install -a 2>&1 | tee -a $Update_File
+	Update_Logfile=$Home/Log/Update_${Project}_`(date +%Y%m%d_%H:%M)`.log
+	git pull 2>&1 | tee $Update_Logfile
+	./scripts/feeds update -a 2>&1 | tee -a $Update_Logfile
+	./scripts/feeds install -a 2>&1 | tee -a $Update_Logfile
 	echo " "
-	Updated_Check=$(cat $Update_File | grep -o error )
+	Updated_Check=$(cat $Update_Logfile | grep -o error )
 	if [ "$Updated_Check" == "error" ]; then
-		Say="源代码和Feeds更新失败!" && Color_R
+		Say="更新失败!" && Color_R
 	else
-		Say="源代码和Feeds更新成功!" && Color_Y
+		Say="更新成功!" && Color_Y
 	fi
 	echo " "
 	Enter
@@ -752,11 +744,10 @@ cd $Home/Projects/$Project
 if [ -f ./Makefile ];then
 	if [ $Project == Lede ];then
 		cp ./feeds.conf.default $Home/Backups/feeds.conf.default
-		sed -i '11s/#src-git/src-git/g' feeds.conf.default
 	fi
-	Say="$Project源码下载成功!" && Color_Y
+	Say="下载成功!" && Color_Y
 else
-	Say="$Project源码下载失败!" && Color_R
+	Say="下载失败!" && Color_R
 fi
 echo " "
 Enter
@@ -907,9 +898,11 @@ done
 }
 
 Home=$(cd $(dirname $0); pwd)
+set -u
 
 Dependency="build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget swig"
 Extra_Dependency="ntpdate httping openssh-client lm-sensors"
+
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
@@ -920,6 +913,5 @@ do
 	source $Module
 done
 
-set -u
 Default_Settings
 AutoBuild_Core
