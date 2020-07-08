@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.08
-Version=V3.5.0
+Version=V3.5.1
 
 Second_Menu() {
 while :
@@ -691,12 +691,6 @@ fi
 Sources_Update() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	if [ $Project == Lede ];then
-		cd $Home
-		if [ -f ./Backups/feeds.conf.default ];then
-			mv ./Backups/feeds.conf.default ./Projects/$Project/feeds.conf.default
-		fi
-	fi
 	clear
 	cd $Home/Projects/$Project
 	if [ $Enforce_Update == 1 ];then
@@ -742,9 +736,7 @@ Sources_Download_Check() {
 echo " "
 cd $Home/Projects/$Project
 if [ -f ./Makefile ];then
-	if [ $Project == Lede ];then
-		cp ./feeds.conf.default $Home/Backups/feeds.conf.default
-	fi
+	cp ./feeds.conf.default $Home/Backups/$Project.feeds.conf.default
 	Say="下载成功!" && Color_Y
 else
 	Say="下载失败!" && Color_R
