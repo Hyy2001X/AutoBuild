@@ -1,15 +1,15 @@
 # AutoBuild Script Module by Hyy2001
 
 function Systeminfo() {
-Update=2020.07.07
-Module_Version=V1.3
+Update=2020.07.08
+Module_Version=V1.4
 
 clear
 CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
 CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
 Current_Freq=`awk -F'[ :]' '/cpu MHz/ {print $4;exit}' /proc/cpuinfo`
-CPU_Cores=`cat /proc/cpuinfo| grep "processor"| wc -l`
-CPU_Physical_Cores=`cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l`
+Current_Temp=`sensors | grep 'Core 0' | cut -c17-24`
+CPU_Cores=`cat /proc/cpuinfo | grep "processor"| wc -l`
 CPU_Base=`uname -m`
 System_Bit=`getconf LONG_BIT`
 Kernel_Version=`uname -r`
@@ -38,9 +38,9 @@ echo -e "$Skyb物理内存$Yellow		${MemTotal_GB}GB/${MemTotal_MB}MB"
 echo -e "${Skyb}CPU 型号$Yellow		$CPU_Model"
 echo -e "${Skyb}CPU 频率$Yellow		$CPU_Freq"
 echo -e "${Skyb}CPU 架构$Yellow		$CPU_Base ($System_Bit Bit)"
-echo -e "$Skyb物理CPU数量$Yellow		$CPU_Physical_Cores"
-echo -e "$Skyb逻辑CPU数量$Yellow		$CPU_Cores"
-echo -e "$Skyb当前CPU频率$Yellow		${Current_Freq}MHz"
+echo -e "${Skyb}CPU 核心数量$Yellow		$CPU_Cores"
+echo -e "${Skyb}CPU 当前频率$Yellow		${Current_Freq}MHz"
+echo -e "${Skyb}CPU 当前温度$Yellow		${Current_Temp}"
 echo -e "${Skyb}IP地址$Yellow			$IP_Address"
 echo -e "$Skyb开机时长$Yellow		$Computer_Startup"
 Decoration
