@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.09
-Version=V3.6.1
+Version=V3.6.2
 
 Second_Menu() {
 while :
@@ -759,36 +759,12 @@ Enter
 
 Dir_Check() {
 cd $Home
-if [ ! -d ./Projects ];then
-	mkdir Projects
-fi
-if [ ! -d ./TEMP ];then
-	mkdir TEMP
-fi
-if [ ! -d ./Packages ];then
-	mkdir Packages
-fi
-if [ ! -d ./Packages/Details ];then
-	mkdir Packages/Details
-fi
-if [ ! -d ./Backups ];then
-	mkdir Backups
-fi
-if [ ! -d ./Backups/Projects ];then
-	mkdir Backups/Projects
-fi
-if [ ! -d ./Backups/OldVersion ];then
-	mkdir Backups/OldVersion
-fi
-if [ ! -d ./Backups/Configs ];then
-	mkdir Backups/Configs
-fi
-if [ ! -d ./Configs ];then
-	mkdir Configs
-fi
-if [ ! -d ./Log ];then
-	mkdir Log
-fi
+for WD in `cat  ./Additional/Working_Directory`
+do
+	if [ ! -d ./$WD ];then
+		mkdir $WD
+	fi
+done
 }
 
 Second_Menu_Check() {
