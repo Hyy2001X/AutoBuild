@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.07.04
-Module_Version=V1.3.5
+Update=2020.07.09
+Module_Version=V1.3.6
 
 while :
 do
@@ -10,33 +10,28 @@ do
 	clear
 	Say="脚本设置[实验性]" && Color_B
 	echo " "
-	if [ $GitSource == 0 ];then
-		Say="1.源码下载源		[Github]" && Color_Y
-	else
-		Say="1.源码下载源		[Gitee]" && Color_B
-	fi
 	if [ $SimpleCompilation == 0 ];then
-		Say="2.高级编译		[关闭]" && Color_R
+		Say="1.高级编译		[关闭]" && Color_R
 	else
-		Say="2.高级编译		[打开]" && Color_Y
+		Say="1.高级编译		[打开]" && Color_Y
 	fi
 	if [ $ColorfulUI == 0 ];then
-		Say="3.高亮显示		[关闭]" && Color_R
+		Say="2.高亮显示		[关闭]" && Color_R
 	else
-		Say="3.高亮显示		[打开]" && Color_Y
+		Say="2.高亮显示		[打开]" && Color_Y
 	fi
 	if [ $DeveloperMode == 0 ];then
-		Say="4.调试模式		[关闭]" && Color_R
+		Say="3.调试模式		[关闭]" && Color_R
 	else
-		Say="4.调试模式		[打开]" && Color_Y
+		Say="3.调试模式		[打开]" && Color_Y
 	fi
 	if [ $SaveCompileLog == 0 ];then
-		Say="5.自动保存编译日志	[关闭]" && Color_R
+		Say="4.自动保存编译日志	[关闭]" && Color_R
 	else
-		Say="5.自动保存编译日志	[打开]" && Color_Y
+		Say="4.自动保存编译日志	[打开]" && Color_Y
 	fi
 	if [ $CustomSources == 0 ];then
-		Say="6.自定义源码		[关闭]" && Color_R
+		Say="5.自定义源码		[关闭]" && Color_R
 	else
 		Say="6.自定义源码		[打开]" && Color_Y
 	fi
@@ -51,42 +46,35 @@ do
 	x)
 		Default_Settings
 	;;
-	4)
-		if [ $DeveloperMode == 0 ];then
-			DeveloperMode=1
-		else
-			DeveloperMode=0
-		fi
-	;;
-	2)
+	1)
 		if [ $SimpleCompilation == 0 ];then
 			SimpleCompilation=1
 		else
 			SimpleCompilation=0
 		fi
 	;;
-	3)
+	2)
 		if [ $ColorfulUI == 0 ];then
 			ColorfulUI=1
 		else
 			ColorfulUI=0
 		fi
 	;;
-	1)
-		if [ $GitSource == 0 ];then
-			GitSource=1
+	3)
+		if [ $DeveloperMode == 0 ];then
+			DeveloperMode=1
 		else
-			GitSource=0
+			DeveloperMode=0
 		fi
 	;;
-	5)
+	4)
 		if [ $SaveCompileLog == 0 ];then
 			SaveCompileLog=1
 		else
 			SaveCompileLog=0
 		fi
 	;;
-	6)
+	5)
 		if [ $CustomSources == 0 ];then
 			CustomSources=1
 		else
@@ -101,7 +89,6 @@ Default_Settings() {
 DeveloperMode=0
 SimpleCompilation=1
 ColorfulUI=1
-GitSource=0
 SaveCompileLog=0
 CustomSources=1
 }
@@ -119,22 +106,6 @@ else
 	Red="\e[0m"
 	Blue="\e[0m"
 	Skyb="\e[0m"
-fi
-}
-
-GitSource_Check() {
-if [ $GitSource == 1 ];then
-	Lede_git=https://gitee.com/Hyy2001X/Lede
-	Openwrt_git=https://gitee.com/Hyy2001X/Openwrt
-	Lienol_git=https://gitee.com/Hyy2001X/Lienol
-	AutoBuild_git=https://gitee.com/Hyy2001X/AutoBuild
-	GitSource_Stat=Gitee
-else
-	Lede_git=https://github.com/coolsnowwolf/lede
-	Openwrt_git=https://github.com/openwrt/openwrt
-	Lienol_git=https://github.com/lienol/openwrt
-	AutoBuild_git=https://github.com/Hyy2001X/AutoBuild
-	GitSource_Stat=Github
 fi
 }
 
