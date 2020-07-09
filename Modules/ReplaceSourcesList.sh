@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ReplaceSourcesList() {
-Update=2020.07.08
-Module_Version=V1.3
+Update=2020.07.09
+Module_Version=V1.3.1
 
 if [ -f /etc/lsb-release ];then
 	OS_ID=`awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release`
@@ -71,7 +71,7 @@ if [ -f /etc/apt/sources.list ];then
 		sudo chmod 777 $Home/Backups/sources.list.bak
 	fi
 fi
-sudo cp $Home/Additional/$Sources_File /etc/apt/sources.list
+sudo cp $Home/Additional/Sources/$Sources_File /etc/apt/sources.list
 echo " "
 Say="已切换到$Sources_Name." && Color_Y
 }
