@@ -3,14 +3,14 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.09
-Version=V3.6.2
+Version=V3.6.3
 
 Second_Menu() {
 while :
 do
 	clear
 	Dir_Check
-	if [ -f "./Projects/$Project/feeds.conf.default" ];then
+	if [ -f ./Projects/$Project/feeds.conf.default ];then
 		Say="项目位置:$Home/Projects/$Project" && Color_Y
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
@@ -63,41 +63,41 @@ done
 
 Sources_Download() {
 cd $Home
-if [ -f "./Projects/$Project/Makefile" ];then
+if [ -f ./Projects/$Project/Makefile ];then
 	echo " "
-	Say="已检测到$Project源码,无需下载!" && Color_Y
-	Say="当前分支:$Branch" && Color_Y
+	Say="已检测到$Project源代码,无需下载!" && Color_Y
+	Say="当前源代码分支:$Branch" && Color_Y
 	sleep 2
 else
 	clear
 	cd $Home/Projects
-	if  [ $Project == 'Lede' ];then
+	Say="$Project源代码下载-选择分支" && Color_B
+	if  [ $Project == Lede ];then
 	while :
 	do
-		Say="$Project源码下载-分支选择" && Color_B
-		Say="$GitSource_Stat仓库:$Lede_git" && Color_Y
+		Say="仓库地址:$Lede_Git" && Color_Y
 		echo " "
 		Branch_1=master
 		echo "1.$Branch_1[默认]"
 		echo "q.返回"
 		echo " "
 		read -p '请从上方选择一个分支:' Choose
+		clear
 		case $Choose in
 		q)
 			break
 		;;
 		1)
-			clear
-			git clone $Lede_git $Project
+			git clone $Lede_Git $Project
+		;;
 		esac
 		Sources_Download_Check
 		break
 	done
-	elif [ $Project == 'Openwrt' ];then
+	elif [ $Project == Openwrt ];then
 	while :
 	do
-		Say="$Project源码下载-分支选择" && Color_B
-		Say="$GitSource_Stat仓库:$Openwrt_git" && Color_Y
+		Say="仓库地址:$Openwrt_Git" && Color_Y
 		echo " "
 		Branch_1=master
 		Branch_2=lede-17.01
@@ -110,44 +110,42 @@ else
 		echo "q.返回"
 		echo " "
 		read -p '请从上方选择一个分支:' Choose
+		clear
 		case $Choose in
 		q)
 			break
 		;;
 		1)
-			clear
-			git clone $Openwrt_git $Project
+			git clone $Openwrt_Git $Project
 		;;
 		2)
-			clear
-			git clone -b $Branch_2 $Openwrt_git $Project
+			git clone -b $Branch_2 $Openwrt_Git $Project
 		;;
 		3)
-			clear
-			git clone -b $Branch_3 $Openwrt_git $Project
+			git clone -b $Branch_3 $Openwrt_Git $Project
 		;;
 		4)
-			clear
-			git clone -b $Branch_4 $Openwrt_git $Project
+			git clone -b $Branch_4 $Openwrt_Git $Project
+		;;
 		esac
 		Sources_Download_Check
 		break
 	done
-	elif [ $Project == 'Lienol' ];then			
+	elif [ $Project == Lienol ];then			
 	while :
 	do
-		Say="$Project源码下载-分支选择" && Color_B
-		Say="$GitSource_Stat仓库:$Openwrt_git" && Color_Y
+		Say="仓库地址:$Lienol_Git" && Color_Y
 		echo " "
 		Branch_1=dev-master
 		Branch_2=dev
 		Branch_3=dev-19.07
-		echo "1.$Branch_1[默认]"
+		echo "1.$Branch_1[推荐]"
 		echo "2.$Branch_2"
 		echo "3.$Branch_3"
 		echo "q.返回"
 		echo " "
 		read -p '请从上方选择一个分支:' Choose
+		clear
 		case $Choose in
 		q)
 			break
@@ -161,7 +159,7 @@ else
 		3)
 			Branch=$Branch_3
 		esac
-		git clone -b $Branch $Lienol_git $Project
+		git clone -b $Branch $Lienol_Git $Project
 		Sources_Download_Check
 		break
 	done
@@ -176,7 +174,7 @@ do
 	clear
 	Say="高级选项" && Color_B
 	echo " "
-	echo "1.从$GitSource_Stat下载源代码"
+	echo "1.下载源代码"
 	echo "2.强制更新源代码和Feeds"
 	echo "3.添加第三方主题"
 	echo "4.添加软件包"
@@ -195,11 +193,7 @@ do
 		AutoBuild_Core
 	;;
 	1)
-		if [ $Project == Custom ];then
-			echo " "
-			Say="自定义源码无法使用该功能!" && Color_R
-			sleep 3
-		else
+		if [ ! $Project == Custom ];then
 			Sources_Download
 		fi
 	;;
@@ -749,9 +743,9 @@ echo " "
 cd $Home/Projects/$Project
 if [ -f ./Makefile ];then
 	cp ./feeds.conf.default $Home/Backups/$Project.feeds.conf.default
-	Say="下载成功!" && Color_Y
+	Say="[$Project]源代码下载成功!" && Color_Y
 else
-	Say="下载失败!" && Color_R
+	Say="[$Project]源代码下载失败!" && Color_R
 fi
 echo " "
 Enter
@@ -784,7 +778,6 @@ while :
 do
 	Dir_Check
 	ColorfulUI_Check
-	GitSource_Check
 	clear
 	Say="AutoBuild Core Script $Version" && Color_B
 	echo " "
@@ -807,7 +800,7 @@ do
 		Say="AutoBuild Core Script $Version" && Color_B
 		Decoration
 		cd $Home
-		Say="项目名称		[项目状态]	作者/维护者" && Color_G
+		Say="项目名称		[项目状态]	维护者" && Color_G
 		echo " "
 		if [ -f ./Projects/Lede/Makefile ];then
 			echo -e "${White}1.Lede			$Yellow[已检测到]$Blue	coolsnowwolf"
@@ -857,7 +850,7 @@ do
 				Second_Menu
 			else
 				echo " "
-				Say="请将自定义源码文件放置到'$Home/Projects/Custom'" && Color_B
+				Say="请将源码文件放置到'$Home/Projects/Custom'目录." && Color_B
 				sleep 3
 			fi
 		;;
@@ -886,6 +879,11 @@ Extra_Dependency="ntpdate httping openssh-client lm-sensors"
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
+
+Lede_Git=`awk '/Lede/{print $2}' $Home/Additional/Download_Sources_Link`
+Openwrt_Git=`awk '/Openwrt/{print $2}' $Home/Additional/Download_Sources_Link`
+Lienol_Git=`awk '/Lienol/{print $2}' $Home/Additional/Download_Sources_Link`
+AutoBuild_Git=`awk '/AutoBuild/{print $2}' $Home/Additional/Download_Sources_Link`
 
 chmod +x -R $Home/Modules
 for Module in $Home/Modules/*
