@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.09
-Version=V3.6.3
+Version=V3.6.4
 
 Second_Menu() {
 while :
@@ -674,7 +674,7 @@ if [ $? -eq 0 ];then
 	rm -rf Modules
 	rm -rf Additional
 	rm -rf TEMP
-	svn checkout $AutoBuild_git/trunk ./TEMP
+	svn checkout $AutoBuild_Git/trunk ./TEMP
 	echo " "
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		mv ./TEMP/* $Home
