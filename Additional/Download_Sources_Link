@@ -1,0 +1,6 @@
+#可更改源码地址
+Lede		https://github.com/coolsnowwolf/lede
+Openwrt	https://github.com/openwrt/openwrt
+Lienol		https://github.com/lienol/openwrt
+#不可更改源码地址
+AutoBuild	https://github.com/Hyy2001X/AutoBuild
