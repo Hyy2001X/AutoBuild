@@ -2,17 +2,18 @@
 
 StorageStat() {
 Update=2020.07.09
-Module_Version=V2.1-BETA
+Module_Version=V2.2-BETA
 
 cd $Home
 clear
+
 Say="Loading Configuration..." && Color_Y
-echo " "
 Backups_Size=`du -sh Backups | awk '{print $1}'`
 Packages_Size=`du -sh Packages | awk '{print $1}'`
 Lede_Size=`du -sh ./Projects/Lede | awk '{print $1}'`
 Openwrt_Size=`du -sh ./Projects/Openwrt | awk '{print $1}'`
 Lienol_Size=`du -sh ./Projects/Lienol | awk '{print $1}'`
+
 clear
 Say="Storage Statistics Script $Module_Version" && Color_B
 Decoration
@@ -30,7 +31,6 @@ Type_Size=$Openwrt_Size
 Type_Path=/Projects/Openwrt
 Type_Space="			"
 StorageStat_Mod
-
 
 Type_Name=Lienol
 Type_Size=$Lienol_Size
@@ -56,9 +56,5 @@ Enter
 }
 
 StorageStat_Mod() {
-if [ ! $Type_Size == 0 ];then
-	Say="$Type_Name		$Type_Path$Type_Space$Type_Size" && Color_Y
-else
-	Say="$Type_Name		未检测到				0KB" && Color_R
-fi
+Say="$Type_Name		$Type_Path$Type_Space$Type_Size" && Color_Y
 }
