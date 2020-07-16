@@ -2,8 +2,8 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.09
-Version=V3.6.4
+Update=2020.07.16
+Version=V3.6.5
 
 Second_Menu() {
 while :
@@ -23,6 +23,11 @@ do
 		Branch=${GET_Branch#*heads/}
 	else
 		Say="未检测到[$Project]源码,请前往[高级选项]下载!" && Color_R
+	fi
+	cd $Home
+	if [ -f ./Configs/${Project}_Lasted_Update ];then
+		Lasted_Update=`cat ./Configs/${Project}_Lasted_Update`
+		echo -e "$Blue最近更新:$Lasted_Update$White"
 	fi
 	echo " "
 	echo "1.更新源代码和Feeds"
@@ -698,6 +703,8 @@ Sources_Update() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	clear
+	cd $Home/Configs
+	echo `(date +%Y-%m-%d_%H:%M)` > ${Project}_Lasted_Update
 	cd $Home/Projects/$Project
 	if [ $Enforce_Update == 1 ];then
 		git fetch --all
