@@ -2,15 +2,15 @@
 # AutoBuild Script
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.16
-Version=V3.6.5
+Update=2020.07.17
+Version=V3.6.6
 
 Second_Menu() {
 while :
 do
 	clear
 	Dir_Check
-	if [ -f ./Projects/$Project/feeds.conf.default ];then
+	if [ -f ./Projects/$Project/Makefile ];then
 		Say="项目位置:$Home/Projects/$Project" && Color_Y
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
@@ -234,52 +234,42 @@ do
 		;;
 		1)	
 			make clean
-			sleep 3
-			break
 		;;
 		2)
 			make dirclean
-			sleep 3
-			break
 		;;
 		3)
 			make distclean
-			sleep 3
-			break
 		;;
 		4)
 			cd $Home/Projects
 			echo " "
-			Say="正在删除,请耐心等待..." && Color_B
+			Say="正在删除$Project..." && Color_B
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
-				Say="删除成功!" && Color_Y
+				Say="$Project删除成功!" && Color_Y
 			else 
-				Say="删除失败!" && Color_R
+				Say="$Project删除失败!" && Color_R
 			fi
-			sleep 2
-			break
 		;;
 		5)
 			echo " "
 			rm -rf $Home/Projects/$Project/tmp
 			Say="$Yellow[临时文件/编译缓存]删除成功!" && Color_Y
-			sleep 2
 		;;
 		6)
 			echo " "
 			rm -f $Home/Log/Update_${Project}_*
 			Say="$Yellow[更新日志]删除成功!" && Color_Y
-			sleep 2
 		;;
 		7)
 			echo " "
 			rm -f $Home/Log/Compile_${Project}_*
 			Say="$Yellow[编译日志]删除成功!" && Color_Y
-			sleep 2
 		;;
 		esac
+		sleep 2
 	done
 	;;
 	6)
@@ -500,8 +490,7 @@ do
 			clear
 			echo -ne "\r开始第$Update_Times次安装...\r"
 			sleep 2
-			sudo apt-get -y install $Dependency
-			sudo apt-get -y install $Extra_Dependency
+			sudo apt-get -y install $Dependency $Extra_Dependency
 			Update_Times=$(($Update_Times + 1))
 		done
 		echo " "
@@ -531,8 +520,8 @@ do
 			Say="SSH连接路由器" && Color_B
 			echo " "
 			echo "1.使用上次保存的配置连接"
-			echo "2.创建新的配置文件"
-			echo "3.删除现有配置文件"
+			echo "2.创建[新的配置文件]"
+			echo "3.删除[现有配置文件]"
 			echo "4.重置[RSA Key Fingerprint]"
 			echo "q.返回"
 			GET_Choose
@@ -562,16 +551,16 @@ do
 				echo " "
 				if [ -f ./Configs/SSH ];then
 					rm $Home/Configs/SSH
-					Say="删除成功!" && Color_Y
+					Say="[现有配置文件]删除成功!" && Color_Y
 				else
-					Say="删除失败!" && Color_R
+					Say="[现有配置文件]删除失败!" && Color_R
 				fi
 				sleep 2
 			;;
 			4)
 				ssh-keygen -R $SSH_IP
 				echo " "
-				Say="重置成功!" && Color_Y
+				Say="[RSA Key Fingerprint]重置成功!" && Color_Y
 				sleep 2
 			esac
 		done
@@ -686,11 +675,11 @@ if [ $? -eq 0 ];then
 		chmod +x -R $Home/AutoBuild.sh
 		chmod +x -R $Home/Modules
 		rm -rf TEMP
-		Say="更新成功!" && Color_Y
+		Say="AutoBuild更新成功!" && Color_Y
 		sleep 2
 		./AutoBuild.sh
 	else
-		Say="更新失败!" && Color_R
+		Say="AutoBuild更新失败!" && Color_R
 		sleep 2
 	fi
 else
@@ -717,9 +706,9 @@ if [ $? -eq 0 ];then
 	echo " "
 	Updated_Check=$(cat $Update_Logfile | grep -o error )
 	if [ "$Updated_Check" == "error" ]; then
-		Say="更新失败!" && Color_R
+		Say="源代码和Feeds更新失败!" && Color_R
 	else
-		Say="更新成功!" && Color_Y
+		Say="源代码和Feeds更新成功!" && Color_Y
 	fi
 	echo " "
 	Enter
@@ -769,6 +758,7 @@ done
 }
 
 Second_Menu_Check() {
+Project=$1
 if [ -f ./Projects/$Project/Makefile ];then
 	Second_Menu
 else
@@ -840,21 +830,17 @@ do
 			break
 		;;
 		1)
-			Project=Lede
-			Second_Menu_Check
+			Second_Menu_Check Lede
 		;;
 		2)
-			Project=Openwrt
-			Second_Menu_Check
+			Second_Menu_Check Openwrt
 		;;
 		3)
-			Project=Lienol
-			Second_Menu_Check
+			Second_Menu_Check Lienol
 		;;
 		4)
-			Project=Custom
 			if [ -f ./Projects/Custom/Makefile ];then
-				Second_Menu
+				Second_MenuCustom
 			else
 				echo " "
 				Say="请将源码文件放置到'$Home/Projects/Custom'目录." && Color_B
@@ -883,6 +869,7 @@ set -u
 Dependency="build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget swig"
 Extra_Dependency="ntpdate httping openssh-client lm-sensors"
 
+CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
