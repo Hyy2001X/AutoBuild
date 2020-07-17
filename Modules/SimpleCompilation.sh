@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.07.07
-Module_Version=V1.4.1
+Update=2020.07.17
+Module_Version=V1.4.2
 
 while :
 do
@@ -28,14 +28,12 @@ do
 		Say="Simple Compilation Script $Module_Version" && Color_B
 		CPU_TEMP=`sensors | grep 'Core 0' | cut -c17-24`
 		echo " "
-		Say="CPU信息:$CPU_Freq $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP" && Color_Y
+		Say="CPU 信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP" && Color_Y
 		Decoration
-		echo " "
 		echo -e "设备名称:$Yellow$TARGET_PROFILE$White"
 		echo -e "CPU 架构:$Yellow$TARGET_BOARD$White"
 		echo -e "CPU 型号:$Yellow$TARGET_SUBTARGET$White"
 		echo -e "软件架构:$Yellow$TARGET_ARCH_PACKAGES$White"
-		echo " "
 	else
 		echo " "
 		Say="未检测到配置文件,无法编译!" && Color_R
@@ -43,13 +41,13 @@ do
 		break
 	fi
 	echo " "
-	Say="编译参数选择" && Color_B
+	Say="编译参数" && Color_B
 	echo "1.make -j1"
 	echo "2.make -j1 V=s"
 	echo "3.make -j4"
 	echo "4.make -j4 V=s"
 	echo -e "5.$Yellow自动选择$White"
-	echo "6.手动输入"
+	echo "6.手动输入参数"
 	echo "q.返回"
 	echo " "
 	Decoration
@@ -79,15 +77,19 @@ do
 	;;
 	6)
 		read -p '请输入编译参数:' Threads
+	;;
+	*)
+		SimpleCompilation
+	;;
 	esac
 	if [ ! $Choose == 6 ];then
 		if [ ! $Choose == 5 ];then
 			if [ $Print_CompileLog == 0 ];then
 				Thread="make -j$Threads"
-				Compile_Say="编译参数:$Skyb$Threads线程编译,不在屏幕上输出日志[快]$White"
+				Compile_Say="编译参数:$Skyb$Threads线程编译,不输出日志[快]$White"
 			else
 				Thread="make -j$Threads V=s"
-				Compile_Say="编译参数:$Skyb$Threads线程编译,并在屏幕上输出日志[慢]$White"
+				Compile_Say="编译参数:$Skyb$Threads线程编译,并输出日志[慢]$White"
 			fi
 		else
 			Compile_Say="自动选择:$Skyb$Threads线程编译$White"
