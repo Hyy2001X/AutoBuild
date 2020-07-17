@@ -1,15 +1,12 @@
 # AutoBuild Script Module by Hyy2001
 
-function Systeminfo() {
-Update=2020.07.08
-Module_Version=V1.4
+Systeminfo() {
+Update=2020.07.17
+Module_Version=V1.5
 
 clear
-CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
-CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
 Current_Freq=`awk -F'[ :]' '/cpu MHz/ {print $4;exit}' /proc/cpuinfo`
 Current_Temp=`sensors | grep 'Core 0' | cut -c17-24`
-CPU_Cores=`cat /proc/cpuinfo | grep "processor"| wc -l`
 CPU_Base=`uname -m`
 System_Bit=`getconf LONG_BIT`
 Kernel_Version=`uname -r`
