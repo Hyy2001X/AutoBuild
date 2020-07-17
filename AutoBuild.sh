@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.17
-Version=V3.6.6
+Version=V3.6.6-b
 
 Second_Menu() {
 while :
@@ -840,7 +840,7 @@ do
 		;;
 		4)
 			if [ -f ./Projects/Custom/Makefile ];then
-				Second_MenuCustom
+				Second_Menu Custom
 			else
 				echo " "
 				Say="请将源码文件放置到'$Home/Projects/Custom'目录." && Color_B
