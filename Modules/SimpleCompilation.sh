@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.07.17
-Module_Version=V1.4.2
+Update=2020.07.19
+Module_Version=V1.5.0
 
 while :
 do
@@ -46,10 +46,15 @@ do
 	echo "2.make -j1 V=s"
 	echo "3.make -j4"
 	echo "4.make -j4 V=s"
-	echo -e "5.$Yellow自动选择$White"
+	echo "5.自动选择"
 	echo "6.手动输入参数"
 	echo "q.返回"
 	echo " "
+	if [ -f $Home/Configs/${Project}_Lasted_Compile ];then
+		Lasted_Compile=`awk 'NR==1' $Home/Configs/${Project}_Lasted_Compile`
+		Lasted_Compile_Stat=`awk 'NR==2' $Home/Configs/${Project}_Lasted_Compile`
+		echo -e "$Blue最近编译:$Yellow$Lasted_Compile $Lasted_Compile_Stat"
+	fi
 	Decoration
 	GET_Choose
 	case $Choose in
@@ -57,47 +62,27 @@ do
 		break
 	;;
 	1)
-		Threads=1
-		Print_CompileLog=0
+		Compile_Parameter="make -j1"
 	;;
 	2)
-		Threads=1
-		Print_CompileLog=1
+		Compile_Parameter="make -j1 V=s"
 	;;
 	3)
-		Threads=4
-		Print_CompileLog=0
+		Compile_Parameter="make -j4"
 	;;
 	4)
-		Threads=4
-		Print_CompileLog=1
+		Compile_Parameter="make -j4 V=s"
 	;;
 	5)
-		Threads=$CPU_Threads
+		Compile_Parameter="make -j$CPU_Threads V=s"
 	;;
 	6)
-		read -p '请输入编译参数:' Threads
+		read -p '请输入编译参数:' Compile_Parameter
 	;;
 	*)
 		SimpleCompilation
 	;;
 	esac
-	if [ ! $Choose == 6 ];then
-		if [ ! $Choose == 5 ];then
-			if [ $Print_CompileLog == 0 ];then
-				Thread="make -j$Threads"
-				Compile_Say="编译参数:$Skyb$Threads线程编译,不输出日志[快]$White"
-			else
-				Thread="make -j$Threads V=s"
-				Compile_Say="编译参数:$Skyb$Threads线程编译,并输出日志[慢]$White"
-			fi
-		else
-			Compile_Say="自动选择:$Skyb$Threads线程编译$White"
-			Thread="make -j$Threads"
-		fi
-	else
-		Thread=$Threads
-	fi
 	if [ $Default_Check == 0 ];then
 		Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
 		if [ $Project == Lede ];then
@@ -123,30 +108,27 @@ do
 		fi
 	fi
 	clear
-	if [ ! $Choose == 6 ];then
-		echo -e "$Yellow$Compile_Say$White"
-	fi
 	if [ $X86_Check == 0 ];then
 		if [ $Default_Check == 0 ];then
-			echo -e "$Yellow预期固件名称:$Blue$AutoBuild_Firmware$White"
+			echo -e "$Yellow固件名称:$Blue$AutoBuild_Firmware$White"
 		fi
-	else
-		:
 	fi
 	echo " "
 	Say="开始编译$Project..." && Color_Y
 	Compile_Start=`date +'%Y-%m-%d %H:%M:%S'`
+	echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Lasted_Compile
 	cd $Home/Projects/$Project
 	if [ $SaveCompileLog == 0 ];then
-		$Thread
+		$Compile_Parameter
 	else
 		Compile_Date=`(date +%Y%m%d_%H:%M)`
-		$Thread 2>&1 | tee $Home/Log/Compile_${Project}_${Compile_Date}.log
+		$Compile_Parameter 2>&1 | tee $Home/Log/Compile_${Project}_${Compile_Date}.log
 	fi
 	echo " "
 	if [ $X86_Check == 0 ];then
 		if [ $Default_Check == 0 ];then
 			if [ -f ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name ];then
+				echo "成功" >> $Home/Configs/${Project}_Lasted_Compile
 				Compile_Time_End
 				mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Packages/$AutoBuild_Firmware
 				echo " "
@@ -171,14 +153,15 @@ do
 				echo " "
 				Compile_Time_End
 				Say="编译失败!" && Color_R
+				echo "失败" >> $Home/Configs/${Project}_Lasted_Compile
 			fi
 		else
 			Say="编译结束." && Color_Y
-			echo "所选编译设备为Default，请前往'$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET'查看结果."
+			echo "所选编译设备为Default，请前往'$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET'查看编译结果."
 		fi
 	else
 		Say="编译结束." && Color_Y
-		echo "所选编译设备为X86架构，请前往'$Project/bin/targets/$TARGET_BOARD'查看结果."
+		echo "所选编译设备为X86架构，请前往'$Project/bin/targets/$TARGET_BOARD'查看编译结果."
 	fi
 	echo " "
 	Enter
@@ -200,8 +183,8 @@ fi
 
 Compile_Time_End() {
 Compile_End=`date +'%Y-%m-%d %H:%M:%S'`
-Start_Seconds=$(date --date="$Compile_Start" +%s);
-End_Seconds=$(date --date="$Compile_End" +%s);
+Start_Seconds=$(date --date="$Compile_Start" +%s)
+End_Seconds=$(date --date="$Compile_End" +%s)
 echo -ne "$Skyb$Compile_Start --> $Compile_End "
 Compile_TIME=`awk 'BEGIN{printf "编译用时:%.2f分钟\n",'$((End_Seconds-Start_Seconds))'/60}'`
 echo -ne "$Compile_TIME$White"
