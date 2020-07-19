@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.17
-Version=V3.6.6-b
+Version=V3.6.6-c
 
 Second_Menu() {
 while :
@@ -19,8 +19,6 @@ do
 				Say="源码版本:$Lede_Version" && Color_Y
 			fi
 		fi
-		GET_Branch=`cat $Home/Projects/$Project/.git/HEAD`
-		Branch=${GET_Branch#*heads/}
 	else
 		Say="未检测到[$Project]源码,请前往[高级选项]下载!" && Color_R
 	fi
@@ -29,6 +27,8 @@ do
 		Lasted_Update=`cat ./Configs/${Project}_Lasted_Update`
 		echo -e "$Blue最近更新:$Lasted_Update$White"
 	fi
+	cd $Home/Projects/$Project
+	Branch=`git branch | sed 's/* //g'`
 	echo " "
 	echo "1.更新源代码和Feeds"
 	echo "2.打开固件配置菜单"
@@ -307,7 +307,7 @@ do
 	Say="3.备份[dl]库" && Color_B
 	Say="4.恢复[dl]库" && Color_B
 	Say="5.备份[$Project]源代码" && Color_G
-	Say="5.恢复[$Project]源代码" && Color_G
+	Say="6.恢复[$Project]源代码" && Color_G
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
