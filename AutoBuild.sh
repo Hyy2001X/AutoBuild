@@ -3,7 +3,7 @@
 # https://github.com/Hyy2001X/AutoBuild
 # Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.17
-Version=V3.6.6-c
+Version=V3.6.7
 
 Second_Menu() {
 while :
@@ -420,6 +420,9 @@ do
 	5)
 		echo " "
 		echo -ne "\r$Yellow正在备份[$Project]源代码...$White\r"
+		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
+			rm -rf $Home/Backups/Projects/$Project
+		fi
 		sudo cp -a $Home/Projects/$Project $Home/Backups/Projects
 		Say="备份成功![$Project]源代码已备份到:'$Home/Backups/Projects/$Project'" && Color_Y
 		Say="存储占用:$(du -sh $Home/Backups/Projects/$Project | awk '{print $1}')B" && Color_B
@@ -428,12 +431,17 @@ do
 	;;
 	6)
 		echo " "
-		echo -ne "\r$Yellow正在恢复[$Project]源代码...$White\r"
-		sudo cp -a $Home/Backups/Projects/$Project $Home/Projects/
-		Say="恢复成功![$Project]源代码已恢复到:'$Home/Projects/$Project'" && Color_Y
-		Say="存储占用:$(du -sh $Home/Projects/$Project | awk '{print $1}')B" && Color_B
-		echo " "
-		Enter
+		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
+			echo -ne "\r$Yellow正在恢复[$Project]源代码...$White\r"
+			sudo cp -a $Home/Backups/Projects/$Project $Home/Projects/
+			Say="恢复成功![$Project]源代码已恢复到:'$Home/Projects/$Project'" && Color_Y
+			Say="存储占用:$(du -sh $Home/Projects/$Project | awk '{print $1}')B" && Color_B
+			echo " "
+			Enter
+		else
+			Say="未找到[$Project]源代码,恢复失败!" && Color_R
+			sleep 2
+		fi
 	;;
 	esac
 done
