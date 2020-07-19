@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.07.09
-Module_Version=V1.3.6
+Update=2020.07.19
+Module_Version=V1.4.0
 
 while :
 do
@@ -26,14 +26,9 @@ do
 		Say="3.调试模式		[打开]" && Color_Y
 	fi
 	if [ $SaveCompileLog == 0 ];then
-		Say="4.自动保存编译日志	[关闭]" && Color_R
+		Say="4.保存编译日志		[关闭]" && Color_R
 	else
-		Say="4.自动保存编译日志	[打开]" && Color_Y
-	fi
-	if [ $CustomSources == 0 ];then
-		Say="5.自定义源码		[关闭]" && Color_R
-	else
-		Say="6.自定义源码		[打开]" && Color_Y
+		Say="4.保存编译日志		[打开]" && Color_Y
 	fi
 	echo " "
 	echo "x.恢复所有默认设置"
@@ -73,14 +68,6 @@ do
 		else
 			SaveCompileLog=0
 		fi
-	;;
-	5)
-		if [ $CustomSources == 0 ];then
-			CustomSources=1
-		else
-			CustomSources=0
-		fi
-	;;
 	esac
 done
 }
@@ -90,7 +77,6 @@ DeveloperMode=0
 SimpleCompilation=1
 ColorfulUI=1
 SaveCompileLog=0
-CustomSources=1
 }
 
 ColorfulUI_Check() {
@@ -123,4 +109,19 @@ echo -e "$Blue$Say$White"
 
 Color_G() {
 echo -e "$Skyb$Say$White"
+}
+
+GET_Choose() {
+echo " "
+read -p '请从上方选择一个操作:' Choose
+}
+
+Enter() {
+read -p "按下[回车]键以继续..." Key
+}
+
+Decoration() {
+echo -ne "$Skyb"
+printf "%-70s\n" "-" | sed 's/\s/-/g'
+echo -ne "$White"
 }
