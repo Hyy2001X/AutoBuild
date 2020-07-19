@@ -1,9 +1,10 @@
 #!/bin/bash
-# AutoBuild Script
-# https://github.com/Hyy2001X/AutoBuild
-# Supported Linux Systems:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.17
-Version=V3.6.7
+# Project	AutoBuild
+# Author	Hyy2001
+# Github	https://github.com/Hyy2001X/AutoBuild
+# Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
+Update=2020.07.19
+Version=V3.7.1
 
 Second_Menu() {
 while :
@@ -76,17 +77,20 @@ if [ -f ./Projects/$Project/Makefile ];then
 else
 	clear
 	cd $Home/Projects
-	Say="$Project源代码下载-选择分支" && Color_B
+	Say="$Project源代码下载-选择内核" && Color_B
 	if  [ $Project == Lede ];then
 	while :
 	do
-		Say="仓库地址:$Lede_Git" && Color_Y
+		Say="仓库地址1:$Lede_Git" && Color_Y
+		Say="仓库地址2:$Lede_Old_Git" && Color_Y
 		echo " "
-		Branch_1=master
-		echo "1.$Branch_1[默认]"
+		Branch_1="内核版本 5.4.x "
+		Branch_2="内核版本 4.14.x"
+		echo "1.$Branch_1"
+		echo "2.$Branch_2"
 		echo "q.返回"
 		echo " "
-		read -p '请从上方选择一个分支:' Choose
+		read -p '请从上方选择一个内核:' Choose
 		clear
 		case $Choose in
 		q)
@@ -94,6 +98,9 @@ else
 		;;
 		1)
 			git clone $Lede_Git $Project
+		;;
+		2)
+			git clone -b lede-17.01 $Lede_Old_Git $Project
 		;;
 		esac
 		Sources_Download_Check
@@ -198,9 +205,7 @@ do
 		AutoBuild_Core
 	;;
 	1)
-		if [ ! $Project == Custom ];then
-			Sources_Download
-		fi
+		Sources_Download
 	;;
 	2)
 		Enforce_Update=1
@@ -248,9 +253,9 @@ do
 			echo " "
 			rm -rf $Project
 			if [ ! -d ./$Project ];then
-				Say="$Project删除成功!" && Color_Y
+				Say="删除成功!" && Color_Y
 			else 
-				Say="$Project删除失败!" && Color_R
+				Say="删除失败!" && Color_R
 			fi
 		;;
 		5)
@@ -727,19 +732,21 @@ else
 fi
 }
 
-GET_Choose() {
-echo " "
-read -p '请从上方选择一个操作:' Choose
-}
+Project_Choose() {
+if [ ! $1 == Lede ];then
+	if [ -f ./Projects/$1/Makefile ];then
+		echo -e "${White}$2.$1		$Yellow[已检测到]$Blue	$3"
+	else
+		echo -e "${White}$2.$1		$Red[未检测到]$Blue	$3"
+	fi
+else
+	if [ -f ./Projects/$1/Makefile ];then
+		echo -e "${White}$2.$1			$Yellow[已检测到]$Blue	$3"
+	else
+		echo -e "${White}$2.$1			$Red[未检测到]$Blue	$3"
+	fi
+fi
 
-Enter() {
-read -p "按下[回车]键以继续..." Key
-}
-
-Decoration() {
-echo -ne "$Skyb"
-printf "%-70s\n" "-" | sed 's/\s/-/g'
-echo -ne "$White"
 }
 
 Sources_Download_Check() {
@@ -747,6 +754,9 @@ echo " "
 cd $Home/Projects/$Project
 if [ -f ./Makefile ];then
 	cp ./feeds.conf.default $Home/Backups/$Project.feeds.conf.default
+	if [ $Project == Lede ];then
+		sed -i "s/#src-git helloworld/src-git helloworld/g" feeds.conf.default
+	fi
 	Say="[$Project]源代码下载成功!" && Color_Y
 else
 	Say="[$Project]源代码下载失败!" && Color_R
@@ -807,28 +817,9 @@ do
 		cd $Home
 		Say="项目名称		[项目状态]	维护者" && Color_G
 		echo " "
-		if [ -f ./Projects/Lede/Makefile ];then
-			echo -e "${White}1.Lede			$Yellow[已检测到]$Blue	coolsnowwolf"
-		else
-			echo -e "${White}1.Lede			$Red[未检测到]$Blue	coolsnowwolf"
-		fi
-		if [ -f ./Projects/Openwrt/Makefile ];then
-			echo -e "${White}2.Openwrt		$Yellow[已检测到]$Blue	Openwrt_Team"
-		else
-			echo -e "${White}2.Openwrt		$Red[未检测到]$Blue	Openwrt_Team"
-		fi
-		if [ -f ./Projects/Lienol/Makefile ];then
-			echo -e "${White}3.Lienol		$Yellow[已检测到]$Blue	Lienol"
-		else
-			echo -e "${White}3.Lienol		$Red[未检测到]$Blue	Lienol"
-		fi
-		if [ $CustomSources == 1 ];then
-			if [ -f ./Projects/Custom/Makefile ];then
-				echo -e "${White}4.自定义源码		$Blue[已检测到]$White"
-			else
-				echo -e "${White}4.自定义源码		$Red[未检测到]$White"
-			fi
-		fi
+		Project_Choose Lede 1 coolsnowwolf
+		Project_Choose Openwrt 2 Openwrt_Team	
+		Project_Choose Lienol 3 Lienol
 		echo "q.返回"
 		Decoration
 		echo " "
@@ -845,15 +836,6 @@ do
 		;;
 		3)
 			Second_Menu_Check Lienol
-		;;
-		4)
-			if [ -f ./Projects/Custom/Makefile ];then
-				Second_Menu Custom
-			else
-				echo " "
-				Say="请将源码文件放置到'$Home/Projects/Custom'目录." && Color_B
-				sleep 3
-			fi
 		;;
 		esac
 	done
@@ -883,6 +865,7 @@ CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
 
 Lede_Git=`awk '/Lede/{print $2}' $Home/Additional/Download_Sources_Link`
+Lede_Old_Git=`awk '/lede-17.01/{print $2}' $Home/Additional/Download_Sources_Link`
 Openwrt_Git=`awk '/Openwrt/{print $2}' $Home/Additional/Download_Sources_Link`
 Lienol_Git=`awk '/Lienol/{print $2}' $Home/Additional/Download_Sources_Link`
 AutoBuild_Git=`awk '/AutoBuild/{print $2}' $Home/Additional/Download_Sources_Link`
