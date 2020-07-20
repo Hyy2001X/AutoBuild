@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.07.08
-Module_Version=V4.0-BETA
+Update=2020.07.20
+Module_Version=V4.1
 
 while :
 do
@@ -12,7 +12,7 @@ do
 	fi
 	cd custom
 	clear
-	Say="Extra Packages Script $Module_Version by Hyy2001" && Color_B
+	Say="Extra Packages Script $Module_Version" && Color_B
 	echo " "
 	echo -e "1.SmartDNS"
 	echo -e "2.AdGuardHome"
@@ -70,10 +70,6 @@ done
 }
 
 ExtraThemes() {
-Update=2020.07.07
-Module_Version=V2.5
-PKGHome=$Home/Projects/$Project/package
-
 while :
 do
 	cd $Home/Projects/$Project/package
@@ -82,8 +78,7 @@ do
 	fi
 	cd theme
 	clear
-	echo -e "${Blue}Extra Themes Script $Module_Version by Hyy2001${White}"
-	echo -e "$Skyb"
+	echo -e "${Blue}添加第三方主题包${Yellow}"
 	echo "1.luci-theme-argon"
 	echo "2.luci-theme-argon-mc"
 	echo "3.luci-theme-argon-dark-mod"
@@ -97,6 +92,8 @@ do
 	echo "11.luci-theme-Butterfly"
 	echo "12.luci-theme-Butterfly-dark"
 	echo "13.luci-theme-netgearv2"
+	echo "14.luci-theme-edge"
+	echo "15.luci-theme-btmod"
 	echo -e "${White}"
 	echo "x.关于主题"
 	echo "q.返回"
@@ -118,7 +115,7 @@ do
 			fi
 			PKG_URL=" -b 18.06 https://github.com/jerrykuku/luci-theme-argon"
 			ExtraThemes_git
-			mv $PKGHome/theme/luci-theme-argon $PKGHome/lean/luci-theme-argon
+			mv $Home/Projects/$Project/package/theme/luci-theme-argon $Home/Projects/$Project/package/lean/luci-theme-argon
 		else
 			PKG_URL="https://github.com/jerrykuku/luci-theme-argon"
 			ExtraThemes_git
@@ -126,62 +123,76 @@ do
 	;;
 	2)
 		PKG_NAME=luci-theme-argon-mc
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/$PKG_NAME
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argon-mc
 		ExtraThemes_svn
 	;;
 	3)
 		PKG_NAME=luci-theme-argon-dark-mod
-		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/$PKG_NAME
+		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/luci-theme-argon-dark-mod
 		ExtraThemes_svn
 	;;
 	4)
 		PKG_NAME=luci-theme-argon-light-mod
-		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/$PKG_NAME
+		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/luci-theme-argon-light-mod
 		ExtraThemes_svn
 	;;
 	5)
 		PKG_NAME=luci-theme-bootstrap-mod
-		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/$PKG_NAME
+		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/luci-theme-bootstrap-mod
 		ExtraThemes_svn
 	;;
 	6)
 		PKG_NAME=luci-theme-rosy
-		PKG_URL=https://github.com/rosywrt/$PKG_NAME/trunk/
+		PKG_URL=https://github.com/rosywrt/luci-theme-rosy/trunk/
 		ExtraThemes_svn
 	;;
 	7)
 		PKG_NAME=luci-theme-atmaterial
-		PKG_URL=https://github.com/openwrt-develop/$PKG_NAME
+		PKG_URL=https://github.com/openwrt-develop/luci-theme-atmaterial
 		ExtraThemes_git
 	;;
 	8)
 		PKG_NAME=luci-theme-darkmatter
-		PKG_URL=https://github.com/Lienol/$PKG_NAME/trunk/
+		PKG_URL=https://github.com/Lienol/luci-theme-darkmatter/trunk/
 		ExtraThemes_svn
 	;;
 	9)
 		PKG_NAME=luci-theme-opentomcat
-		PKG_URL=https://github.com/Leo-Jo-My/$PKG_NAME
+		PKG_URL=https://github.com/Leo-Jo-My/luci-theme-opentomcat
 		ExtraThemes_git
 	;;
 	10)
 		PKG_NAME=luci-theme-opentomato
-		PKG_URL=https://github.com/Leo-Jo-My/$PKG_NAME
+		PKG_URL=https://github.com/Leo-Jo-My/luci-theme-opentomato
 		ExtraThemes_git
 	;;
 	11)
 		PKG_NAME=luci-theme-Butterfly
-		PKG_URL=https://github.com/Leo-Jo-My/$PKG_NAME
+		PKG_URL=https://github.com/Leo-Jo-My/luci-theme-Butterfly
 		ExtraThemes_git
 	;;
 	12)
 		PKG_NAME=luci-theme-Butterfly-dark
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/$PKG_NAME
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-Butterfly-dark
 		ExtraThemes_svn
 	;;
 	13)
 		PKG_NAME=luci-theme-netgearv2
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/$PKG_NAME
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-netgearv2
+		ExtraThemes_svn
+	;;
+	14)
+		PKG_NAME=luci-theme-edge
+		if [ $Project == Lede ];then
+			PKG_URL=" -b 18.06 https://github.com/garypang13/luci-theme-edge"
+		else
+			PKG_URL="https://github.com/garypang13/luci-theme-edge"
+		fi
+		ExtraThemes_git
+	;;
+	15)
+		PKG_NAME=luci-theme-btmod
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-btmod
 		ExtraThemes_svn
 	;;
 	esac
@@ -270,9 +281,9 @@ echo "https://github.com/project-openwrt"
 echo "https://github.com/Lienol"
 echo "https://github.com/openwrt-develop"
 echo "https://github.com/Leo-Jo-My"
+echo "https://github.com/garypang13"
 echo -e "https://github.com/rosywrt$White"
 echo " "
-echo -e "${Skyb}感谢以上作者的贡献!"
 Decoration
 echo " "
 Enter
