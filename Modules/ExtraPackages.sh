@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.07.20
-Module_Version=V4.1
+Update=2020.07.21
+Module_Version=V4.2
 
 while :
 do
@@ -79,6 +79,7 @@ do
 	cd theme
 	clear
 	echo -e "${Blue}添加第三方主题包${Yellow}"
+	echo " "
 	echo "1.luci-theme-argon"
 	echo "2.luci-theme-argon-mc"
 	echo "3.luci-theme-argon-dark-mod"
@@ -88,13 +89,8 @@ do
 	echo "7.luci-theme-atmaterial"
 	echo "8.luci-theme-darkmatter"
 	echo "9.luci-theme-opentomcat"
-	echo "10.luci-theme-opentomato"
-	echo "11.luci-theme-Butterfly"
-	echo "12.luci-theme-Butterfly-dark"
-	echo "13.luci-theme-netgearv2"
-	echo "14.luci-theme-edge"
-	echo "15.luci-theme-btmod"
-	echo -e "${White}"
+	echo " "
+	echo -e "${Blue}n.浏览下一页$White"
 	echo "x.关于主题"
 	echo "q.返回"
 	echo " "
@@ -103,6 +99,9 @@ do
 	case $Choose in
 	q)
 		break
+	;;
+	n)
+		ExtraThemes_P2
 	;;
 	x)
 		ExtraThemes_info
@@ -143,7 +142,7 @@ do
 	;;
 	6)
 		PKG_NAME=luci-theme-rosy
-		PKG_URL=https://github.com/rosywrt/luci-theme-rosy/trunk/
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-rosy/
 		ExtraThemes_svn
 	;;
 	7)
@@ -158,30 +157,60 @@ do
 	;;
 	9)
 		PKG_NAME=luci-theme-opentomcat
-		PKG_URL=https://github.com/Leo-Jo-My/luci-theme-opentomcat
-		ExtraThemes_git
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-opentomcat
+		ExtraThemes_svn
 	;;
-	10)
+	esac
+done
+}
+
+ExtraThemes_P2() {
+while :
+do
+	clear
+	echo -e "${Blue}添加第三方主题包${Yellow}"
+	echo " "
+	echo "1.luci-theme-opentomato"
+	echo "2.luci-theme-Butterfly"
+	echo "3.luci-theme-Butterfly-dark"
+	echo "4.luci-theme-netgearv2"
+	echo "5.luci-theme-edge"
+	echo "6.luci-theme-argonv2"
+	echo "7.luci-theme-argonv3"
+	echo " "
+	echo -e "${White}x.关于主题"
+	echo "q.返回"
+	echo " "
+	read -p '请从上方选择一个主题包:' Choose
+	echo " "
+	case $Choose in
+	q)
+		break
+	;;
+	x)
+		ExtraThemes_info
+	;;
+	1)
 		PKG_NAME=luci-theme-opentomato
-		PKG_URL=https://github.com/Leo-Jo-My/luci-theme-opentomato
-		ExtraThemes_git
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-opentomato
+		ExtraThemes_svn
 	;;
-	11)
+	2)
 		PKG_NAME=luci-theme-Butterfly
-		PKG_URL=https://github.com/Leo-Jo-My/luci-theme-Butterfly
-		ExtraThemes_git
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-Butterfly
+		ExtraThemes_svn
 	;;
-	12)
+	3)
 		PKG_NAME=luci-theme-Butterfly-dark
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-Butterfly-dark
 		ExtraThemes_svn
 	;;
-	13)
+	4)
 		PKG_NAME=luci-theme-netgearv2
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-netgearv2
 		ExtraThemes_svn
 	;;
-	14)
+	5)
 		PKG_NAME=luci-theme-edge
 		if [ $Project == Lede ];then
 			PKG_URL=" -b 18.06 https://github.com/garypang13/luci-theme-edge"
@@ -190,9 +219,14 @@ do
 		fi
 		ExtraThemes_git
 	;;
-	15)
-		PKG_NAME=luci-theme-btmod
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-btmod
+	6)
+		PKG_NAME=luci-theme-argonv2
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argonv2
+		ExtraThemes_svn
+	;;
+	7)
+		PKG_NAME=luci-theme-argonv3
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argonv3
 		ExtraThemes_svn
 	;;
 	esac
@@ -272,7 +306,6 @@ sleep 2
 
 ExtraThemes_info() {
 clear
-echo -e "${Blue}Extra Themes Script $Module_Version by Hyy2001${White}"
 Decoration
 echo -e "${Skyb}主题源码来自以下作者:$Yellow"
 echo " "
