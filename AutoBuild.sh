@@ -3,8 +3,8 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.19
-Version=V3.7.1
+Update=2020.07.23
+Version=V3.7.2
 
 Second_Menu() {
 while :
@@ -281,7 +281,7 @@ do
 		cd $Home/Projects/$Project
 		rm -f ./.config*
 		echo " "
-		Say="删除成功!" && Color_Y
+		Say="[配置文件]删除成功!" && Color_Y
 		sleep 2
 	;;
 	7)
@@ -290,6 +290,8 @@ do
 		if [ $? -eq 0 ];then
 			clear
 			make -j$CPU_Threads download V=s
+			find dl -size -1024c -exec ls -l {} \;
+			find dl -size -1024c -exec rm -f {} \;
 			echo " "
 			Enter
 		else
