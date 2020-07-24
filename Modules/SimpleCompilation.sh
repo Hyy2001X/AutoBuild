@@ -2,7 +2,7 @@
 
 SimpleCompilation() {
 Update=2020.07.19
-Module_Version=V2.0-TAB+
+Module_Version=V2.1-BETA
 
 while :
 do
@@ -144,6 +144,7 @@ do
 		Compile_Date=`(date +%Y%m%d_%H:%M)`
 		$Compile_Parameter 2>&1 | tee $Home/Log/Compile_${Project}_${Compile_Date}.log
 	fi
+	awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
 	echo " "
 	if [ $X86_Check == 0 ];then
 		if [ $MULTI_PROFILE_Check == 0 ];then
