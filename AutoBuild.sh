@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.24
-Version=V3.7.4
+Version=V3.7.5
 
 Second_Menu() {
 while :
@@ -735,6 +735,20 @@ else
 fi
 }
 
+Sources_Update_mod() {
+cd $Home/Projects
+if [ -f ./$1/Makefile ];then
+	clear
+	Say="开始更新$1..." && Color_Y
+	echo " "
+	cd $Home/Projects/$1
+	git pull
+	./scripts/feeds update -a
+	./scripts/feeds install -a
+	sleep 2
+fi
+}
+
 Project_Choose() {
 if [ ! $1 == Lede ];then
 	if [ -f ./Projects/$1/Makefile ];then
@@ -749,7 +763,6 @@ else
 		echo -e "${White}$2.$1			$Red[未检测到]$Blue	$3"
 	fi
 fi
-
 }
 
 Sources_Download_Check() {
@@ -822,7 +835,9 @@ do
 		echo " "
 		Project_Choose Lede 1 coolsnowwolf
 		Project_Choose Openwrt 2 Openwrt_Team	
-		Project_Choose Lienol 3 Lienol
+		Project_Choose Lienol 3 Li2nOnline
+		echo " "
+		Say="x.更新所有源代码和Feeds" && Color_B
 		echo "q.返回"
 		Decoration
 		echo " "
@@ -830,6 +845,19 @@ do
 		case $Choose in
 		q)
 			break
+		;;
+		x)
+			timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
+			if [ $? -eq 0 ];then
+				cd $Home/Projects
+				Sources_Update_mod Lede
+				Sources_Update_mod Openwrt
+				Sources_Update_mod Lienol
+			else
+				echo " "
+				Say="网络连接错误,更新失败!" && Color_R
+				sleep 2	
+			fi
 		;;
 		1)
 			Second_Menu_Check Lede
