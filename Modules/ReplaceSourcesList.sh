@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ReplaceSourcesList() {
-Update=2020.07.09
-Module_Version=V1.3.1
+Update=2020.07.24
+Module_Version=V1.3.2-BETA
 
 if [ -f /etc/lsb-release ];then
 	OS_ID=`awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release`
@@ -25,19 +25,13 @@ if [ -f /etc/lsb-release ];then
 				break
 			;;
 			1)
-				Sources_Name="阿里源"
-				Sources_File="Ubuntu-$OS_Version-Aliyun"
-				ReplaceSources_mod
+				ReplaceSources_mod 阿里源 Ubuntu-$OS_Version-Aliyun
 			;;
 			2)
-				Sources_Name="清华源"
-				Sources_File="Ubuntu-$OS_Version-Tuna"
-				ReplaceSources_mod
+				ReplaceSources_mod 清华源 Ubuntu-$OS_Version-Tuna
 			;;
 			3)
-				Sources_Name="Ubuntu CN"
-				Sources_File="Ubuntu-$OS_Version-CN"
-				ReplaceSources_mod
+				ReplaceSources_mod Ubuntu中国 Ubuntu-$OS_Version-CN
 			;;
 			4)
 				sudo mv $Home/Backups/sources.list.bak /etc/apt/sources.list
@@ -71,7 +65,7 @@ if [ -f /etc/apt/sources.list ];then
 		sudo chmod 777 $Home/Backups/sources.list.bak
 	fi
 fi
-sudo cp $Home/Additional/Sources/$Sources_File /etc/apt/sources.list
+sudo cp $Home/Additional/Sources/$2 /etc/apt/sources.list
 echo " "
-Say="已切换到$Sources_Name." && Color_Y
+Say="已切换到$1." && Color_Y
 }
