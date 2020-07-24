@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Systeminfo() {
-Update=2020.07.17
-Module_Version=V1.5
+Update=2020.07.24
+Module_Version=V1.6
 
 clear
 Current_Freq=`awk -F'[ :]' '/cpu MHz/ {print $4;exit}' /proc/cpuinfo`
@@ -12,7 +12,7 @@ System_Bit=`getconf LONG_BIT`
 Kernel_Version=`uname -r`
 Computer_Name=`hostname`
 Computer_Startup=`awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60} {printf("%d 天 %d 小时 %d 分钟\n",a,b,c)}' /proc/uptime`
-IP_Address=`ip addr show | awk '$1 == "inet" {gsub(/\/.*$/, "", $2); print $2}' | egrep -v "127.0.0.1" | xargs`
+IP_Address=`ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | tr -d "addr:"`
 MemTotal_KB=`awk '/MemTotal/' /proc/meminfo | tr -cd "[0-9]"`
 ((MemTotal_MB=$MemTotal_KB/1024))
 MemTotal_GB=`echo "scale=2; $MemTotal_KB / 1024000" | bc`
