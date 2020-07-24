@@ -3,8 +3,8 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.23
-Version=V3.7.2
+Update=2020.07.24
+Version=V3.7.3
 
 Second_Menu() {
 while :
@@ -292,6 +292,7 @@ do
 			make -j$CPU_Threads download V=s
 			find dl -size -1024c -exec ls -l {} \;
 			find dl -size -1024c -exec rm -f {} \;
+			awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
 			echo " "
 			Enter
 		else
