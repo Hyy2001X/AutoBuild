@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.07.24
-Version=V3.7.5
+Version=V3.7.6
 
 Second_Menu() {
 while :
@@ -310,13 +310,13 @@ do
 	clear
 	Say="备份与恢复" && Color_B
 	echo " "
-	Say="1.备份[.config]" && Color_Y
-	Say="2.恢复[.config]" && Color_Y
-	Say="3.备份[dl]库" && Color_B
-	Say="4.恢复[dl]库" && Color_B
-	Say="5.备份[$Project]源代码" && Color_G
-	Say="6.恢复[$Project]源代码" && Color_G
-	echo "q.返回"
+	echo -e "${Yellow}1.备份[.config]"
+	echo "2.恢复[.config]"
+	echo "3.备份[dl]库"
+	echo "4.恢复[dl]库"
+	echo "5.备份[$Project]源代码"
+	echo "6.恢复[$Project]源代码"
+	echo -e "${White}q.返回"
 	GET_Choose
 	case $Choose in
 	q)
@@ -419,7 +419,7 @@ do
 		else
 			echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 			cp -a $Home/Backups/dl $Home/Projects/$Project
-			Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_B
+			Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_Y
 			Say="存储占用:$(du -sh $Home/Projects/$Project/dl | awk '{print $1}')B" && Color_B
 		fi
 		echo " "
@@ -458,7 +458,7 @@ done
 Make_Menuconfig() {
 clear
 cd $Home/Projects/$Project
-Say="Loading $Project Configuration..." && Color_Y
+Say="Loading $Project Configuration..." && Color_B
 make menuconfig
 Enter
 }
@@ -888,7 +888,7 @@ Home=$(cd $(dirname $0); pwd)
 set -u
 
 Dependency="build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget swig"
-Extra_Dependency="ntpdate httping openssh-client lm-sensors"
+Extra_Dependency="ntpdate httping openssh-client lm-sensors net-tools"
 
 CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
