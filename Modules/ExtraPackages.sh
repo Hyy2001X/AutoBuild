@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.07.21
-Module_Version=V4.2
+Update=2020.07.24
+Module_Version=V4.3
 
 while :
 do
@@ -14,10 +14,11 @@ do
 	clear
 	Say="Extra Packages Script $Module_Version" && Color_B
 	echo " "
-	echo -e "1.SmartDNS"
-	echo -e "2.AdGuardHome"
-	echo -e "3.Openclash"
-	echo -e "4.Clash"
+	echo "1.SmartDNS"
+	echo "2.AdGuardHome"
+	echo "3.OpenClash"
+	echo "4.Clash"
+	echo "5.OpenAppFilter"
 	Say="w.[软件库]Lienol" && Color_B
 	echo " "
 	echo "q.返回"
@@ -27,6 +28,11 @@ do
 	case $Choose in
 	q)
 		break
+	;;
+	w)
+		SRC_NAME=lienol
+		SRC_URL=https://github.com/Lienol/openwrt-package
+		ExtraPackages_src-git
 	;;
 	1)
 		PKG_NAME=openwrt-smartdns
@@ -51,7 +57,7 @@ do
 		ExtraPackages_svn
 	;;
 	3)
-		SRC_NAME=Openclash
+		SRC_NAME=OpenClash
 		SRC_URL=https://github.com/vernesong/OpenClash;master
 		ExtraPackages_src-git
 	;;
@@ -60,10 +66,10 @@ do
 		PKG_URL=https://github.com/frainzy1477/luci-app-clash
 		ExtraPackages_git
 	;;
-	w)
-		SRC_NAME=lienol
-		SRC_URL=https://github.com/Lienol/openwrt-package
-		ExtraPackages_src-git
+	5)
+		PKG_NAME=OpenAppFilter
+		PKG_URL=https://github.com/Lienol/openwrt-OpenAppFilter
+		ExtraPackages_git
 	;;
 	esac
 done
