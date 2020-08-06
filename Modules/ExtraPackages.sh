@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.07.24
-Module_Version=V4.3
+Update=2020.08.06
+Module_Version=V4.4
 
 while :
 do
@@ -58,7 +58,7 @@ do
 	;;
 	3)
 		SRC_NAME=OpenClash
-		SRC_URL=https://github.com/vernesong/OpenClash;master
+		SRC_URL="https://github.com/vernesong/OpenClash;master"
 		ExtraPackages_src-git
 	;;
 	4)
@@ -221,7 +221,7 @@ do
 		if [ $Project == Lede ];then
 			PKG_URL=" -b 18.06 https://github.com/garypang13/luci-theme-edge"
 		else
-			PKG_URL="https://github.com/garypang13/luci-theme-edge"
+			PKG_URL=https://github.com/garypang13/luci-theme-edge
 		fi
 		ExtraThemes_git
 	;;
