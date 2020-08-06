@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.08.06
-Version=V3.7.8
+Version=V3.7.9
 
 Second_Menu() {
 while :
@@ -695,6 +695,7 @@ if [ $? -eq 0 ];then
 		sleep 2
 	fi
 else
+	echo " "
 	Say="网络连接错误,更新失败!" && Color_R
 	sleep 2
 fi
@@ -732,15 +733,16 @@ fi
 }
 
 Sources_Update_mod() {
-cd $Home/Projects
-if [ -f ./$1/Makefile ];then
+Project=$1
+cd $Home/Projects/$Project
+if [ -f ./Makefile ];then
 	clear
-	Say="开始更新$1..." && Color_Y
+	Say="开始更新$Project..." && Color_Y
 	echo " "
-	cd $Home/Projects/$1
 	git pull
 	./scripts/feeds update -a
 	./scripts/feeds install -a
+	echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Lasted_Update
 	sleep 2
 fi
 }
