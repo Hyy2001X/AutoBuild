@@ -2,7 +2,7 @@
 
 ExtraPackages() {
 Update=2020.08.06
-Module_Version=V4.5
+Module_Version=V4.6-b
 
 while :
 do
@@ -20,6 +20,7 @@ do
 	echo "4.Clash"
 	echo "5.OpenAppFilter"
 	echo "6.Passwall"
+	echo "7.[依赖包]Passwall"
 	Say="w.Li2nOnline's Packages Source" && Color_B
 	echo " "
 	echo "q.返回"
@@ -76,6 +77,15 @@ do
 		PKG_NAME=luci-app-passwall
 		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-app-passwall
 		ExtraPackages_svn
+	;;
+	7)
+		clear
+		for PD in `cat  $Home/Additional/Passwall_Dependency`
+		do
+			PKG_NAME=$PD
+			PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/package/$PD
+			ExtraPackages_svn
+		done
 	;;
 	esac
 done
