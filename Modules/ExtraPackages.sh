@@ -2,7 +2,7 @@
 
 ExtraPackages() {
 Update=2020.08.06
-Module_Version=V4.4
+Module_Version=V4.5
 
 while :
 do
@@ -19,7 +19,8 @@ do
 	echo "3.OpenClash"
 	echo "4.Clash"
 	echo "5.OpenAppFilter"
-	Say="w.[软件库]Lienol" && Color_B
+	echo "6.Passwall"
+	Say="w.Li2nOnline's Packages Source" && Color_B
 	echo " "
 	echo "q.返回"
 	echo " "
@@ -31,7 +32,7 @@ do
 	;;
 	w)
 		SRC_NAME=lienol
-		SRC_URL=https://github.com/Lienol/openwrt-package
+		SRC_URL=https://github.com/xiaorouji/openwrt-package
 		ExtraPackages_src-git
 	;;
 	1)
@@ -70,6 +71,11 @@ do
 		PKG_NAME=OpenAppFilter
 		PKG_URL=https://github.com/Lienol/openwrt-OpenAppFilter
 		ExtraPackages_git
+	;;
+	6)
+		PKG_NAME=luci-app-passwall
+		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-app-passwall
+		ExtraPackages_svn
 	;;
 	esac
 done
@@ -133,17 +139,17 @@ do
 	;;
 	3)
 		PKG_NAME=luci-theme-argon-dark-mod
-		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/luci-theme-argon-dark-mod
+		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-argon-dark-mod
 		ExtraThemes_svn
 	;;
 	4)
 		PKG_NAME=luci-theme-argon-light-mod
-		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/luci-theme-argon-light-mod
+		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-argon-light-mod
 		ExtraThemes_svn
 	;;
 	5)
 		PKG_NAME=luci-theme-bootstrap-mod
-		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/lienol/luci-theme-bootstrap-mod
+		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-bootstrap-mod
 		ExtraThemes_svn
 	;;
 	6)
@@ -318,11 +324,12 @@ echo " "
 echo "https://github.com/jerrykuku"
 echo "https://github.com/project-openwrt"
 echo "https://github.com/Lienol"
+echo "https://github.com/xiaorouji"
 echo "https://github.com/openwrt-develop"
 echo "https://github.com/Leo-Jo-My"
 echo "https://github.com/garypang13"
-echo -e "https://github.com/rosywrt$White"
-echo " "
+echo "https://github.com/rosywrt"
+echo -e "$White "
 Decoration
 echo " "
 Enter
