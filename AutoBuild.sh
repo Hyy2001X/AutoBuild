@@ -3,8 +3,8 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.07.27
-Version=V3.7.7
+Update=2020.08.06
+Version=V3.7.8
 
 Second_Menu() {
 while :
@@ -20,16 +20,16 @@ do
 				Say="源码版本:$Lede_Version" && Color_Y
 			fi
 		fi
+		cd $Home
+		if [ -f ./Configs/${Project}_Lasted_Update ];then
+			Lasted_Update=`cat ./Configs/${Project}_Lasted_Update`
+			echo -e "$Blue最近更新:$Lasted_Update$White"
+		fi
+		cd $Home/Projects/$Project
+		Branch=`git branch | sed 's/* //g'`
 	else
 		Say="未检测到[$Project]源码,请前往[高级选项]下载!" && Color_R
 	fi
-	cd $Home
-	if [ -f ./Configs/${Project}_Lasted_Update ];then
-		Lasted_Update=`cat ./Configs/${Project}_Lasted_Update`
-		echo -e "$Blue最近更新:$Lasted_Update$White"
-	fi
-	cd $Home/Projects/$Project
-	Branch=`git branch | sed 's/* //g'`
 	echo " "
 	echo "1.更新源代码和Feeds"
 	echo "2.打开固件配置菜单"
@@ -252,11 +252,7 @@ do
 			Say="正在删除$Project..." && Color_B
 			echo " "
 			rm -rf $Project
-			if [ ! -d ./$Project ];then
-				Say="删除成功!" && Color_Y
-			else 
-				Say="删除失败!" && Color_R
-			fi
+			break
 		;;
 		5)
 			echo " "
