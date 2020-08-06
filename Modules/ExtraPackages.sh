@@ -2,15 +2,17 @@
 
 ExtraPackages() {
 Update=2020.08.06
-Module_Version=V4.6-b
+Module_Version=V4.7-b
+
+PKG_Home=$Home/Projects/$Project/package
+if [ ! -d $PKG_Home/ExtraPackages ];then
+		mkdir $PKG_Home/ExtraPackages
+fi
+PKG_Dir=$PKG_Home/ExtraPackages
 
 while :
 do
-	cd $Home/Projects/$Project/package
-	if [ ! -d ./custom ];then
-		mkdir custom
-	fi
-	cd custom
+	cd $PKG_Dir
 	clear
 	Say="Extra Packages Script $Module_Version" && Color_B
 	echo " "
@@ -37,18 +39,23 @@ do
 		ExtraPackages_src-git
 	;;
 	1)
-		PKG_NAME=openwrt-smartdns
-		PKG_URL=https://github.com/pymumu/openwrt-smartdns
-		ExtraPackages_git
-		mv ./openwrt-smartdns smartdns
-		PKG_NAME=luci-app-smartdns
-		if [ $Project == Lede ];then
-			PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
+		grep "git.openwrt.org/project/luci.git" $Home/Projects/$Project/feeds.conf.default > /dev/null
+		if [ $? -ne 0 ]; then
+			PKG_NAME=openwrt-smartdns
+			PKG_URL=https://github.com/pymumu/openwrt-smartdns
+			ExtraPackages_git
+			PKG_NAME=luci-app-smartdns
+			if [ $Project == Lede ];then
+				PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
+			else
+				PKG_URL="https://github.com/pymumu/luci-app-smartdns"
+			fi
+			ExtraPackages_git
+			rm -rf $Home/Projects/$Project/tmp
 		else
-			PKG_URL="https://github.com/pymumu/luci-app-smartdns"
+			Say="无法添加 SmartDNS" && Color_R
+			sleep 2
 		fi
-		ExtraPackages_git
-		rm -rf ../../tmp
 	;;
 	2)
 		PKG_NAME=luci-app-adguardhome
@@ -92,15 +99,17 @@ done
 }
 
 ExtraThemes() {
+PKG_Home=$Home/Projects/$Project/package
+if [ ! -d $PKG_Home/ExtraPackages ];then
+		mkdir $PKG_Home/ExtraPackages
+fi
+PKG_Dir=$PKG_Home/ExtraPackages
+
 while :
 do
-	cd $Home/Projects/$Project/package
-	if [ ! -d ./theme ];then
-		mkdir theme
-	fi
-	cd theme
+	cd $PKG_Dir
 	clear
-	echo -e "${Blue}添加第三方主题包${Yellow}"
+	echo -e "${Blue}添加第三方主题包 Page-1${White}"
 	echo " "
 	echo "1.luci-theme-argon"
 	echo "2.luci-theme-argon-mc"
@@ -112,7 +121,7 @@ do
 	echo "8.luci-theme-darkmatter"
 	echo "9.luci-theme-opentomcat"
 	echo " "
-	echo -e "${Blue}n.浏览下一页$White"
+	echo -e "${Blue}n.查看下一页$White"
 	echo "x.关于主题"
 	echo "q.返回"
 	echo " "
@@ -131,56 +140,56 @@ do
 	1)
 		PKG_NAME=luci-theme-argon
 		if [ $Project == Lede ];then
-			if [ -d ../lean/luci-theme-argon ];then
-				rm -rf ../lean/luci-theme-argon
+			if [ -d $PKG_Home/lean/luci-theme-argon ];then
+				rm -rf $PKG_Home/lean/luci-theme-argon
 			fi
 			PKG_URL=" -b 18.06 https://github.com/jerrykuku/luci-theme-argon"
-			ExtraThemes_git
-			mv $Home/Projects/$Project/package/theme/luci-theme-argon $Home/Projects/$Project/package/lean/luci-theme-argon
+			ExtraPackages_git
+			mv $PKG_Dir/luci-theme-argon $PKG_Home/lean/luci-theme-argon
 		else
 			PKG_URL="https://github.com/jerrykuku/luci-theme-argon"
-			ExtraThemes_git
+			ExtraPackages_git
 		fi
 	;;
 	2)
 		PKG_NAME=luci-theme-argon-mc
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argon-mc
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	3)
 		PKG_NAME=luci-theme-argon-dark-mod
 		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-argon-dark-mod
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	4)
 		PKG_NAME=luci-theme-argon-light-mod
 		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-argon-light-mod
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	5)
 		PKG_NAME=luci-theme-bootstrap-mod
 		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-bootstrap-mod
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	6)
 		PKG_NAME=luci-theme-rosy
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-rosy/
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	7)
 		PKG_NAME=luci-theme-atmaterial
 		PKG_URL=https://github.com/openwrt-develop/luci-theme-atmaterial
-		ExtraThemes_git
+		ExtraPackages_git
 	;;
 	8)
 		PKG_NAME=luci-theme-darkmatter
 		PKG_URL=https://github.com/Lienol/luci-theme-darkmatter/trunk/
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	9)
 		PKG_NAME=luci-theme-opentomcat
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-opentomcat
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	esac
 done
@@ -190,7 +199,7 @@ ExtraThemes_P2() {
 while :
 do
 	clear
-	echo -e "${Blue}添加第三方主题包${Yellow}"
+	echo -e "${Blue}添加第三方主题包 Page-2${White}"
 	echo " "
 	echo "1.luci-theme-opentomato"
 	echo "2.luci-theme-Butterfly"
@@ -215,22 +224,22 @@ do
 	1)
 		PKG_NAME=luci-theme-opentomato
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-opentomato
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	2)
 		PKG_NAME=luci-theme-Butterfly
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-Butterfly
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	3)
 		PKG_NAME=luci-theme-Butterfly-dark
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-Butterfly-dark
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	4)
 		PKG_NAME=luci-theme-netgearv2
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-netgearv2
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	5)
 		PKG_NAME=luci-theme-edge
@@ -239,54 +248,54 @@ do
 		else
 			PKG_URL=https://github.com/garypang13/luci-theme-edge
 		fi
-		ExtraThemes_git
+		ExtraPackages_git
 	;;
 	6)
 		PKG_NAME=luci-theme-argonv2
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argonv2
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	7)
 		PKG_NAME=luci-theme-argonv3
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argonv3
-		ExtraThemes_svn
+		ExtraPackages_svn
 	;;
 	esac
 done
 }
 
 ExtraPackages_git() {
-if [ -d ./$PKG_NAME ];then
-	rm -rf ./$PKG_NAME
+if [ -d $PKG_Dir/$PKG_NAME ];then
+	rm -rf $PKG_Dir/$PKG_NAME
 fi
 git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
-	Say="已添加软件包 $PKG_NAME" && Color_Y
-	rm -rf ./$PKG_NAME/.git
+if [ -f $PKG_Dir/$PKG_NAME/Makefile ] || [ -f $PKG_Dir/$PKG_NAME/README.md ];then
+	Say="已添加 $PKG_NAME" && Color_Y
+	rm -rf $PKG_Dir/$PKG_NAME/.git
 else
-	Say="未添加软件包 $PKG_NAME" && Color_R
+	Say="未添加 $PKG_NAME" && Color_R
 fi
 sleep 2
 }
 
 ExtraPackages_svn() {
-if [ -d ./$PKG_NAME ];then
-	rm -rf ./$PKG_NAME
+if [ -d $PKG_Dir/$PKG_NAME ];then
+	rm -rf $PKG_Dir/$PKG_NAME
 fi
 svn checkout $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
-	Say="已添加软件包 $PKG_NAME" && Color_Y
+if [ -f $PKG_Dir/$PKG_NAME/Makefile ] || [ -f $PKG_Dir/$PKG_NAME/README.md ];then
+	Say="已添加 $PKG_NAME" && Color_Y
 	rm -rf ./$PKG_NAME/.svn
 else
-	Say="未添加软件包 $PKG_NAME" && Color_R
+	Say="未添加 $PKG_NAME" && Color_R
 fi
 sleep 2
 }
 
 ExtraPackages_src-git() {
-cd $Home/Projects/$Project
-grep "$SRC_NAME" feeds.conf.default > /dev/null
+grep "$SRC_NAME" $Home/Projects/$Project/feeds.conf.default > /dev/null
 if [ $? -ne 0 ]; then
+	cd $Home/Projects/$Project
 	clear
 	echo "src-git $SRC_NAME $SRC_URL" >> feeds.conf.default
 	./scripts/feeds update $SRC_NAME
@@ -294,36 +303,9 @@ if [ $? -ne 0 ]; then
 	echo " "
 	Enter
 else
-	Say="添加失败,无法重复添加!" && Color_Y
+	Say="添加失败,无法重复添加!" && Color_R
 	sleep 2
 fi
-}
-
-ExtraThemes_git() {
-if [ -d ./$PKG_NAME ];then
-	rm -rf ./$PKG_NAME
-fi
-git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
-	Say="已添加主题包 $PKG_NAME" && Color_Y
-else
-	Say="未添加主题包 $PKG_NAME" && Color_R
-fi
-sleep 3
-}
-
-ExtraThemes_svn() {
-if [ -d ./$PKG_NAME ];then
-	rm -rf ./$PKG_NAME
-fi
-svn checkout $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -f ./$PKG_NAME/Makefile ] || [ -f ./$PKG_NAME/README.md ];then
-	Say="已添加主题包 $PKG_NAME" && Color_Y
-	rm -rf ./$PKG_NAME/.svn
-else
-	Say="未添加主题包 $PKG_NAME" && Color_R
-fi
-sleep 2
 }
 
 ExtraThemes_info() {
