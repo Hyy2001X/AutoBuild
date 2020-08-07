@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.08.07
-Version=V3.8.1-BETA
+Version=V3.8.2
 
 Second_Menu() {
 while :
@@ -590,8 +590,10 @@ done
 Script_Update() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	clear
 	cd $Home
+	clear
+	Say="开始下载更新..." && Color_Y
+	echo " "
 	Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
 	Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version
 	if [ -d $Backups_Dir ];then
@@ -603,9 +605,9 @@ if [ $? -eq 0 ];then
 	cp $Home/LICENSE $Backups_Dir/LICENSE
 	cp -a $Home/Additional $Backups_Dir/Additional
 	cp -a $Home/Modules $Backups_Dir/Modules
+	rm -rf ./TEMP
 	svn checkout https://github.com/Hyy2001X/AutoBuild/trunk ./TEMP
 	echo " "
-	rm -rf ./TEMP
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		rm -rf ./Modules
 		rm -rf ./Additional
@@ -615,9 +617,9 @@ if [ $? -eq 0 ];then
 		chmod +x -R $Home/Modules
 		rm -rf ./TEMP
 		New_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
-		Say="AutoBuild_Core $Old_Version --> $New_Version" && Color_Y
-		Say="AutoBuild 更新成功!" && Color_Y
-		sleep 3
+		echo -e "${Yellow}AutoBuild_Core ${Blue}$Old_Version --> $New_Version${Yellow}"
+		echo " "
+		read -p "AutoBuild 更新成功!" Key
 		./AutoBuild.sh
 	else
 		Say="AutoBuild 更新失败!" && Color_R
