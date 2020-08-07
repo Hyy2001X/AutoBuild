@@ -3,8 +3,8 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
-Update=2020.08.06
-Version=V3.7.9
+Update=2020.08.07
+Version=V3.8-b
 
 Second_Menu() {
 while :
@@ -68,12 +68,10 @@ done
 }
 
 Sources_Download() {
-cd $Home
-if [ -f ./Projects/$Project/Makefile ];then
+if [ -f $Home/Projects/$Project/Makefile ];then
 	echo " "
-	Say="已检测到$Project源代码,无需下载!" && Color_Y
-	Say="当前源代码分支:$Branch" && Color_Y
-	sleep 2
+	Say="已检测到[$Project]项目,当前分支:$Branch" && Color_Y
+	sleep 3
 else
 	clear
 	cd $Home/Projects
@@ -286,7 +284,6 @@ do
 		if [ $? -eq 0 ];then
 			clear
 			make -j$CPU_Threads download V=s
-			find dl -size -1024c -exec ls -l {} \;
 			find dl -size -1024c -exec rm -f {} \;
 			awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
 			echo " "
@@ -671,7 +668,7 @@ if [ $? -eq 0 ];then
 	if [ -d $Backups_Dir ];then
 		rm -rf $Backups_Dir
 	fi
-	mkdir $Backups_Dir
+	mkdir -p $Backups_Dir
 	cp $Home/AutoBuild.sh $Backups_Dir/AutoBuild.sh
 	cp $Home/README.md $Backups_Dir/README.md
 	cp $Home/LICENSE $Backups_Dir/LICENSE
@@ -765,11 +762,11 @@ fi
 
 Sources_Download_Check() {
 echo " "
-cd $Home/Projects/$Project
-if [ -f ./Makefile ];then
+if [ -f $Home/Projects/$Project/Makefile ];then
+	cd $Home/Projects/$Project
 	cp ./feeds.conf.default $Home/Backups/$Project.feeds.conf.default
 	if [ $Project == Lede ];then
-		sed -i "s/#src-git helloworld/src-git helloworld/g" feeds.conf.default
+		sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
 	fi
 	Say="[$Project]源代码下载成功!" && Color_Y
 else
@@ -784,7 +781,7 @@ cd $Home
 for WD in `cat  ./Additional/Working_Directory`
 do
 	if [ ! -d ./$WD ];then
-		mkdir $WD
+		mkdir -p $WD
 	fi
 done
 }
