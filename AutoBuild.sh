@@ -1,10 +1,10 @@
 #!/bin/bash
 # Project	AutoBuild
-# Author	Hyy2001
+# Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
-# Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
+# Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.08.07
-Version=V3.8.2
+Version=V3.8.3
 
 Second_Menu() {
 while :
@@ -55,13 +55,13 @@ do
 		Make_Menuconfig
 	;;
 	3)
-		Backup_Recovery
+		Backup_Restore
 	;;
 	4)
 		SimpleCompilation_Check
 	;;
 	5)
-		Advanced_Options_2
+		Project_Options
 	;;
 	esac
 done
@@ -106,7 +106,7 @@ else
 fi
 }
 
-Advanced_Options_2() {
+Project_Options() {
 while :
 do
 	cd $Home/Projects/$Project
@@ -211,10 +211,13 @@ do
 		echo " "
 		timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 		if [ $? -eq 0 ];then
+			cd $Home/Projects/$Project
 			clear
 			make -j$CPU_Threads download V=s
 			find dl -size -1024c -exec rm -f {} \;
 			awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
+			echo " "
+			Say="[dl]库下载结束,存储占用:$(du -sh dl | awk '{print $1}')B" && Color_B
 			echo " "
 			Enter
 		else
@@ -226,7 +229,7 @@ do
 done
 }
 
-Backup_Recovery() {
+Backup_FRestore() {
 while :
 do
 	clear
@@ -385,7 +388,7 @@ make menuconfig
 Enter
 }
 
-Advanced_Options_1() {
+Advanced_Options() {
 while :
 do
 	clear
@@ -511,7 +514,7 @@ do
 		sleep 2
 	;;
 	5)
-		StorageStat
+		StorageDetails
 	;;
 	6)
 		echo " "
@@ -633,7 +636,7 @@ fi
 }
 
 Sources_Update() {
-timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
+timeout 5 ping -c 1 www.github.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	clear
 	cd $Home/Configs
@@ -776,7 +779,7 @@ do
 			break
 		;;
 		x)
-			timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
+			timeout 5 ping -c 1 www.github.com > /dev/null 2>&1
 			if [ $? -eq 0 ];then
 				cd $Home/Projects
 				Sources_Update_mod Lede
@@ -804,7 +807,7 @@ do
 		Network_Test
 	;;
 	3)
-		Advanced_Options_1
+		Advanced_Options
 	;;
 	4)
 		Settings
