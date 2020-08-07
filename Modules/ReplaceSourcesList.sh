@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ReplaceSourcesList() {
-Update=2020.07.24
-Module_Version=V1.3.2-BETA
+Update=2020.08.07
+Module_Version=V1.3.3
 
 if [ -f /etc/lsb-release ];then
 	OS_ID=`awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release`
@@ -31,7 +31,7 @@ if [ -f /etc/lsb-release ];then
 				ReplaceSources_mod 清华源 Ubuntu-$OS_Version-Tuna
 			;;
 			3)
-				ReplaceSources_mod Ubuntu中国 Ubuntu-$OS_Version-CN
+				ReplaceSources_mod Ubuntu中国源 Ubuntu-$OS_Version-CN
 			;;
 			4)
 				sudo mv $Home/Backups/sources.list.bak /etc/apt/sources.list
@@ -65,7 +65,11 @@ if [ -f /etc/apt/sources.list ];then
 		sudo chmod 777 $Home/Backups/sources.list.bak
 	fi
 fi
-sudo cp $Home/Additional/Sources/$2 /etc/apt/sources.list
-echo " "
-Say="已切换到$1." && Color_Y
+if [ -f $Home/Additional/Sources_List/$2 ];then
+	sudo cp $Home/Additional/Sources_List/$2 /etc/apt/sources.list
+	echo " "
+	Say="已切换到$1." && Color_Y
+else
+	Say="未找到对应文件,切换失败!" && Color_R
+fi
 }
