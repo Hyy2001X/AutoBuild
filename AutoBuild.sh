@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20 Beta
 Update=2020.08.07
-Version=V3.8-b
+Version=V3.8.1-BETA
 
 Second_Menu() {
 while :
@@ -74,106 +74,35 @@ if [ -f $Home/Projects/$Project/Makefile ];then
 	sleep 3
 else
 	clear
-	cd $Home/Projects
-	Say="$Project源代码下载-选择内核" && Color_B
-	if  [ $Project == Lede ];then
-	while :
-	do
-		Say="仓库地址1:$Lede_Git" && Color_Y
-		Say="仓库地址2:$Lede_Old_Git" && Color_Y
-		echo " "
-		Branch_1="内核版本 5.4.x "
-		Branch_2="内核版本 4.14.x"
-		echo "1.$Branch_1"
-		echo "2.$Branch_2"
-		echo "q.返回"
-		echo " "
-		read -p '请从上方选择一个内核:' Choose
-		clear
-		case $Choose in
-		q)
-			break
-		;;
-		1)
-			git clone $Lede_Git $Project
-		;;
-		2)
-			git clone -b lede-17.01 $Lede_Old_Git $Project
-		;;
-		esac
-		Sources_Download_Check
-		break
+	Say="$Project源代码下载-选择分支" && Color_B
+	GitLink_File=$Home/Additional/GitLink_$Project
+	Github_Link=`sed -n 1p $GitLink_File`
+	echo "Github仓库地址:$Github_Link"
+	echo " "
+	WC=`sed -n '$=' $GitLink_File`
+	for ((i=2;i<=$WC;i++));
+	do   
+		Github_Branch=`sed -n ${i}p $GitLink_File`
+		x=`expr $i - 1`
+		echo "${x}.${Github_Branch}"
 	done
-	elif [ $Project == Openwrt ];then
-	while :
-	do
-		Say="仓库地址:$Openwrt_Git" && Color_Y
-		echo " "
-		Branch_1=master
-		Branch_2=lede-17.01
-		Branch_3=openwrt-18.06
-		Branch_4=openwrt-19.07
-		echo "1.$Branch_1[默认]"
-		echo "2.$Branch_2"
-		echo "3.$Branch_3"
-		echo "4.$Branch_4"
-		echo "q.返回"
-		echo " "
-		read -p '请从上方选择一个分支:' Choose
-		clear
-		case $Choose in
-		q)
-			break
-		;;
-		1)
-			git clone $Openwrt_Git $Project
-		;;
-		2)
-			git clone -b $Branch_2 $Openwrt_Git $Project
-		;;
-		3)
-			git clone -b $Branch_3 $Openwrt_Git $Project
-		;;
-		4)
-			git clone -b $Branch_4 $Openwrt_Git $Project
-		;;
-		esac
-		Sources_Download_Check
+	echo "q.返回"
+	echo " "
+	read -p '请从上方选择一个分支:' Choose
+	case $Choose in
+	q)
 		break
-	done
-	elif [ $Project == Lienol ];then			
-	while :
-	do
-		Say="仓库地址:$Lienol_Git" && Color_Y
-		echo " "
-		Branch_1=dev-master
-		Branch_2=dev
-		Branch_3=dev-19.07
-		echo "1.$Branch_1[推荐]"
-		echo "2.$Branch_2"
-		echo "3.$Branch_3"
-		echo "q.返回"
-		echo " "
-		read -p '请从上方选择一个分支:' Choose
+	;;
+	*)
 		clear
-		case $Choose in
-		q)
-			break
-		;;
-		1)
-			Branch=$Branch_1
-		;;
-		2)
-			Branch=$Branch_2
-		;;
-		3)
-			Branch=$Branch_3
-		esac
-		git clone -b $Branch $Lienol_Git $Project
+		echo -e "$Blue下载地址:$Yellow$Github_Link$White"
+		echo -e "$Blue下载分支:$Yellow$Github_Branch$White"
+		echo " "
+		cd $Home/Projects/
+		git clone -b $Github_Branch $Github_Link $Project
 		Sources_Download_Check
-		break
-	done
-	fi
+	;;
+	esac
 fi
 }
 
@@ -663,7 +592,7 @@ timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	clear
 	cd $Home
-	Old_Version=`awk 'NR==7' ./AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
+	Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
 	Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version
 	if [ -d $Backups_Dir ];then
 		rm -rf $Backups_Dir
@@ -674,18 +603,21 @@ if [ $? -eq 0 ];then
 	cp $Home/LICENSE $Backups_Dir/LICENSE
 	cp -a $Home/Additional $Backups_Dir/Additional
 	cp -a $Home/Modules $Backups_Dir/Modules
-	rm -rf Modules
-	rm -rf Additional
-	rm -rf TEMP
-	svn checkout $AutoBuild_Git/trunk ./TEMP
+	svn checkout https://github.com/Hyy2001X/AutoBuild/trunk ./TEMP
 	echo " "
+	rm -rf ./TEMP
 	if [ -f ./TEMP/AutoBuild.sh ];then
+		rm -rf ./Modules
+		rm -rf ./Additional
+		rm -f ./AutoBuild.sh
 		mv ./TEMP/* $Home
-		chmod +x -R $Home/AutoBuild.sh
+		chmod +x $Home/AutoBuild.sh
 		chmod +x -R $Home/Modules
-		rm -rf TEMP
+		rm -rf ./TEMP
+		New_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
+		Say="AutoBuild_Core $Old_Version --> $New_Version" && Color_Y
 		Say="AutoBuild 更新成功!" && Color_Y
-		sleep 2
+		sleep 3
 		./AutoBuild.sh
 	else
 		Say="AutoBuild 更新失败!" && Color_R
@@ -889,12 +821,6 @@ CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
 CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
-
-Lede_Git=`awk '/Lede/{print $2}' $Home/Additional/Download_Sources_Link`
-Lede_Old_Git=`awk '/lede-17.01/{print $2}' $Home/Additional/Download_Sources_Link`
-Openwrt_Git=`awk '/Openwrt/{print $2}' $Home/Additional/Download_Sources_Link`
-Lienol_Git=`awk '/Lienol/{print $2}' $Home/Additional/Download_Sources_Link`
-AutoBuild_Git=`awk '/AutoBuild/{print $2}' $Home/Additional/Download_Sources_Link`
 
 chmod +x -R $Home/Modules
 for Module in $Home/Modules/*
