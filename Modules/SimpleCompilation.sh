@@ -1,13 +1,13 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.07.19
-Module_Version=V2.1-BETA
+Update=2020.08.07
+Module_Version=V2.2
 
 while :
 do
-	cd $Home/Projects/$Project
-	if [ -f .config ];then
+	if [ -f $Home/Projects/$Project/.config ];then
+		cd $Home/Projects/$Project
 		TARGET_BOARD=`awk -F'[="]+' '/TARGET_BOARD/{print $2}' .config`
 		TARGET_SUBTARGET=`awk -F'[="]+' '/TARGET_SUBTARGET/{print $2}' .config`
 		TARGET_ARCH_PACKAGES=`awk -F'[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config`
@@ -43,7 +43,7 @@ do
 				echo -e "设备名称:${Blue}Default Profile${White}"
 			fi
 		else
-			echo -e "设备名称:${Blue}Multiple devices$White"
+			echo -e "设备名称:${Blue}Multiple Devices$White"
 		fi
 		echo -e "CPU 架构:$Yellow$TARGET_BOARD$White"
 		echo -e "CPU 型号:$Yellow$TARGET_SUBTARGET$White"
@@ -101,11 +101,11 @@ do
 		if [ $MULTI_PROFILE_Check == 0 ];then
 			if [ $Default_Check == 0 ];then
 				Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
+				cd $Home
 				if [ $Project == Lede ];then
 					read -p '请输入附加信息:' Extra
 					AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d-$Extra.bin)`"
-					cd $Home
-					while [ -f "./Packages/$AutoBuild_Firmware" ]
+					while [ -f ./Firmware/$AutoBuild_Firmware ]
 					do
 						read -p '包含该附加信息的名称已存在!请重新添加:' Extra
 						AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d-$Extra.bin)`"
@@ -114,8 +114,7 @@ do
 				else
 					read -p '请输入附加信息:' Extra
 					AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
-					cd $Home
-					while [ -f "./Packages/$AutoBuild_Firmware" ]
+					while [ -f ./Firmware/$AutoBuild_Firmware ]
 					do
 						read -p '包含该附加信息的名称已存在,请重新添加:' Extra
 						AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
@@ -152,11 +151,11 @@ do
 				if [ -f ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name ];then
 					echo "成功" >> $Home/Configs/${Project}_Lasted_Compile
 					Compile_Time_End
-					mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Packages/$AutoBuild_Firmware
+					mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Firmware/$AutoBuild_Firmware
 					echo " "
-					Say="固件位置:$Home/Packages" && Color_Y
+					Say="固件位置:$Home/Firmware" && Color_Y
 					echo -e "$Yellow固件名称:$Blue$AutoBuild_Firmware$White"
-					cd $Home/Packages
+					cd $Home/Firmware
 					Firmware_Size=`ls -l $AutoBuild_Firmware | awk '{print $5}'`
 					Firmware_Size_MB=`awk 'BEGIN{printf "固件大小:%.2fMB\n",'$((Firmware_Size))'/1000000}'`
 					Firmware_MD5=`md5sum $AutoBuild_Firmware | cut -d ' ' -f1`
@@ -186,12 +185,12 @@ do
 		else
 			Compile_Time_End
 			echo " "
-			Say="[Multiple devices]编译结束." && Color_Y
+			Say="[Multiple Devices]编译结束." && Color_Y
 		fi
 	else
 		Compile_Time_End
 		echo " "
-		Say="[X86]编译结束." && Color_Y
+		Say="[x86 Devices]编译结束." && Color_Y
 	fi
 	echo " "
 	Enter
