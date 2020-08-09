@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.07
-Version=V3.8.3
+Update=2020.08.09
+Version=V3.8.4
 
 Second_Menu() {
 while :
@@ -12,7 +12,7 @@ do
 	clear
 	Dir_Check
 	if [ -f ./Projects/$Project/Makefile ];then
-		Say="项目位置:$Home/Projects/$Project" && Color_Y
+		Say="源码位置:$Home/Projects/$Project" && Color_Y
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd ./Projects/$Project/package/lean/default-settings/files
@@ -23,7 +23,7 @@ do
 		cd $Home
 		if [ -f ./Configs/${Project}_Lasted_Update ];then
 			Lasted_Update=`cat ./Configs/${Project}_Lasted_Update`
-			echo -e "$Blue最近更新:$Lasted_Update$White"
+			echo -e "$Yellow最近更新:$Blue$Lasted_Update$White"
 		fi
 		cd $Home/Projects/$Project
 		Branch=`git branch | sed 's/* //g'`
@@ -49,7 +49,7 @@ do
 	;;
 	1)
 		Enforce_Update=0
-		Sources_Update
+		Sources_Update_Check
 	;;
 	2)
 		Make_Menuconfig
@@ -75,32 +75,39 @@ if [ -f $Home/Projects/$Project/Makefile ];then
 else
 	clear
 	Say="$Project源代码下载-选择分支" && Color_B
-	GitLink_File=$Home/Additional/GitLink_$Project
-	Github_Link=`sed -n 1p $GitLink_File`
-	echo "Github仓库地址:$Github_Link"
+	Github_File=$Home/Additional/GitLink_$Project
+	Final_GitLink=`sed -n 1p $Github_File`
+	echo "Github仓库地址:$Final_GitLink"
 	echo " "
-	WC=`sed -n '$=' $GitLink_File`
-	for ((i=2;i<=$WC;i++));
+	Max_All_Line=`sed -n '$=' $Github_File`
+	Max_Branch_Line=`expr $Max_All_Line - 1`
+	for ((i=2;i<=$Max_All_Line;i++));
 	do   
-		Github_Branch=`sed -n ${i}p $GitLink_File`
+		Github_File_Branch=`sed -n ${i}p $Github_File`
 		x=`expr $i - 1`
-		echo "${x}.${Github_Branch}"
+		echo "${x}.${Github_File_Branch}"
 	done
 	echo "q.返回"
 	echo " "
-	read -p '请从上方选择一个分支:' Choose
+	read -p '请从上方选择一个分支:' Choose_Branch
 	case $Choose in
 	q)
 		break
 	;;
 	*)
 		clear
-		echo -e "$Blue下载地址:$Yellow$Github_Link$White"
-		echo -e "$Blue下载分支:$Yellow$Github_Branch$White"
-		echo " "
-		cd $Home/Projects/
-		git clone -b $Github_Branch $Github_Link $Project
-		Sources_Download_Check
+		if [ $Choose_Branch -le $Max_Branch_Line ];then
+			Branch_Line=`expr $Choose_Branch + 1`
+			Final_GitBranch=`sed -n ${Branch_Line}p $Github_File`
+			echo -e "$Blue下载地址:$Yellow$Final_GitLink$White"
+			echo -e "$Blue下载分支:$Yellow$Final_GitBranch$White"
+			echo " "
+			cd $Home/Projects/
+			git clone -b $Final_GitBranch $Final_GitLink $Project
+			Sources_Download_Check
+		else
+			Sources_Download
+		fi
 	;;
 	esac
 fi
@@ -136,7 +143,7 @@ do
 	;;
 	2)
 		Enforce_Update=1
-		Sources_Update
+		Sources_Update_Check
 	;;
 	3)
 		ExtraThemes
@@ -635,28 +642,10 @@ else
 fi
 }
 
-Sources_Update() {
-timeout 5 ping -c 1 www.github.com > /dev/null 2>&1
+Sources_Update_Check() {
+timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	clear
-	cd $Home/Configs
-	echo `(date +%Y-%m-%d_%H:%M)` > ${Project}_Lasted_Update
-	cd $Home/Projects/$Project
-	if [ $Enforce_Update == 1 ];then
-		git fetch --all
-		git reset --hard origin/$Branch
-	fi
-	Update_Logfile=$Home/Log/Update_${Project}_`(date +%Y%m%d_%H:%M)`.log
-	git pull 2>&1 | tee $Update_Logfile
-	./scripts/feeds update -a 2>&1 | tee -a $Update_Logfile
-	./scripts/feeds install -a 2>&1 | tee -a $Update_Logfile
-	echo " "
-	Updated_Check=$(cat $Update_Logfile | grep -o error )
-	if [ "$Updated_Check" == "error" ]; then
-		Say="源代码和Feeds更新失败!" && Color_R
-	else
-		Say="源代码和Feeds更新成功!" && Color_Y
-	fi
+	Sources_Update_Core
 	echo " "
 	Enter
 else
@@ -666,22 +655,32 @@ else
 fi
 }
 
-Sources_Update_mod() {
-Project=$1
+Sources_Update_Core() {
+clear
+Say="开始更新$Project..." && Color_Y
+echo " "
+echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Lasted_Update
 cd $Home/Projects/$Project
-if [ -f ./Makefile ];then
-	clear
-	Say="开始更新$Project..." && Color_Y
-	echo " "
-	git pull
-	./scripts/feeds update -a
-	./scripts/feeds install -a
-	echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Lasted_Update
+if [ $Enforce_Update == 1 ];then
+	git fetch --all
+	git reset --hard origin/$Branch
+fi
+Update_Logfile=$Home/Log/Update_${Project}_`(date +%Y%m%d_%H:%M)`.log
+git pull 2>&1 | tee $Update_Logfile
+./scripts/feeds update -a 2>&1 | tee -a $Update_Logfile
+./scripts/feeds install -a 2>&1 | tee -a $Update_Logfile
+}
+
+Multi_Sources_Update() {
+if [ -f $Home/Projects/$1/Makefile ];then
+	Project=$1
+	Enforce_Update=0
+	Sources_Update_Core
 	sleep 2
 fi
 }
 
-Project_Choose() {
+Project_Details() {
 if [ ! $1 == Lede ];then
 	if [ -f ./Projects/$1/Makefile ];then
 		echo -e "${White}$2.$1		$Yellow[已检测到]$Blue	$3"
@@ -698,19 +697,19 @@ fi
 }
 
 Sources_Download_Check() {
-echo " "
 if [ -f $Home/Projects/$Project/Makefile ];then
 	cd $Home/Projects/$Project
 	cp ./feeds.conf.default $Home/Backups/$Project.feeds.conf.default
 	if [ $Project == Lede ];then
 		sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
 	fi
-	Say="[$Project]源代码下载成功!" && Color_Y
+	echo -e "$Yellow"
+	read -p "[$Project]源代码下载成功!" Key
 else
-	Say="[$Project]源代码下载失败!" && Color_R
+	echo -e "$Red"
+	read -p "[$Project]源代码下载失败!" Key
 fi
-echo " "
-Enter
+echo -e "$White"
 }
 
 Dir_Check() {
@@ -765,9 +764,9 @@ do
 		cd $Home
 		Say="项目名称		[项目状态]	维护者" && Color_G
 		echo " "
-		Project_Choose Lede 1 coolsnowwolf
-		Project_Choose Openwrt 2 Openwrt_Team	
-		Project_Choose Lienol 3 Li2nOnline
+		Project_Details Lede 1 coolsnowwolf
+		Project_Details Openwrt 2 Openwrt_Team	
+		Project_Details Lienol 3 Li2nOnline
 		echo " "
 		Say="x.更新所有源代码和Feeds" && Color_B
 		echo "q.返回"
@@ -779,12 +778,12 @@ do
 			break
 		;;
 		x)
-			timeout 5 ping -c 1 www.github.com > /dev/null 2>&1
+			timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 			if [ $? -eq 0 ];then
 				cd $Home/Projects
-				Sources_Update_mod Lede
-				Sources_Update_mod Openwrt
-				Sources_Update_mod Lienol
+				Multi_Sources_Update Lede
+				Multi_Sources_Update Openwrt
+				Multi_Sources_Update Lienol
 			else
 				echo " "
 				Say="网络连接错误,更新失败!" && Color_R
