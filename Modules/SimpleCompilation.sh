@@ -1,13 +1,42 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.08.07
-Module_Version=V2.2
+Update=2020.08.11
+Module_Version=V2.3-BETA
+
+ROOTFS_SQUASHFS=0
+ROOTFS_EXT4FS=0
+ROOTFS_CPIOGZ=0
+ROOTFS_TARGZ=0
 
 while :
 do
 	if [ -f $Home/Projects/$Project/.config ];then
 		cd $Home/Projects/$Project
+# Root filesystem archives
+		grep "CONFIG_TARGET_ROOTFS_CPIOGZ=y" .config > /dev/null
+		if [ $? -eq 0 ]; then
+			ROOTFS_CPIOGZ=1
+			Filesystem_Archives=cpio.gz
+		fi
+		grep "CONFIG_TARGET_ROOTFS_TARGZ=y" .config > /dev/null
+		if [ $? -eq 0 ]; then
+			ROOTFS_TARGZ=1
+			Filesystem_Archives=tar.gz
+		fi
+# Root filesystem images
+		grep "CONFIG_TARGET_ROOTFS_SQUASHFS=y" .config > /dev/null
+		if [ $? -eq 0 ]; then
+			ROOTFS_SQUASHFS=1
+			Filesystem_images=squashfs
+		fi
+		grep "CONFIG_TARGET_ROOTFS_EXT4FS=y" .config > /dev/null
+		if [ $? -eq 0 ]; then
+			ROOTFS_EXT4FS=1
+			Filesystem_images=ext4
+		fi
+		Filesystem_All=`expr $ROOTFS_SQUASHFS + $ROOTFS_EXT4FS`
+		Filesystem_Archives_All=`expr $ROOTFS_CPIOGZ + $ROOTFS_TARGZ`
 		TARGET_BOARD=`awk -F'[="]+' '/TARGET_BOARD/{print $2}' .config`
 		TARGET_SUBTARGET=`awk -F'[="]+' '/TARGET_SUBTARGET/{print $2}' .config`
 		TARGET_ARCH_PACKAGES=`awk -F'[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config`
@@ -48,6 +77,20 @@ do
 		echo -e "CPU 架构:$Yellow$TARGET_BOARD$White"
 		echo -e "CPU 型号:$Yellow$TARGET_SUBTARGET$White"
 		echo -e "软件架构:$Yellow$TARGET_ARCH_PACKAGES$White"
+		if [ ! $Filesystem_Archives_All == 0 ];then
+			if [ $Filesystem_Archives_All == 2 ];then
+				echo -e "固件压缩:${Yellow}cpio.gz tar.gz$White"
+			else
+				echo -e "固件压缩:$Yellow$Filesystem_Archives$White"
+			fi
+		fi
+		if [ ! $Filesystem_All == 0 ];then
+			if [ $Filesystem_All == 2 ];then
+				echo -e "固件格式:${Yellow}squashfs ext4$White"
+			else
+				echo -e "固件格式:$Yellow$Filesystem_images$White"
+			fi
+		fi
 	else
 		echo " "
 		Say="未检测到配置文件,无法编译!" && Color_R
@@ -126,6 +169,7 @@ do
 	fi
 	clear
 	if [ $X86_Check == 0 ];then
+		rm -rf $Home/Projects/$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET
 		if [ $MULTI_PROFILE_Check == 0 ];then
 			if [ $Default_Check == 0 ];then
 				echo -e "$Yellow固件名称:$Blue$AutoBuild_Firmware$White"
