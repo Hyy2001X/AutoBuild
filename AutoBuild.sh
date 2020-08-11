@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.08.11
-Version=V3.8.5
+Version=V3.8.6
 
 Second_Menu() {
 while :
@@ -90,7 +90,7 @@ else
 	echo "q.返回"
 	echo " "
 	read -p '请从上方选择一个分支:' Choose_Branch
-	case $Choose in
+	case $Choose_Branch in
 	q)
 		break
 	;;
@@ -307,27 +307,41 @@ do
 		clear
 		Say="恢复[.config]" && Color_B && echo " "
 		cd $Home/Backups/Configs
-		echo -n "备份文件"
-		ls -lh -u -o
+		ls | cat > $Home/TEMP/Config.List
+		ConfigList_File=$Home/TEMP/Config.List
+		Max_ConfigList_Line=`sed -n '$=' $ConfigList_File`
+		for ((i=1;i<=$Max_ConfigList_Line;i++));
+		do   
+			ConfigFile_Name=`sed -n ${i}p $ConfigList_File`
+			echo -e "${i}.$Yellow${ConfigFile_Name}$White"
+		done
 		echo " "
-		read -p '请从上方选出你想要恢复的配置文件[q.返回]:' Recover_Config
+		echo "q.返回"
 		echo " "
-		if [ $Recover_Config == q ];then
+		read -p '请从上方选择一个文件:' Choose
+		case $Choose in
+		q)
 			break
-		fi
-		if [ -f $Recover_Config ];then
-			Recover_PATH=$Home/Projects/$Project/.config
-			if [ -f $Recover_PATH ];then
-				rm $Recover_PATH
+		;;
+		*)
+			if [ $Choose -le $Max_ConfigList_Line ];then
+				echo " "
+				ConfigFile=`sed -n ${Choose}p $ConfigList_File`
+				if [ -f "$ConfigFile" ];then
+					ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
+					cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
+					Say="[$ConfigFile]恢复成功!" && Color_Y
+					sleep 2
+				else
+					Say="未找到对应的配置文件!" && Color_R
+					sleep 2
+				fi
+			else
+				Say="输入错误,请输入正确的数字!" && Color_R
+				sleep 2
 			fi
-			cp $Recover_Config $Recover_PATH
-			Say="[$Recover_Config]恢复成功!" && Color_Y
-			sleep 2
-			break
-		else
-			Say="未找到[$Recover_Config],恢复失败!" && Color_R
-			sleep 2
-		fi
+		;;
+		esac
 	done
 	;;
 	3)
