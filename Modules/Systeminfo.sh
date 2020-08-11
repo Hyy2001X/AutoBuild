@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Systeminfo() {
-Update=2020.07.24
-Module_Version=V1.6
+Update=2020.08.11
+Module_Version=V1.7
 
 clear
 Current_Freq=`awk -F'[ :]' '/cpu MHz/ {print $4;exit}' /proc/cpuinfo`
@@ -13,9 +13,10 @@ Kernel_Version=`uname -r`
 Computer_Name=`hostname`
 Computer_Startup=`awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60} {printf("%d 天 %d 小时 %d 分钟\n",a,b,c)}' /proc/uptime`
 IP_Address=`ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | tr -d "addr:"`
-MemTotal_KB=`awk '/MemTotal/' /proc/meminfo | tr -cd "[0-9]"`
-((MemTotal_MB=$MemTotal_KB/1024))
-MemTotal_GB=`echo "scale=2; $MemTotal_KB / 1024000" | bc`
+MemTotal_MB=`free -m | awk  '{print $2}' | awk 'NR==2'`
+MemTotal_GB=`echo "scale=1; $MemTotal_MB / 1000" | bc`
+MemFree=`free -m | awk  '{print $7}' | awk 'NR==2'`
+MemFree_GB=`echo "scale=1; $MemFree / 1000" | bc`
 
 Get_OS() {
     [ -f /etc/redhat-release ] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
@@ -28,10 +29,12 @@ clear
 Say="System info Script $Module_Version" && Color_B
 
 Decoration
+echo -e "$Skyb操作系统$Yellow		$OS_INFO"
 echo -e "$Skyb计算机名称$Yellow		$Computer_Name"
-echo -e "$Skyb操作系统名称$Yellow		$OS_INFO"
+
 echo -e "$Skyb内核版本$Yellow		$Kernel_Version"
 echo -e "$Skyb物理内存$Yellow		${MemTotal_GB}GB/${MemTotal_MB}MB"
+echo -e "$Skyb可用内存$Yellow		${MemFree_GB}GB"
 echo -e "${Skyb}CPU 型号$Yellow		$CPU_Model"
 echo -e "${Skyb}CPU 频率$Yellow		$CPU_Freq"
 echo -e "${Skyb}CPU 架构$Yellow		$CPU_Base ($System_Bit Bit)"
