@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.09
-Version=V3.8.4
+Update=2020.08.11
+Version=V3.8.5
 
 Second_Menu() {
 while :
@@ -236,19 +236,20 @@ do
 done
 }
 
-Backup_FRestore() {
+Backup_Restore() {
 while :
 do
 	clear
 	Say="备份与恢复" && Color_B
 	echo " "
-	echo -e "${Yellow}1.备份[.config]"
+	echo "1.备份[.config]"
 	echo "2.恢复[.config]"
 	echo "3.备份[dl]库"
 	echo "4.恢复[dl]库"
 	echo "5.备份[$Project]源代码"
 	echo "6.恢复[$Project]源代码"
-	echo -e "${White}q.返回"
+	echo " "
+	echo "q.返回"
 	GET_Choose
 	case $Choose in
 	q)
