@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.11
-Version=V3.8.6
+Update=2020.08.12
+Version=V3.8.7
 
 Second_Menu() {
 while :
@@ -69,8 +69,7 @@ done
 
 Sources_Download() {
 if [ -f $Home/Projects/$Project/Makefile ];then
-	echo " "
-	Say="已检测到[$Project]项目,当前分支:$Branch" && Color_Y
+	Say="\n已检测到[$Project]项目,当前分支:$Branch" && Color_Y
 	sleep 3
 else
 	clear
@@ -182,26 +181,22 @@ do
 		;;
 		4)
 			cd $Home/Projects
-			echo " "
-			Say="正在删除$Project..." && Color_B
+			Say="\n正在删除$Project..." && Color_B
 			echo " "
 			rm -rf $Project
 			break
 		;;
 		5)
-			echo " "
 			rm -rf $Home/Projects/$Project/tmp
-			Say="$Yellow[临时文件/编译缓存]删除成功!" && Color_Y
+			Say="\n$Yellow[临时文件/编译缓存]删除成功!" && Color_Y
 		;;
 		6)
-			echo " "
 			rm -f $Home/Log/Update_${Project}_*
-			Say="$Yellow[更新日志]删除成功!" && Color_Y
+			Say=\n"$Yellow[更新日志]删除成功!" && Color_Y
 		;;
 		7)
-			echo " "
 			rm -f $Home/Log/Compile_${Project}_*
-			Say="$Yellow[编译日志]删除成功!" && Color_Y
+			Say="\n$Yellow[编译日志]删除成功!" && Color_Y
 		;;
 		esac
 		sleep 2
@@ -210,8 +205,7 @@ do
 	6)
 		cd $Home/Projects/$Project
 		rm -f ./.config*
-		echo " "
-		Say="[配置文件]删除成功!" && Color_Y
+		Say="\n[配置文件]删除成功!" && Color_Y
 		sleep 2
 	;;
 	7)
@@ -223,8 +217,7 @@ do
 			make -j$CPU_Threads download V=s
 			find dl -size -1024c -exec rm -f {} \;
 			awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
-			echo " "
-			Say="[dl]库下载结束,存储占用:$(du -sh dl | awk '{print $1}')B" && Color_B
+			Say="\n[dl]库下载结束,存储占用:$(du -sh dl | awk '{print $1}')B" && Color_B
 			echo " "
 			Enter
 		else
@@ -291,7 +284,7 @@ do
 			read -p '请输入自定义名称:' Backup_Config
 			echo " "
 			if [ -f ./Projects/$Project/.config ];then
-				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
+				cp ./Projects/$Project/.config ./Backups/Configs/"$Backup_Config"
 				Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Config'" && Color_Y
 			else
 				Say="备份失败!" && Color_R
@@ -302,12 +295,13 @@ do
 	done
 	;;
 	2)
+	if [ ! "`ls -A $Home/Backups/Configs`" = "" ];then
 	while :
 	do
 		clear
 		Say="恢复[.config]" && Color_B && echo " "
 		cd $Home/Backups/Configs
-		ls | cat > $Home/TEMP/Config.List
+		ls -A | cat > $Home/TEMP/Config.List
 		ConfigList_File=$Home/TEMP/Config.List
 		Max_ConfigList_Line=`sed -n '$=' $ConfigList_File`
 		for ((i=1;i<=$Max_ConfigList_Line;i++));
@@ -315,9 +309,7 @@ do
 			ConfigFile_Name=`sed -n ${i}p $ConfigList_File`
 			echo -e "${i}.$Yellow${ConfigFile_Name}$White"
 		done
-		echo " "
-		echo "q.返回"
-		echo " "
+		echo -e "\nq.返回\n"
 		read -p '请从上方选择一个文件:' Choose
 		case $Choose in
 		q)
@@ -333,7 +325,7 @@ do
 					Say="[$ConfigFile]恢复成功!" && Color_Y
 					sleep 2
 				else
-					Say="未找到对应的配置文件!" && Color_R
+					Say="未检测到对应的配置文件!" && Color_R
 					sleep 2
 				fi
 			else
@@ -343,6 +335,10 @@ do
 		;;
 		esac
 	done
+	else
+		Say="\n未检测到备份文件!" && Color_R
+		sleep 2
+	fi
 	;;
 	3)
 		echo " "
@@ -467,8 +463,7 @@ do
 			read -p '请输入路由器的IP地址:' SSH_IP
 			echo "Username=$SSH_User" > ./Configs/SSH
 			echo "IP=$SSH_IP" >> ./Configs/SSH
-			echo " "
-			Say="配置已保存到'$Home/Configs/SSH'" && Color_Y
+			Say="\n配置已保存到'$Home/Configs/SSH'" && Color_Y
 			sleep 2
 			ssh-keygen -R $SSH_IP
 			clear
@@ -503,8 +498,7 @@ do
 					read -p '请输入路由器的IP地址:' SSH_IP
 					echo "Username=$SSH_User" > ./Configs/SSH
 					echo "IP=$SSH_IP" >> ./Configs/SSH
-					echo " "
-					Say="配置已保存到'$Home/Configs/SSH'" && Color_Y
+					Say="\n配置已保存到'$Home/Configs/SSH'" && Color_Y
 				else
 					Say="若要创建新的配置文件,请先删除旧配置文件." && Color_R
 				fi
@@ -522,8 +516,7 @@ do
 			;;
 			4)
 				ssh-keygen -R $SSH_IP
-				echo " "
-				Say="[RSA Key Fingerprint]重置成功!" && Color_Y
+				Say="\n[RSA Key Fingerprint]重置成功!" && Color_Y
 				sleep 2
 			esac
 		done
@@ -545,8 +538,7 @@ do
 			read -p '请输入快捷启动的名称:' FastOpen		
 			echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
 			source ~/.bashrc
-			echo " "
-			Say="创建成功!在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
+			Say="\n创建成功!在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
 		else
 			Say="创建失败!" && Color_R
 		fi
@@ -651,8 +643,7 @@ if [ $? -eq 0 ];then
 		sleep 2
 	fi
 else
-	echo " "
-	Say="网络连接错误,更新失败!" && Color_R
+	Say="\n网络连接错误,更新失败!" && Color_R
 	sleep 2
 fi
 }
@@ -664,8 +655,7 @@ if [ $? -eq 0 ];then
 	echo " "
 	Enter
 else
-	echo " "
-	Say="网络连接错误,更新失败!" && Color_R
+	Say="\n网络连接错误,更新失败!" && Color_R
 	sleep 2
 fi
 }
@@ -720,11 +710,11 @@ if [ -f $Home/Projects/$Project/Makefile ];then
 	fi
 	echo -e "$Yellow"
 	read -p "[$Project]源代码下载成功!" Key
+	Second_Menu
 else
 	echo -e "$Red"
 	read -p "[$Project]源代码下载失败!" Key
 fi
-echo -e "$White"
 }
 
 Dir_Check() {
@@ -757,8 +747,7 @@ do
 	ColorfulUI_Check
 	clear
 	Say="AutoBuild Core Script $Version" && Color_B
-	echo " "
-	Say="1.Get Started!" && Color_G
+	Say="\n1.Get Started!" && Color_G
 	echo "2.网络测试"
 	echo "3.高级选项"
 	echo "4.脚本设置"
@@ -782,8 +771,7 @@ do
 		Project_Details Lede 1 coolsnowwolf
 		Project_Details Openwrt 2 Openwrt_Team	
 		Project_Details Lienol 3 Li2nOnline
-		echo " "
-		Say="x.更新所有源代码和Feeds" && Color_B
+		Say="\nx.更新所有源代码和Feeds" && Color_B
 		echo "q.返回"
 		Decoration
 		echo " "
@@ -800,8 +788,7 @@ do
 				Multi_Sources_Update Openwrt
 				Multi_Sources_Update Lienol
 			else
-				echo " "
-				Say="网络连接错误,更新失败!" && Color_R
+				Say="\n网络连接错误,更新失败!" && Color_R
 				sleep 2	
 			fi
 		;;
