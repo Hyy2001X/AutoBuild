@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.08.11
-Module_Version=V2.3-BETA
+Update=2020.08.12
+Module_Version=V2.3.1-BETA
 
 ROOTFS_SQUASHFS=0
 ROOTFS_EXT4FS=0
@@ -13,7 +13,6 @@ while :
 do
 	if [ -f $Home/Projects/$Project/.config ];then
 		cd $Home/Projects/$Project
-# Root filesystem archives
 		grep "CONFIG_TARGET_ROOTFS_CPIOGZ=y" .config > /dev/null
 		if [ $? -eq 0 ]; then
 			ROOTFS_CPIOGZ=1
@@ -24,7 +23,6 @@ do
 			ROOTFS_TARGZ=1
 			Filesystem_Archives=tar.gz
 		fi
-# Root filesystem images
 		grep "CONFIG_TARGET_ROOTFS_SQUASHFS=y" .config > /dev/null
 		if [ $? -eq 0 ]; then
 			ROOTFS_SQUASHFS=1
@@ -62,8 +60,7 @@ do
 		CPU_TEMP=`sensors | grep 'Core 0' | cut -c17-24`
 		clear
 		Say="Simple Compilation Script $Module_Version" && Color_B
-		echo " "
-		Say="CPU 信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP" && Color_Y
+		Say="\nCPU 信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP" && Color_Y
 		Decoration
 		if [ $MULTI_PROFILE_Check == 0 ];then
 			if [ $Default_Check == 0 ];then
@@ -92,13 +89,11 @@ do
 			fi
 		fi
 	else
-		echo " "
-		Say="未检测到配置文件,无法编译!" && Color_R
+		Say="\n未检测到配置文件,无法编译!" && Color_R
 		sleep 3
 		break
 	fi
-	echo " "
-	Say="编译参数" && Color_B
+	Say="\n编译参数" && Color_B
 	echo "1.make -j1"
 	echo "2.make -j1 V=s"
 	echo "3.make -j4"
@@ -196,8 +191,7 @@ do
 					echo "成功" >> $Home/Configs/${Project}_Lasted_Compile
 					Compile_Time_End
 					mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Firmware/$AutoBuild_Firmware
-					echo " "
-					Say="固件位置:$Home/Firmware" && Color_Y
+					Say="\n固件位置:$Home/Firmware" && Color_Y
 					echo -e "$Yellow固件名称:$Blue$AutoBuild_Firmware$White"
 					cd $Home/Firmware
 					Firmware_Size=`ls -l $AutoBuild_Firmware | awk '{print $5}'`
@@ -205,8 +199,7 @@ do
 					Firmware_MD5=`md5sum $AutoBuild_Firmware | cut -d ' ' -f1`
 					Firmware_SHA256=`sha256sum $AutoBuild_Firmware | cut -d ' ' -f1`
 					Say="$Firmware_Size_MB" && Color_Y
-					echo " "
-					Say="MD5:$Firmware_MD5" && Color_B
+					Say="\nMD5:$Firmware_MD5" && Color_B
 					Say="SHA256:$Firmware_SHA256" && Color_B
 					echo "固件名称:$AutoBuild_Firmware" > ./Details/$Firmware_Detail
 					echo "$Firmware_Size_MB" >> ./Details/$Firmware_Detail
@@ -222,19 +215,16 @@ do
 				fi
 			else
 				Compile_Time_End
-				echo " "
-				Say="[Default Profile]编译结束." && Color_Y
+				Say="\n[Default Profile]编译结束." && Color_Y
 				
 			fi
 		else
 			Compile_Time_End
-			echo " "
-			Say="[Multiple Devices]编译结束." && Color_Y
+			Say="\n[Multiple Devices]编译结束." && Color_Y
 		fi
 	else
 		Compile_Time_End
-		echo " "
-		Say="[x86 Devices]编译结束." && Color_Y
+		Say="\n[x86 Devices]编译结束." && Color_Y
 	fi
 	echo " "
 	Enter
