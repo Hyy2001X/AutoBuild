@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.12
-Version=V3.8.7
+Update=2020.08.03
+Version=V3.8.8
 
 Second_Menu() {
 while :
@@ -414,7 +414,7 @@ do
 	echo " "
 	echo "1.更新系统软件包"
 	Say="2.安装编译环境" && Color_G
-	echo "3.SSH服务"
+	echo "3.SSH Services"
 	echo "4.同步网络时间"
 	echo "5.存储空间占用统计"
 	echo "6.创建快捷启动"
@@ -459,58 +459,48 @@ do
 		echo " "
 		cd $Home
 		if [ ! -f ./Configs/SSH ];then
-			read -p '请输入路由器的用户名:' SSH_User
-			read -p '请输入路由器的IP地址:' SSH_IP
-			echo "Username=$SSH_User" > ./Configs/SSH
-			echo "IP=$SSH_IP" >> ./Configs/SSH
-			Say="\n配置已保存到'$Home/Configs/SSH'" && Color_Y
+			SSH_Profile
 			sleep 2
-			ssh-keygen -R $SSH_IP
-			clear
-			ssh $SSH_User@$SSH_IP
+			SSH_Login
 		else
-			SSH_User=`awk -F'[="]+' '/Username/{print $2}' ./Configs/SSH`
 			SSH_IP=`awk -F'[="]+' '/IP/{print $2}' ./Configs/SSH`
+			SSH_User=`awk -F'[="]+' '/Username/{print $2}' ./Configs/SSH`
+			SSH_Password=`awk -F'[="]+' '/Password/{print $2}' ./Configs/SSH`
 		fi
 		while :
 		do
 			clear
-			Say="SSH连接路由器" && Color_B
+			Say="SSH Services Script by Hyy2001" && Color_B
 			echo " "
 			echo "1.使用上次保存的配置连接"
 			echo "2.创建[新的配置文件]"
 			echo "3.删除[现有配置文件]"
 			echo "4.重置[RSA Key Fingerprint]"
-			echo "q.返回"
+			echo -e "\nq.返回"
 			GET_Choose
 			case $Choose in
 			q)
 				break
 			;;
 			1)
-				clear
-				ssh $SSH_User@$SSH_IP
+				SSH_Login
 			;;
 			2)
 				echo " "
 				if [ ! -f ./Configs/SSH ];then
-					read -p '请输入路由器的用户名:' SSH_User
-					read -p '请输入路由器的IP地址:' SSH_IP
-					echo "Username=$SSH_User" > ./Configs/SSH
-					echo "IP=$SSH_IP" >> ./Configs/SSH
-					Say="\n配置已保存到'$Home/Configs/SSH'" && Color_Y
+					SSH_Profile
 				else
-					Say="若要创建新的配置文件,请先删除旧配置文件." && Color_R
+					Say="若要创建[新的配置文件],请先删除[现有配置文件]." && Color_B
 				fi
-				sleep 2
+				sleep 3
 			;;
 			3)
 				echo " "
 				if [ -f ./Configs/SSH ];then
 					rm $Home/Configs/SSH
-					Say="[现有配置文件]删除成功!" && Color_Y
+					Say="[配置文件]删除成功!" && Color_Y
 				else
-					Say="[现有配置文件]删除失败!" && Color_R
+					Say="[配置文件]删除失败!" && Color_R
 				fi
 				sleep 2
 			;;
@@ -717,6 +707,29 @@ else
 fi
 }
 
+SSH_Login() {
+clear
+expect -c "
+	set timeout 1
+	spawn ssh $SSH_User@$SSH_IP
+	expect {
+		*yes/no* { send \"yes\r\"; exp_continue }
+		*password:* { send \"$SSH_Password\r\" }  
+	}
+	interact
+"
+}
+
+SSH_Profile() {
+read -p '请输入IP地址:' SSH_IP
+read -p '请输入用户名:' SSH_User
+read -p '请输入密码:' SSH_Password
+echo "IP=$SSH_IP" > ./Configs/SSH
+echo "Username=$SSH_User" >> ./Configs/SSH
+echo "Password=$SSH_Password" >> ./Configs/SSH
+Say="\nSSH配置已保存到'$Home/Configs/SSH'" && Color_Y
+}
+
 Dir_Check() {
 cd $Home
 for WD in `cat  ./Additional/Working_Directory`
@@ -821,7 +834,7 @@ Home=$(cd $(dirname $0); pwd)
 set -u
 
 Dependency="build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget swig rsync"
-Extra_Dependency="ntpdate httping openssh-client lm-sensors net-tools"
+Extra_Dependency="ntpdate httping openssh-client lm-sensors net-tools expect"
 
 CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
