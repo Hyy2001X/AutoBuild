@@ -7,8 +7,8 @@
 2.打开终端，更新系统软件包
 	`sudo apt-get update`
 
-3.安装 AutoBuild 依赖
-	`sudo apt-get -y install git httping ntpdate subversion openssh-client lm-sensors`
+3.安装 AutoBuild 必要依赖
+	`sudo apt-get -y install git httping ntpdate subversion openssh-client lm-sensors expect`
 
 4.克隆此项目到任意目录
 	`git clone https://github.com/Hyy2001X/AutoBuild.git AutoBuild`
@@ -26,4 +26,6 @@
 快捷脚本
 	`cd ./AutoBuild && chmod +x AutoBuild.sh && ./AutoBuild.sh`
 	
-AutoBuild 支持使用自定义源码地址,修改位于 Additional/GitLink_* 的文件即可实现。
+AutoBuild 支持使用自定义源码地址以及分支,修改位于 Additional/GitLink_* 的文件即可实现自定义.
+
+AutoBuild 支持自定义Command指令启动,首先启动AutoBuild,选择[3.高级选项/6.创建快捷启动],输入你想要的指令即可.
