@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.08.13
-Version=V3.8.9-b
+Version=V3.9.0-b
 
 Second_Menu() {
 while :
@@ -602,34 +602,33 @@ if [ $? -eq 0 ];then
 	cd $Home/Backups
 	if [ "`ls -A ./AutoBuild-Update`" = "" ];then
 		git clone https://github.com/Hyy2001X/AutoBuild AutoBuild-Update
-	else
-		cd ./AutoBuild-Update
-		Update_Logfile=$Home/Log/Script_Update_`(date +%Y%m%d_%H:%M)`.log
-		git pull 2>&1 | tee $Update_Logfile
-		if [ $(grep -o "fatal: 无法访问" $Update_Logfile | wc -l) = "0" ];then
-			if [ $(grep -o "已经是最新的" $Update_Logfile | wc -l) = "1" ];then
-				Say="\n强制合并到本地文件..." && Color_Y
-			else
-				Say="\n合并到本地文件..." && Color_Y
-			fi
-			Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
-			Old_Version_Dir=$Old_Version-`(date +%Y%m%d_%H:%M)`
-			Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir
-			mkdir $Backups_Dir
-			mv $Home/AutoBuild.sh $Backups_Dir/AutoBuild.sh
-			mv $Home/README.md $Backups_Dir/README.md
-			mv $Home/LICENSE $Backups_Dir/LICENSE
-			mv $Home/Additional $Backups_Dir/Additional
-			mv $Home/Modules $Backups_Dir/Modules
-			cp -a * $Home
-			Say="\nAutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
-			echo -e "$Yellow"
-			read -p "AutoBuild 更新成功!" Key
-			$Home/AutoBuild.sh
+	fi
+	cd ./AutoBuild-Update
+	Update_Logfile=$Home/Log/Script_Update_`(date +%Y%m%d_%H:%M)`.log
+	git pull 2>&1 | tee $Update_Logfile
+	if [ $(grep -o "fatal: 无法访问" $Update_Logfile | wc -l) = "0" ];then
+		if [ $(grep -o "已经是最新的" $Update_Logfile | wc -l) = "1" ];then
+			Say="\n强制合并到本地文件..." && Color_Y
 		else
-			echo -e "$Red"
-			read -p "AutoBuild 更新失败!" Key
+			Say="\n合并到本地文件..." && Color_Y
 		fi
+		Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
+		Old_Version_Dir=$Old_Version-`(date +%Y%m%d_%H:%M)`
+		Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir
+		mkdir $Backups_Dir
+		mv $Home/AutoBuild.sh $Backups_Dir/AutoBuild.sh
+		mv $Home/README.md $Backups_Dir/README.md
+		mv $Home/LICENSE $Backups_Dir/LICENSE
+		mv $Home/Additional $Backups_Dir/Additional
+		mv $Home/Modules $Backups_Dir/Modules
+		cp -a * $Home
+		Say="\nAutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
+		echo -e "$Yellow"
+		read -p "AutoBuild 更新成功!" Key
+		$Home/AutoBuild.sh
+	else
+		echo -e "$Red"
+		read -p "AutoBuild 更新失败!" Key
 	fi
 else
 	Say="\n网络连接错误,更新失败!" && Color_R
