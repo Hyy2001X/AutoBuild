@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.08.14
-Version=V3.9.4-b
+Version=V3.9.5
 
 Second_Menu() {
 while :
@@ -608,14 +608,17 @@ if [ $? -eq 0 ];then
 		Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
 		Old_Version_Dir=$Old_Version-`(date +%Y%m%d_%H:%M)`
 		Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir
-		mkdir $Backups_Dir
+		if [ -d $Backups_Dir ];then
+			rm -rf $Backups_Dir
+		fi
+		mkdir -p $Backups_Dir
 		mv $Home/AutoBuild.sh $Backups_Dir/AutoBuild.sh
 		mv $Home/README.md $Backups_Dir/README.md
 		mv $Home/LICENSE $Backups_Dir/LICENSE
 		mv $Home/Additional $Backups_Dir/Additional
 		mv $Home/Modules $Backups_Dir/Modules
 		cp -a * $Home
-		Say="AutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
+		Say="\nAutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
 		echo -e "$Yellow"
 		read -p "AutoBuild 更新成功!" Key
 		$Home/AutoBuild.sh
@@ -634,8 +637,7 @@ timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	cd $Home
 	clear
-	Say="开始下载更新..." && Color_Y
-	echo " "
+	Say="开始下载更新...\n" && Color_Y
 	Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
 	Old_Version_Dir=$Old_Version-`(date +%Y%m%d_%H:%M)`
 	Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir
@@ -648,23 +650,23 @@ if [ $? -eq 0 ];then
 	cp $Home/LICENSE $Backups_Dir/LICENSE
 	cp -a $Home/Additional $Backups_Dir/Additional
 	cp -a $Home/Modules $Backups_Dir/Modules
-	Say="AutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
+	Say="AutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'\n" && Color_B
 	rm -rf ./TEMP
 	svn checkout https://github.com/Hyy2001X/AutoBuild/trunk ./TEMP
-	echo " "
 	if [ -f ./TEMP/AutoBuild.sh ];then
 		rm -rf ./Modules
 		rm -rf ./Additional
 		rm -f ./AutoBuild.sh
+		Say="\n合并到本地文件..." && Color_Y
 		mv ./TEMP/* $Home
 		chmod +x $Home/AutoBuild.sh
 		chmod +x -R $Home/Modules
 		New_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
-		echo -e "${Yellow}AutoBuild_Core ${Blue}$Old_Version --> $New_Version${Yellow}\n"
+		echo -e "\n${Yellow}AutoBuild_Core ${Blue}$Old_Version --> $New_Version${Yellow}\n"
 		read -p "AutoBuild 更新成功!" Key
 		./AutoBuild.sh
 	else
-		Say="AutoBuild 更新失败!" && Color_R
+		Say="\nAutoBuild 更新失败!" && Color_R
 		sleep 2
 	fi
 else
