@@ -4,13 +4,13 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.08.14
-Version=V3.9.1-b
+Version=V3.9.2-b
 
 Second_Menu() {
 while :
 do
-	clear
 	Dir_Check
+	clear
 	if [ -f ./Projects/$Project/Makefile ];then
 		Say="源码位置:$Home/Projects/$Project" && Color_Y
 		if [ $Project == Lede ];then
@@ -588,7 +588,7 @@ do
 done
 }
 
-Script_Update() {
+Script_Update_Beta() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	clear
@@ -623,6 +623,50 @@ if [ $? -eq 0 ];then
 	else
 		echo -e "$Red"
 		read -p "AutoBuild 更新失败!" Key
+	fi
+else
+	Say="\n网络连接错误,更新失败!" && Color_R
+	sleep 2
+fi
+}
+
+Script_Update() {
+timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
+if [ $? -eq 0 ];then
+	cd $Home
+	clear
+	Say="开始下载更新..." && Color_Y
+	echo " "
+	Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
+	Old_Version_Dir=$Old_Version-`(date +%Y%m%d_%H:%M)`
+	Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir
+	if [ -d $Backups_Dir ];then
+		rm -rf $Backups_Dir
+	fi
+	mkdir -p $Backups_Dir
+	cp $Home/AutoBuild.sh $Backups_Dir/AutoBuild.sh
+	cp $Home/README.md $Backups_Dir/README.md
+	cp $Home/LICENSE $Backups_Dir/LICENSE
+	cp -a $Home/Additional $Backups_Dir/Additional
+	cp -a $Home/Modules $Backups_Dir/Modules
+	Say="\nAutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
+	rm -rf ./TEMP
+	svn checkout https://github.com/Hyy2001X/AutoBuild/trunk ./TEMP
+	echo " "
+	if [ -f ./TEMP/AutoBuild.sh ];then
+		rm -rf ./Modules
+		rm -rf ./Additional
+		rm -f ./AutoBuild.sh
+		mv ./TEMP/* $Home
+		chmod +x $Home/AutoBuild.sh
+		chmod +x -R $Home/Modules
+		New_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
+		echo -e "${Yellow}AutoBuild_Core ${Blue}$Old_Version --> $New_Version${Yellow}\n"
+		read -p "AutoBuild 更新成功!" Key
+		./AutoBuild.sh
+	else
+		Say="AutoBuild 更新失败!" && Color_R
+		sleep 2
 	fi
 else
 	Say="\n网络连接错误,更新失败!" && Color_R
@@ -744,6 +788,15 @@ else
 fi
 }
 
+Script_Update_Check() {
+if [ $ScriptUpdater ==  ];then
+	Script_Update_Beta
+else
+	Script_Update
+fi
+
+}
+
 AutoBuild_Core() {
 while :
 do
@@ -838,5 +891,6 @@ do
 	source $Module
 done
 
-Default_Settings
+Dir_Check
+Settings_Props
 AutoBuild_Core
