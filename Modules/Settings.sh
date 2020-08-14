@@ -2,10 +2,11 @@
 
 Settings() {
 Update=2020.08.14
-Module_Version=V1.4.1
+Module_Version=V2.0-BETA
 
 while :
 do
+	Settings_Props
 	ColorfulUI_Check
 	clear
 	Say="脚本设置[实验性]\n" && Color_B
@@ -29,6 +30,11 @@ do
 	else
 		Say="4.保存编译日志		[打开]" && Color_Y
 	fi
+	if [ $ScriptUpdater == 0 ];then
+		Say="5.脚本更新模式		[新版]" && Color_Y
+	else
+		Say="5.脚本更新模式		[旧版]" && Color_B
+	fi
 	echo " "
 	echo "x.恢复所有默认设置"
 	echo "q.返回"
@@ -38,34 +44,51 @@ do
 		break
 	;;
 	x)
-		Default_Settings
+		Set_Default_Settings
 	;;
 	1)
 		if [ $SimpleCompilation == 0 ];then
 			SimpleCompilation=1
+			sed -i "s/SimpleCompilation=0/SimpleCompilation=1/g" ./Settings
 		else
 			SimpleCompilation=0
+			sed -i "s/SimpleCompilation=1/SimpleCompilation=0/g" ./Settings
 		fi
 	;;
 	2)
 		if [ $ColorfulUI == 0 ];then
 			ColorfulUI=1
+			sed -i "s/ColorfulUI=0/ColorfulUI=1/g" ./Settings
 		else
 			ColorfulUI=0
+			sed -i "s/ColorfulUI=1/ColorfulUI=0/g" ./Settings
 		fi
 	;;
 	3)
 		if [ $DeveloperMode == 0 ];then
 			DeveloperMode=1
+			sed -i "s/DeveloperMode=0/DeveloperMode=1/g" ./Settings
 		else
 			DeveloperMode=0
+			sed -i "s/DeveloperMode=1/DeveloperMode=0/g" ./Settings
 		fi
 	;;
 	4)
 		if [ $SaveCompileLog == 0 ];then
 			SaveCompileLog=1
+			sed -i "s/SaveCompileLog=0/SaveCompileLog=1/g" ./Settings
 		else
 			SaveCompileLog=0
+			sed -i "s/SaveCompileLog=1/SaveCompileLog=0/g" ./Settings
+		fi
+	;;
+	5)
+		if [ $ScriptUpdater == 0 ];then
+			ScriptUpdater=1
+			sed -i "s/ScriptUpdater=0/ScriptUpdater=1/g" ./Settings
+		else
+			SaveCompileLog=0
+			sed -i "s/ScriptUpdater=1/ScriptUpdater=0/g" ./Settings
 		fi
 	esac
 done
@@ -76,6 +99,29 @@ DeveloperMode=0
 SimpleCompilation=1
 ColorfulUI=1
 SaveCompileLog=0
+ScriptUpdater=0
+}
+
+Set_Default_Settings() {
+Default_Settings
+echo "DeveloperMode=$DeveloperMode" > $Home/Configs/Settings
+echo "SimpleCompilation=$SimpleCompilation" >> $Home/Configs/Settings
+echo "ColorfulUI=$ColorfulUI" >> $Home/Configs/Settings
+echo "SaveCompileLog=$SaveCompileLog" >> $Home/Configs/Settings
+echo "ScriptUpdater=$ScriptUpdater" >> $Home/Configs/Settings
+}
+
+Settings_Props() {
+cd $Home/Configs
+if [ ! -f $Home/Configs/Settings ];then
+	Set_Default_Settings
+else
+	DeveloperMode=`awk -F'[="]+' '/DeveloperMode/{print $2}' Settings`
+	SimpleCompilation=`awk -F'[="]+' '/SimpleCompilation/{print $2}' Settings`
+	ColorfulUI=`awk -F'[="]+' '/ColorfulUI/{print $2}' Settings`
+	SaveCompileLog=`awk -F'[="]+' '/SaveCompileLog/{print $2}' Settings`
+	ScriptUpdater=`awk -F'[="]+' '/ScriptUpdater/{print $2}' Settings`
+fi
 }
 
 ColorfulUI_Check() {
