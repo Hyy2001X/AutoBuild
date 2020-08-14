@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.08.14
-Version=V3.9.3-b
+Version=V3.9.4-b
 
 Second_Menu() {
 while :
@@ -648,7 +648,7 @@ if [ $? -eq 0 ];then
 	cp $Home/LICENSE $Backups_Dir/LICENSE
 	cp -a $Home/Additional $Backups_Dir/Additional
 	cp -a $Home/Modules $Backups_Dir/Modules
-	Say="\nAutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
+	Say="AutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
 	rm -rf ./TEMP
 	svn checkout https://github.com/Hyy2001X/AutoBuild/trunk ./TEMP
 	echo " "
@@ -788,7 +788,7 @@ fi
 }
 
 Script_Update_Check() {
-if [ $ScriptUpdater ==  ];then
+if [ $ScriptUpdater ==  0 ];then
 	Script_Update_Beta
 else
 	Script_Update
