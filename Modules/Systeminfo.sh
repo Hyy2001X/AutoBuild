@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Systeminfo() {
-Update=2020.08.11
-Module_Version=V1.7
+Update=2020.08.14
+Module_Version=V1.7.1
 
 clear
 Current_Freq=`awk -F'[ :]' '/cpu MHz/ {print $4;exit}' /proc/cpuinfo`
@@ -27,11 +27,9 @@ OS_INFO=$( Get_OS )
 
 clear
 Say="System info Script $Module_Version" && Color_B
-
 Decoration
 echo -e "$Skyb操作系统$Yellow		$OS_INFO"
 echo -e "$Skyb计算机名称$Yellow		$Computer_Name"
-
 echo -e "$Skyb内核版本$Yellow		$Kernel_Version"
 echo -e "$Skyb物理内存$Yellow		${MemTotal_GB}GB/${MemTotal_MB}MB"
 echo -e "$Skyb可用内存$Yellow		${MemFree_GB}GB"
@@ -44,6 +42,5 @@ echo -e "${Skyb}CPU 当前温度$Yellow		${Current_Temp}"
 echo -e "${Skyb}IP地址$Yellow			$IP_Address"
 echo -e "$Skyb开机时长$Yellow		$Computer_Startup"
 Decoration
-echo " "
 Enter
 }

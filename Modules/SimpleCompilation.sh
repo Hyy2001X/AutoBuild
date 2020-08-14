@@ -226,7 +226,6 @@ do
 		Compile_Time_End
 		Say="\n[x86 Devices]编译结束." && Color_Y
 	fi
-	echo " "
 	Enter
 	break
 done
@@ -239,7 +238,6 @@ else
 	clear
 	cd $Home/Projects/$Project
 	make -j$(($(nproc) + 1)) V=s
-	echo " "
 	Enter
 fi
 }

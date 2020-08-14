@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 StorageDetails() {
-Update=2020.08.07
-Module_Version=V2.3
+Update=2020.08.14
+Module_Version=V2.3.1
 
 clear
 cd $Home
@@ -16,7 +16,6 @@ Lienol_Size=`du -sh ./Projects/Lienol | awk '{print $1}'`
 clear
 Say="Storage Details Script $Module_Version" && Color_B
 Decoration
-
 echo -e "$Skyb项目名称	存储位置				存储占用$White"
 echo " "
 Type_Space="				"
@@ -27,9 +26,7 @@ StorageDetails_Mod Lienol /Projects/Lienol $Lienol_Size
 Type_Space="				"
 StorageDetails_Mod 固件 /Firmware $Firmware_Size
 StorageDetails_Mod 备份 /Backups $Backups_Size
-
 Decoration
-echo " "
 Enter
 }
 
