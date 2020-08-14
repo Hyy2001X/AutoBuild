@@ -1,19 +1,18 @@
 # AutoBuild Script Module by Hyy2001
 
 Network_Test() {
-Update=2020.07.20
-Module_Version=V2.7
+Update=2020.08.14
+Module_Version=V2.7.1
 
 clear
 Say="Network Test Script $Module_Version" && Color_B
 Decoration
-echo -e "$Skyb网址			IP地址			状态		延迟$White"
-echo " "
-Network_Mod www.baidu.com 1
-Network_Mod www.github.com 2
-Network_Mod www.google.com 2
+echo -e "$Skyb网址			IP地址			状态		延迟$White\n"
+Network_Mod www.baidu.com 3
+Network_Mod www.github.com 1
+Network_Mod www.google.com 1
 
-echo " " && Decoration && echo " "
+echo " " && Decoration
 Enter
 }
 

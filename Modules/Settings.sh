@@ -1,15 +1,14 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.07.19
-Module_Version=V1.4.0
+Update=2020.08.14
+Module_Version=V1.4.1
 
 while :
 do
 	ColorfulUI_Check
 	clear
-	Say="脚本设置[实验性]" && Color_B
-	echo " "
+	Say="脚本设置[实验性]\n" && Color_B
 	if [ $SimpleCompilation == 0 ];then
 		Say="1.高级编译		[关闭]" && Color_R
 	else
@@ -117,6 +116,7 @@ read -p '请从上方选择一个操作:' Choose
 }
 
 Enter() {
+echo " "
 read -p "按下[回车]键以继续..." Key
 }
 

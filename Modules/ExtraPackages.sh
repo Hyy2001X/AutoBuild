@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.08.06
-Module_Version=V4.7-b
+Update=2020.08.14
+Module_Version=V4.7.1-b
 
 PKG_Home=$Home/Projects/$Project/package
 if [ ! -d $PKG_Home/ExtraPackages ];then
@@ -14,8 +14,7 @@ while :
 do
 	cd $PKG_Dir
 	clear
-	Say="Extra Packages Script $Module_Version" && Color_B
-	echo " "
+	Say="Extra Packages Script $Module_Version\n" && Color_B
 	echo "1.SmartDNS"
 	echo "2.AdGuardHome"
 	echo "3.OpenClash"
@@ -109,8 +108,7 @@ while :
 do
 	cd $PKG_Dir
 	clear
-	echo -e "${Blue}添加第三方主题包 Page-1${White}"
-	echo " "
+	echo -e "${Blue}添加第三方主题包 Page-1${White}\n"
 	echo "1.luci-theme-argon"
 	echo "2.luci-theme-argon-mc"
 	echo "3.luci-theme-argon-dark-mod"
@@ -120,8 +118,7 @@ do
 	echo "7.luci-theme-atmaterial"
 	echo "8.luci-theme-darkmatter"
 	echo "9.luci-theme-opentomcat"
-	echo " "
-	echo -e "${Blue}n.查看下一页$White"
+	echo -e "\n${Blue}n.查看下一页$White"
 	echo "x.关于主题"
 	echo "q.返回"
 	echo " "
@@ -199,8 +196,7 @@ ExtraThemes_P2() {
 while :
 do
 	clear
-	echo -e "${Blue}添加第三方主题包 Page-2${White}"
-	echo " "
+	echo -e "${Blue}添加第三方主题包 Page-2${White}\n"
 	echo "1.luci-theme-opentomato"
 	echo "2.luci-theme-Butterfly"
 	echo "3.luci-theme-Butterfly-dark"
@@ -208,8 +204,7 @@ do
 	echo "5.luci-theme-edge"
 	echo "6.luci-theme-argonv2"
 	echo "7.luci-theme-argonv3"
-	echo " "
-	echo -e "${White}x.关于主题"
+	echo -e "\n${White}x.关于主题"
 	echo "q.返回"
 	echo " "
 	read -p '请从上方选择一个主题包:' Choose
@@ -300,7 +295,6 @@ if [ $? -ne 0 ]; then
 	echo "src-git $SRC_NAME $SRC_URL" >> feeds.conf.default
 	./scripts/feeds update $SRC_NAME
 	./scripts/feeds install -a
-	echo " "
 	Enter
 else
 	Say="添加失败,无法重复添加!" && Color_R
@@ -311,8 +305,7 @@ fi
 ExtraThemes_info() {
 clear
 Decoration
-echo -e "${Skyb}主题源码来自以下作者:$Yellow"
-echo " "
+echo -e "${Skyb}主题源码来自以下作者:$Yellow\n"
 echo "https://github.com/jerrykuku"
 echo "https://github.com/project-openwrt"
 echo "https://github.com/Lienol"
@@ -323,6 +316,5 @@ echo "https://github.com/garypang13"
 echo "https://github.com/rosywrt"
 echo -e "$White "
 Decoration
-echo " "
 Enter
 }
