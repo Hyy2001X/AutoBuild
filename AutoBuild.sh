@@ -4,12 +4,11 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.08.14
-Version=V3.9.2-b
+Version=V3.9.3-b
 
 Second_Menu() {
 while :
 do
-	Dir_Check
 	clear
 	if [ -f ./Projects/$Project/Makefile ];then
 		Say="源码位置:$Home/Projects/$Project" && Color_Y
@@ -428,7 +427,7 @@ do
 		break
 	;;
 	x)
-		Script_Update
+		Script_Update_Check
 	;;
 	1)
 		clear
@@ -616,7 +615,7 @@ if [ $? -eq 0 ];then
 		mv $Home/Additional $Backups_Dir/Additional
 		mv $Home/Modules $Backups_Dir/Modules
 		cp -a * $Home
-		Say="\nAutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
+		Say="AutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
 		echo -e "$Yellow"
 		read -p "AutoBuild 更新成功!" Key
 		$Home/AutoBuild.sh
@@ -800,6 +799,7 @@ fi
 AutoBuild_Core() {
 while :
 do
+	Settings_Props
 	Dir_Check
 	ColorfulUI_Check
 	clear
