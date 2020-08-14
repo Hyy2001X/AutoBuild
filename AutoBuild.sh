@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.13
-Version=V3.9.0-b
+Update=2020.08.14
+Version=V3.9.1-b
 
 Second_Menu() {
 while :
@@ -218,7 +218,6 @@ do
 			find dl -size -1024c -exec rm -f {} \;
 			awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
 			Say="\n[dl]库下载结束,存储占用:$(du -sh dl | awk '{print $1}')B" && Color_B
-			echo " "
 			Enter
 		else
 			Say="网络连接错误,[dl]库下载失败!" && Color_R
@@ -345,28 +344,28 @@ do
 		cd $Home/Projects
 		if [ ! -d ./$Project/dl ];then
 			Say="未找到'$Home/Projects/$Project/dl',备份失败!" && Color_R
+			sleep 2
 		else
 			echo -ne "\r$Yellow正在备份[dl]库...$White\r"
 			cp -a $Home/Projects/$Project/dl $Home/Backups/
 			Say="备份成功![dl]库已备份到:'$Home/Backups/dl'" && Color_Y
 			Say="存储占用:$(du -sh $Home/Backups/dl | awk '{print $1}')B" && Color_B
+			Enter
 		fi
-		echo " "
-		Enter
 	;;
 	4)
 		echo " "
 		cd $Home
 		if [ ! -d ./Backups/dl ];then
 			Say="未找到'$Home/Backups/dl',恢复失败!" && Color_R
+			sleep 2
 		else
 			echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 			cp -a $Home/Backups/dl $Home/Projects/$Project
 			Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_Y
 			Say="存储占用:$(du -sh $Home/Projects/$Project/dl | awk '{print $1}')B" && Color_B
+			Enter
 		fi
-		echo " "
-		Enter
 	;;
 	5)
 		echo " "
@@ -377,7 +376,6 @@ do
 		sudo cp -a $Home/Projects/$Project $Home/Backups/Projects
 		Say="备份成功![$Project]源代码已备份到:'$Home/Backups/Projects/$Project'" && Color_Y
 		Say="存储占用:$(du -sh $Home/Backups/Projects/$Project | awk '{print $1}')B" && Color_B
-		echo " "
 		Enter
 	;;
 	6)
@@ -387,7 +385,6 @@ do
 			sudo cp -a $Home/Backups/Projects/$Project $Home/Projects/
 			Say="恢复成功![$Project]源代码已恢复到:'$Home/Projects/$Project'" && Color_Y
 			Say="存储占用:$(du -sh $Home/Projects/$Project | awk '{print $1}')B" && Color_B
-			echo " "
 			Enter
 		else
 			Say="未找到[$Project]源代码,恢复失败!" && Color_R
@@ -437,7 +434,6 @@ do
 		clear
 		sudo apt-get update
 		sudo apt-get upgrade
-		echo " "
 		Enter
 	;;
 	2)
@@ -452,7 +448,6 @@ do
 			sudo apt-get -y install $Dependency $Extra_Dependency
 			Update_Times=$(($Update_Times + 1))
 		done
-		echo " "
 		Enter
 	;;
 	3)
@@ -537,7 +532,6 @@ do
 	7)
 		clear
 		df -h
-		echo " "
 		Enter
 	;;
 	8)
@@ -640,7 +634,6 @@ Sources_Update_Check() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	Sources_Update_Core
-	echo " "
 	Enter
 else
 	Say="\n网络连接错误,更新失败!" && Color_R
