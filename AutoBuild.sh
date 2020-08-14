@@ -4,13 +4,13 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.08.14
-Version=V3.9.5
+Version=V3.9.5-b
 
 Second_Menu() {
 while :
 do
 	clear
-	if [ -f ./Projects/$Project/Makefile ];then
+	if [ -f $Home/Projects/$Project/Makefile ];then
 		Say="源码位置:$Home/Projects/$Project" && Color_Y
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
