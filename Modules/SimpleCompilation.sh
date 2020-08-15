@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.08.12
-Module_Version=V2.3.1-BETA
+Update=2020.08.15
+Module_Version=V2.3.3-b
 
 ROOTFS_SQUASHFS=0
 ROOTFS_EXT4FS=0
@@ -182,14 +182,21 @@ do
 		Compile_Date=`(date +%Y%m%d_%H:%M)`
 		$Compile_Parameter 2>&1 | tee $Home/Log/Compile_${Project}_${Compile_Date}.log
 	fi
+	Say="\n检出[dl]库到'$Home/Backups/dl'..." && Color_Y
 	awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
-	echo " "
 	if [ $X86_Check == 0 ];then
 		if [ $MULTI_PROFILE_Check == 0 ];then
 			if [ $Default_Check == 0 ];then
 				if [ -f ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name ];then
+					Say="检出软件包到'$Home/Packages'...\n" && Color_Y
+					cd $Home/Packages
+					mkdir -p $TARGET_ARCH_PACKAGES
+					Packages_Dir=$Home/Projects/$Project/bin
+					cp -a $(find $Packages_Dir/packages -type f -name "*.ipk") ./$TARGET_ARCH_PACKAGES
+					mv -f $(find ./$TARGET_ARCH_PACKAGES/ -type f -name "*all.ipk") ./
 					echo "成功" >> $Home/Configs/${Project}_Lasted_Compile
 					Compile_Time_End
+					cd $Home/Projects/$Project
 					mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Firmware/$AutoBuild_Firmware
 					Say="\n固件位置:$Home/Firmware" && Color_Y
 					echo -e "$Yellow固件名称:$Blue$AutoBuild_Firmware$White"
@@ -210,7 +217,7 @@ do
 				else
 					echo " "
 					Compile_Time_End
-					Say="编译失败!" && Color_R
+					Say="\n编译失败!" && Color_R
 					echo "失败" >> $Home/Configs/${Project}_Lasted_Compile
 				fi
 			else
