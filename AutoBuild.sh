@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.14
-Version=V3.9.5-b
+Update=2020.08.15
+Version=V3.9.6-b
 
 Second_Menu() {
 while :
@@ -61,7 +61,6 @@ do
 	;;
 	5)
 		Project_Options
-	;;
 	esac
 done
 }
@@ -712,18 +711,10 @@ fi
 }
 
 Project_Details() {
-if [ ! $1 == Lede ];then
-	if [ -f ./Projects/$1/Makefile ];then
-		echo -e "${White}$2.$1		$Yellow[已检测到]$Blue	$3"
-	else
-		echo -e "${White}$2.$1		$Red[未检测到]$Blue	$3"
-	fi
+if [ -f ./Projects/$1/Makefile ];then
+	echo -e "${White}$2.$1$DE$Yellow[已检测到]$Blue	$3"
 else
-	if [ -f ./Projects/$1/Makefile ];then
-		echo -e "${White}$2.$1			$Yellow[已检测到]$Blue	$3"
-	else
-		echo -e "${White}$2.$1			$Red[未检测到]$Blue	$3"
-	fi
+	echo -e "${White}$2.$1$DE$Red[未检测到]$Blue	$3"
 fi
 }
 
@@ -802,7 +793,6 @@ AutoBuild_Core() {
 while :
 do
 	Settings_Props
-	Dir_Check
 	ColorfulUI_Check
 	clear
 	Say="AutoBuild Core Script $Version" && Color_B
@@ -827,7 +817,9 @@ do
 		cd $Home
 		Say="项目名称		[项目状态]	维护者" && Color_G
 		echo " "
+		DE="			"
 		Project_Details Lede 1 coolsnowwolf
+		DE="		"
 		Project_Details Openwrt 2 Openwrt_Team	
 		Project_Details Lienol 3 Li2nOnline
 		Say="\nx.更新所有源代码和Feeds" && Color_B
@@ -894,5 +886,4 @@ do
 done
 
 Dir_Check
-Settings_Props
 AutoBuild_Core
