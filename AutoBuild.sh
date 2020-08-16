@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.15
-Version=V3.9.6-b
+Update=2020.08.16
+Version=V3.9.7-b
 
 Second_Menu() {
 while :
@@ -15,7 +15,16 @@ do
 		if [ $Project == Lede ];then
 			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd ./Projects/$Project/package/lean/default-settings/files
-				Lede_Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" zzz-default-settings`
+				cp zzz-default-settings $Home/Backups/zzz-default-settings
+				Lede_Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" ./zzz-default-settings`
+				Date=`date +%Y/%m/%d`
+				if [ ! $(grep -o "Compiled by $Username" ./zzz-default-settings | wc -l) = "1" ];then
+					sed -i "s?$Lede_Version?$Lede_Version Compiled by $Username [$Date]?g" ./zzz-default-settings
+				fi
+				Old_Date=`egrep -o "[0-9]+\/[0-9]+\/[0-9]+" ./zzz-default-settings`
+				if [ ! $Date == $Old_Date ];then
+					sed -i "s?$Old_Date?$Date?g" ./zzz-default-settings
+				fi
 				Say="源码版本:$Lede_Version" && Color_Y
 			fi
 		fi
@@ -758,6 +767,7 @@ Say="\nSSH配置已保存到'$Home/Configs/SSH'" && Color_Y
 }
 
 Dir_Check() {
+clear
 cd $Home
 for WD in `cat  ./Additional/Working_Directory`
 do
@@ -765,6 +775,15 @@ do
 		mkdir -p $WD
 	fi
 done
+}
+
+First_Startup_Check() {
+if [ ! -f $Home/Configs/Username ];then
+	read -p '请创建一个用户名:' Username
+	echo "$Username" > $Home/Configs/Username
+else
+	Username=`cat $Home/Configs/Username`
+fi
 }
 
 Second_Menu_Check() {
@@ -886,4 +905,5 @@ do
 done
 
 Dir_Check
+First_Startup_Check
 AutoBuild_Core
