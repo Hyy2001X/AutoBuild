@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.08.16
-Module_Version=V2.3.4-b
+Update=2020.08.19
+Module_Version=V2.3.5-b
 
 ROOTFS_SQUASHFS=0
 ROOTFS_EXT4FS=0
@@ -173,6 +173,15 @@ do
 		fi
 	fi
 	if [ $Project == Lede ];then
+		cd $Home/Projects/$Project/package/lean/default-settings/files
+		Date=`date +%Y/%m/%d`
+		if [ ! $(grep -o "Compiled by $Username" ./zzz-default-settings | wc -l) = "1" ];then
+			sed -i "s?$Lede_Version?$Lede_Version Compiled by $Username [$Date]?g" ./zzz-default-settings
+		fi
+		Old_Date=`egrep -o "[0-9]+\/[0-9]+\/[0-9]+" ./zzz-default-settings`
+		if [ ! $Date == $Old_Date ];then
+			sed -i "s?$Old_Date?$Date?g" ./zzz-default-settings
+		fi
 		cd $Home/Projects/$Project/package/base-files/files/etc
 		echo "$Lede_Version-`date +%Y%m%d`" > openwrt_date
 	fi
