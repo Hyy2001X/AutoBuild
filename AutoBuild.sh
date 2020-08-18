@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.16
-Version=V3.9.7-b
+Update=2020.08.19
+Version=V3.9.8
 
 Second_Menu() {
 while :
@@ -13,18 +13,10 @@ do
 	if [ -f $Home/Projects/$Project/Makefile ];then
 		Say="源码位置:$Home/Projects/$Project" && Color_Y
 		if [ $Project == Lede ];then
-			if [ -f ./Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
-				cd ./Projects/$Project/package/lean/default-settings/files
+			if [ -f $Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
+				cd $Home/Projects/$Project/package/lean/default-settings/files
 				cp zzz-default-settings $Home/Backups/zzz-default-settings
 				Lede_Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" ./zzz-default-settings`
-				Date=`date +%Y/%m/%d`
-				if [ ! $(grep -o "Compiled by $Username" ./zzz-default-settings | wc -l) = "1" ];then
-					sed -i "s?$Lede_Version?$Lede_Version Compiled by $Username [$Date]?g" ./zzz-default-settings
-				fi
-				Old_Date=`egrep -o "[0-9]+\/[0-9]+\/[0-9]+" ./zzz-default-settings`
-				if [ ! $Date == $Old_Date ];then
-					sed -i "s?$Old_Date?$Date?g" ./zzz-default-settings
-				fi
 				Say="源码版本:$Lede_Version" && Color_Y
 			fi
 		fi
