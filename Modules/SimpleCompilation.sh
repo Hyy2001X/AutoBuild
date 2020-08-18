@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.08.15
-Module_Version=V2.3.3-b
+Update=2020.08.16
+Module_Version=V2.3.4-b
 
 ROOTFS_SQUASHFS=0
 ROOTFS_EXT4FS=0
@@ -171,6 +171,10 @@ do
 				echo " "
 			fi
 		fi
+	fi
+	if [ $Project == Lede ];then
+		cd $Home/Projects/$Project/package/base-files/files/etc
+		echo "$Lede_Version-`date +%Y%m%d`" > openwrt_date
 	fi
 	Say="开始编译$Project..." && Color_Y
 	Compile_Start=`date +'%Y-%m-%d %H:%M:%S'`
