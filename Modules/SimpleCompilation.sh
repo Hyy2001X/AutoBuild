@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.08.19
-Module_Version=V2.3.5-b
+Update=2020.08.21
+Module_Version=V2.3.6-b
 
 ROOTFS_SQUASHFS=0
 ROOTFS_EXT4FS=0
@@ -62,6 +62,9 @@ do
 		Say="Simple Compilation Script $Module_Version" && Color_B
 		Say="\nCPU 信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP" && Color_Y
 		Decoration
+		if [ -f $Home/Configs/${Project}_Lasted_Config ];then
+			echo -e "当前配置文件:$Blue[$(cat $Home/Configs/${Project}_Lasted_Config)]$White\n"
+		fi
 		if [ $MULTI_PROFILE_Check == 0 ];then
 			if [ $Default_Check == 0 ];then
 				echo -e "设备名称:${Yellow}$TARGET_PROFILE${White}"
