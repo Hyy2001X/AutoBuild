@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.19
-Version=V3.9.8
+Update=2020.08.21
+Version=V3.9.9
 
 Second_Menu() {
 while :
@@ -68,11 +68,11 @@ done
 
 Sources_Download() {
 if [ -f $Home/Projects/$Project/Makefile ];then
-	Say="\n已检测到[$Project]项目,当前分支:$Branch" && Color_Y
+	Say="\n已检测到[$Project]源码,当前分支:$Branch" && Color_Y
 	sleep 3
 else
 	clear
-	Say="$Project源代码下载-选择分支" && Color_B
+	Say="$Project源码下载-分支选择" && Color_B
 	Github_File=$Home/Additional/GitLink_$Project
 	Final_GitLink=`sed -n 1p $Github_File`
 	echo "Github仓库地址:$Final_GitLink"
@@ -85,8 +85,7 @@ else
 		x=`expr $i - 1`
 		echo "${x}.${Github_File_Branch}"
 	done
-	echo "q.返回"
-	echo " "
+	echo -e "q.返回\n"
 	read -p '请从上方选择一个分支:' Choose_Branch
 	case $Choose_Branch in
 	q)
@@ -180,9 +179,9 @@ do
 		;;
 		4)
 			cd $Home/Projects
-			Say="\n正在删除$Project..." && Color_B
-			echo " "
+			Say="\n正在删除$Project...\n" && Color_B
 			rm -rf $Project
+			rm -f $Home/Configs/${Project}_Lasted_*
 			break
 		;;
 		5)
@@ -320,6 +319,7 @@ do
 				if [ -f "$ConfigFile" ];then
 					ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
 					cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
+					echo "$ConfigFile" > $Home/Configs/${Project}_Lasted_Config
 					Say="[$ConfigFile]恢复成功!" && Color_Y
 					sleep 2
 				else
@@ -509,7 +509,6 @@ do
 		echo " "
 		sudo ntpdate ntp1.aliyun.com
 		sudo hwclock --systohc
-		Say="时间同步完成!" && Color_Y
 		sleep 2
 	;;
 	5)
