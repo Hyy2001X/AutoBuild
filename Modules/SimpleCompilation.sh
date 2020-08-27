@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.08.21
-Module_Version=V2.3.6-b
+Update=2020.08.27
+Module_Version=V2.3.7-b
 
 ROOTFS_SQUASHFS=0
 ROOTFS_EXT4FS=0
@@ -224,10 +224,8 @@ do
 					Say="$Firmware_Size_MB" && Color_Y
 					Say="\nMD5:$Firmware_MD5" && Color_B
 					Say="SHA256:$Firmware_SHA256" && Color_B
-					echo "固件名称:$AutoBuild_Firmware" > ./Details/$Firmware_Detail
-					echo "$Firmware_Size_MB" >> ./Details/$Firmware_Detail
-					echo "$Compile_TIME" >> ./Details/$Firmware_Detail
-					echo " " >> ./Details/$Firmware_Detail
+					echo "$Firmware_Size_MB" > ./Details/$Firmware_Detail
+					echo -e "$Compile_TIME\n" >> ./Details/$Firmware_Detail
 					echo "MD5:$Firmware_MD5" >> ./Details/$Firmware_Detail
 					echo "SHA256:$Firmware_SHA256" >> ./Details/$Firmware_Detail
 				else
