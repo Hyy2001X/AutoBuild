@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.21
-Version=V3.9.9
+Update=2020.08.27
+Version=V4.0
 
 Second_Menu() {
 while :
@@ -395,6 +395,9 @@ done
 }
 
 Make_Menuconfig() {
+if [ -f $Home/Configs/${Project}_Lasted_Config ];then
+	rm -f $Home/Configs/${Project}_Lasted_Config
+fi
 clear
 cd $Home/Projects/$Project
 Say="Loading $Project Configuration..." && Color_B
@@ -450,60 +453,7 @@ do
 		Enter
 	;;
 	3)
-		echo " "
-		cd $Home
-		if [ ! -f ./Configs/SSH ];then
-			SSH_Profile
-			sleep 2
-			SSH_Login
-		else
-			SSH_IP=`awk -F'[="]+' '/IP/{print $2}' ./Configs/SSH`
-			SSH_User=`awk -F'[="]+' '/Username/{print $2}' ./Configs/SSH`
-			SSH_Password=`awk -F'[="]+' '/Password/{print $2}' ./Configs/SSH`
-		fi
-		while :
-		do
-			clear
-			Say="SSH Services Script by Hyy2001" && Color_B
-			echo " "
-			echo "1.使用上次保存的配置连接"
-			echo "2.创建[新的配置文件]"
-			echo "3.删除[现有配置文件]"
-			echo "4.重置[RSA Key Fingerprint]"
-			echo -e "\nq.返回"
-			GET_Choose
-			case $Choose in
-			q)
-				break
-			;;
-			1)
-				SSH_Login
-			;;
-			2)
-				echo " "
-				if [ ! -f ./Configs/SSH ];then
-					SSH_Profile
-				else
-					Say="若要创建[新的配置文件],请先删除[现有配置文件]." && Color_B
-				fi
-				sleep 3
-			;;
-			3)
-				echo " "
-				if [ -f ./Configs/SSH ];then
-					rm $Home/Configs/SSH
-					Say="[配置文件]删除成功!" && Color_Y
-				else
-					Say="[配置文件]删除失败!" && Color_R
-				fi
-				sleep 2
-			;;
-			4)
-				ssh-keygen -R $SSH_IP
-				Say="\n[RSA Key Fingerprint]重置成功!" && Color_Y
-				sleep 2
-			esac
-		done
+		SSHServices
 	;;
 	4)
 		echo " "
@@ -732,29 +682,6 @@ else
 	echo -e "$Red"
 	read -p "[$Project]源代码下载失败!" Key
 fi
-}
-
-SSH_Login() {
-clear
-expect -c "
-	set timeout 1
-	spawn ssh $SSH_User@$SSH_IP
-	expect {
-		*yes/no* { send \"yes\r\"; exp_continue }
-		*password:* { send \"$SSH_Password\r\" }  
-	}
-	interact
-"
-}
-
-SSH_Profile() {
-read -p '请输入IP地址:' SSH_IP
-read -p '请输入用户名:' SSH_User
-read -p '请输入密码:' SSH_Password
-echo "IP=$SSH_IP" > ./Configs/SSH
-echo "Username=$SSH_User" >> ./Configs/SSH
-echo "Password=$SSH_Password" >> ./Configs/SSH
-Say="\nSSH配置已保存到'$Home/Configs/SSH'" && Color_Y
 }
 
 Dir_Check() {
