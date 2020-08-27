@@ -2,39 +2,12 @@
 
 SimpleCompilation() {
 Update=2020.08.27
-Module_Version=V2.3.7-b
-
-ROOTFS_SQUASHFS=0
-ROOTFS_EXT4FS=0
-ROOTFS_CPIOGZ=0
-ROOTFS_TARGZ=0
+Module_Version=V2.3.8
 
 while :
 do
 	if [ -f $Home/Projects/$Project/.config ];then
 		cd $Home/Projects/$Project
-		grep "CONFIG_TARGET_ROOTFS_CPIOGZ=y" .config > /dev/null
-		if [ $? -eq 0 ]; then
-			ROOTFS_CPIOGZ=1
-			Filesystem_Archives=cpio.gz
-		fi
-		grep "CONFIG_TARGET_ROOTFS_TARGZ=y" .config > /dev/null
-		if [ $? -eq 0 ]; then
-			ROOTFS_TARGZ=1
-			Filesystem_Archives=tar.gz
-		fi
-		grep "CONFIG_TARGET_ROOTFS_SQUASHFS=y" .config > /dev/null
-		if [ $? -eq 0 ]; then
-			ROOTFS_SQUASHFS=1
-			Filesystem_images=squashfs
-		fi
-		grep "CONFIG_TARGET_ROOTFS_EXT4FS=y" .config > /dev/null
-		if [ $? -eq 0 ]; then
-			ROOTFS_EXT4FS=1
-			Filesystem_images=ext4
-		fi
-		Filesystem_All=`expr $ROOTFS_SQUASHFS + $ROOTFS_EXT4FS`
-		Filesystem_Archives_All=`expr $ROOTFS_CPIOGZ + $ROOTFS_TARGZ`
 		TARGET_BOARD=`awk -F'[="]+' '/TARGET_BOARD/{print $2}' .config`
 		TARGET_SUBTARGET=`awk -F'[="]+' '/TARGET_SUBTARGET/{print $2}' .config`
 		TARGET_ARCH_PACKAGES=`awk -F'[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config`
@@ -77,30 +50,16 @@ do
 		echo -e "CPU 架构:$Yellow$TARGET_BOARD$White"
 		echo -e "CPU 型号:$Yellow$TARGET_SUBTARGET$White"
 		echo -e "软件架构:$Yellow$TARGET_ARCH_PACKAGES$White"
-		if [ ! $Filesystem_Archives_All == 0 ];then
-			if [ $Filesystem_Archives_All == 2 ];then
-				echo -e "固件压缩:${Yellow}cpio.gz tar.gz$White"
-			else
-				echo -e "固件压缩:$Yellow$Filesystem_Archives$White"
-			fi
-		fi
-		if [ ! $Filesystem_All == 0 ];then
-			if [ $Filesystem_All == 2 ];then
-				echo -e "固件格式:${Yellow}squashfs ext4$White"
-			else
-				echo -e "固件格式:$Yellow$Filesystem_images$White"
-			fi
-		fi
 	else
 		Say="\n未检测到配置文件,无法编译!" && Color_R
 		sleep 3
 		break
 	fi
-	Say="\n编译参数" && Color_B
-	echo "1.make -j1"
-	echo "2.make -j1 V=s"
+	Say="\n预置编译参数" && Color_B
+	echo -e "${Yellow}1.make -j1 V=s"
+	echo "2.make -j2 V=s"
 	echo "3.make -j4"
-	echo "4.make -j4 V=s"
+	echo -e "4.make -j4 V=s${White}"
 	echo "5.自动选择"
 	echo "6.手动输入参数"
 	echo "q.返回"
@@ -117,10 +76,10 @@ do
 		break
 	;;
 	1)
-		Compile_Parameter="make -j1"
+		Compile_Parameter="make -j1 V=s"
 	;;
 	2)
-		Compile_Parameter="make -j1 V=s"
+		Compile_Parameter="make -j2 V=s"
 	;;
 	3)
 		Compile_Parameter="make -j4"
@@ -143,25 +102,33 @@ do
 			if [ $Default_Check == 0 ];then
 				Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
 				cd $Home
-				if [ $Project == Lede ];then
-					read -p '请输入附加信息:' Extra
-					AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d-$Extra.bin)`"
-					while [ -f ./Firmware/$AutoBuild_Firmware ]
-					do
-						read -p '包含该附加信息的名称已存在!请重新添加:' Extra
-						AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d-$Extra.bin)`"
-					done
-					Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d-$Extra.detail)`"
+				read -p '请输入附加信息[按下回车键跳过]:' Extra
+				if [ ! $Extra == "" ];then
+					Extra="-$Extra"
 				else
-					read -p '请输入附加信息:' Extra
-					AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
-					while [ -f ./Firmware/$AutoBuild_Firmware ]
-					do
-						read -p '包含该附加信息的名称已存在,请重新添加:' Extra
-						AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.bin)`"
-					done
-					Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d-$Extra.detail)`"
+					Extra=""
 				fi
+				if [ $Project == Lede ];then
+					AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d$Extra.bin)`"
+				else
+					AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d$Extra.bin)`"
+				fi
+				while [ -f ./Firmware/$AutoBuild_Firmware ]
+				do
+					read -p '该固件已存在!请重新添加附加信息:' Extra
+					if [ ! $Extra == "" ];then
+						Extra="-$Extra"
+					else
+						Extra=""
+					fi
+					if [ $Project == Lede ];then
+						AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d$Extra.bin)`"
+						Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d$Extra.detail)`"
+					else
+						AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d$Extra.bin)`"
+						Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d$Extra.detail)`"
+					fi
+				done
 			fi
 		fi
 	fi
