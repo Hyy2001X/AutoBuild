@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.08.27
-Module_Version=V2.3.8
+Update=2020.08.28
+Module_Version=V2.3.9
 
 while :
 do
@@ -67,7 +67,7 @@ do
 	if [ -f $Home/Configs/${Project}_Lasted_Compile ];then
 		Lasted_Compile=`awk 'NR==1' $Home/Configs/${Project}_Lasted_Compile`
 		Lasted_Compile_Stat=`awk 'NR==2' $Home/Configs/${Project}_Lasted_Compile`
-		echo -e "$Blue最近编译:$Yellow$Lasted_Compile $Lasted_Compile_Stat"
+		echo -e "$Blue上次编译:$Yellow$Lasted_Compile $Lasted_Compile_Stat"
 	fi
 	Decoration
 	GET_Choose
@@ -92,6 +92,11 @@ do
 	;;
 	6)
 		read -p '请输入编译参数:' Compile_Parameter
+		if [ "$Compile_Parameter" == "" ];then
+			Say="\n请输入正确的参数!" && Color_R
+			sleep 2
+			SimpleCompilation
+		fi
 	;;
 	*)
 		SimpleCompilation
@@ -123,12 +128,15 @@ do
 					fi
 					if [ $Project == Lede ];then
 						AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d$Extra.bin)`"
-						Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d$Extra.detail)`"
 					else
 						AutoBuild_Firmware="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d$Extra.bin)`"
-						Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d$Extra.detail)`"
 					fi
 				done
+				if [ $Project == Lede ];then
+					Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version`(date +-%Y%m%d$Extra.detail)`"
+				else
+					Firmware_Detail="AutoBuild-$TARGET_PROFILE-$Project`(date +-%Y%m%d$Extra.detail)`"
+				fi
 			fi
 		fi
 	fi
@@ -137,8 +145,7 @@ do
 		rm -rf $Home/Projects/$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET
 		if [ $MULTI_PROFILE_Check == 0 ];then
 			if [ $Default_Check == 0 ];then
-				echo -e "$Yellow固件名称:$Blue$AutoBuild_Firmware$White"
-				echo " "
+				echo -e "$Yellow固件名称:$Blue$AutoBuild_Firmware$White\n"
 			fi
 		fi
 	fi
@@ -192,9 +199,8 @@ do
 					Say="\nMD5:$Firmware_MD5" && Color_B
 					Say="SHA256:$Firmware_SHA256" && Color_B
 					echo "$Firmware_Size_MB" > ./Details/$Firmware_Detail
-					echo -e "$Compile_TIME\n" >> ./Details/$Firmware_Detail
-					echo "MD5:$Firmware_MD5" >> ./Details/$Firmware_Detail
-					echo "SHA256:$Firmware_SHA256" >> ./Details/$Firmware_Detail
+					echo -e "编译日期:$Compile_Start\n$Compile_TIME\n" >> ./Details/$Firmware_Detail
+					echo -e "MD5:$Firmware_MD5\nSHA256:$Firmware_SHA256" >> ./Details/$Firmware_Detail
 				else
 					echo " "
 					Compile_Time_End
