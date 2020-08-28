@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.27
-Version=V4.0
+Update=2020.08.28
+Version=V4.0.1
 
 Second_Menu() {
 while :
@@ -687,6 +687,9 @@ fi
 Dir_Check() {
 clear
 cd $Home
+if [ -f ./Configs/SSH ];then
+	rm -f ./Configs/SSH
+fi
 for WD in `cat  ./Additional/Working_Directory`
 do
 	if [ ! -d ./$WD ];then
