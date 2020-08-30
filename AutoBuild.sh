@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.28
-Version=V4.0.1
+Update=2020.08.30
+Version=V4.0.2
 
 Second_Menu() {
 while :
@@ -15,7 +15,6 @@ do
 		if [ $Project == Lede ];then
 			if [ -f $Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd $Home/Projects/$Project/package/lean/default-settings/files
-				cp zzz-default-settings $Home/Backups/zzz-default-settings
 				Lede_Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" ./zzz-default-settings`
 				Say="源码版本:$Lede_Version" && Color_Y
 			fi
@@ -313,7 +312,7 @@ do
 			break
 		;;
 		*)
-			if [ $Choose -le $Max_ConfigList_Line ];then
+			if [ $Choose -le $Max_ConfigList_Line ] 2>/dev/null ;then
 				echo " "
 				ConfigFile=`sed -n ${Choose}p $ConfigList_File`
 				if [ -f "$ConfigFile" ];then
@@ -327,7 +326,7 @@ do
 					sleep 2
 				fi
 			else
-				Say="输入错误,请输入正确的数字!" && Color_R
+				Say="\n输入错误,请输入正确的数字!" && Color_R
 				sleep 2
 			fi
 		;;
@@ -820,7 +819,7 @@ CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
 CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
 
 chmod +x -R $Home/Modules
-for Module in $Home/Modules/*
+for Module in $Home/Modules/*.sh
 do
 	source $Module
 done
