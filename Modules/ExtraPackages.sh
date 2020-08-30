@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.08.14
-Module_Version=V4.7.1-b
+Update=2020.08.30
+Module_Version=V4.7.2
 
 PKG_Home=$Home/Projects/$Project/package
 if [ ! -d $PKG_Home/ExtraPackages ];then
@@ -43,6 +43,7 @@ do
 			PKG_NAME=openwrt-smartdns
 			PKG_URL=https://github.com/pymumu/openwrt-smartdns
 			ExtraPackages_git
+			mv ./openwrt-smartdns smartdns
 			PKG_NAME=luci-app-smartdns
 			if [ $Project == Lede ];then
 				PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
