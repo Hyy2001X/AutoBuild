@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.08.30
-Version=V4.0.2
+Update=2020.09.06
+Version=V4.0.3
 
 Second_Menu() {
 while :
@@ -65,50 +65,6 @@ do
 done
 }
 
-Sources_Download() {
-if [ -f $Home/Projects/$Project/Makefile ];then
-	Say="\n已检测到[$Project]源码,当前分支:$Branch" && Color_Y
-	sleep 3
-else
-	clear
-	Say="$Project源码下载-分支选择" && Color_B
-	Github_File=$Home/Additional/GitLink_$Project
-	Final_GitLink=`sed -n 1p $Github_File`
-	echo "Github仓库地址:$Final_GitLink"
-	echo " "
-	Max_All_Line=`sed -n '$=' $Github_File`
-	Max_Branch_Line=`expr $Max_All_Line - 1`
-	for ((i=2;i<=$Max_All_Line;i++));
-	do   
-		Github_File_Branch=`sed -n ${i}p $Github_File`
-		x=`expr $i - 1`
-		echo "${x}.${Github_File_Branch}"
-	done
-	echo -e "q.返回\n"
-	read -p '请从上方选择一个分支:' Choose_Branch
-	case $Choose_Branch in
-	q)
-		break
-	;;
-	*)
-		clear
-		if [ $Choose_Branch -le $Max_Branch_Line ];then
-			Branch_Line=`expr $Choose_Branch + 1`
-			Final_GitBranch=`sed -n ${Branch_Line}p $Github_File`
-			echo -e "$Blue下载地址:$Yellow$Final_GitLink$White"
-			echo -e "$Blue下载分支:$Yellow$Final_GitBranch$White"
-			echo " "
-			cd $Home/Projects/
-			git clone -b $Final_GitBranch $Final_GitLink $Project
-			Sources_Download_Check
-		else
-			Sources_Download
-		fi
-	;;
-	esac
-fi
-}
-
 Project_Options() {
 while :
 do
@@ -123,6 +79,7 @@ do
 	echo "5.空间清理"
 	echo "6.删除配置文件"
 	echo "7.下载[dl]库"
+	echo "8.源代码更新日志"
 	echo " "
 	echo "m.主菜单"
 	echo "q.返回"
@@ -221,6 +178,14 @@ do
 			sleep 2
 		fi
 	;;
+	8)
+		clear
+		if [ -d $Home/Projects/$Project/.git ];then
+			cd $Home/Projects/$Project
+			git log -10 --graph --all --branches --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%cr)%C(reset) %C(bold green)(%ai)%C(reset) %C(white)%s'
+			Enter
+		fi
+	;;
 	esac
 done
 }
@@ -271,7 +236,7 @@ do
 			fi	
 			if [ -f ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
-				Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Config'" && Color_Y
+				Say="备份成功!备份文件存放于:'/Backups/Configs/$Backup_Config'" && Color_Y
 			else
 				Say="备份失败!" && Color_R
 			fi
@@ -281,7 +246,7 @@ do
 			echo " "
 			if [ -f ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/"$Backup_Config"
-				Say="备份成功!备份文件存放于:'$Home/Backups/Configs/$Backup_Config'" && Color_Y
+				Say="备份成功!备份文件存放于:'/Backups/Configs/$Backup_Config'" && Color_Y
 			else
 				Say="备份失败!" && Color_R
 			fi
@@ -313,16 +278,21 @@ do
 		;;
 		*)
 			if [ $Choose -le $Max_ConfigList_Line ] 2>/dev/null ;then
-				echo " "
-				ConfigFile=`sed -n ${Choose}p $ConfigList_File`
-				if [ -f "$ConfigFile" ];then
-					ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
-					cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
-					echo "$ConfigFile" > $Home/Configs/${Project}_Lasted_Config
-					Say="[$ConfigFile]恢复成功!" && Color_Y
-					sleep 2
+				if [ ! $Choose == 0 ] 2>/dev/null ;then
+					echo " "
+					ConfigFile=`sed -n ${Choose}p $ConfigList_File`
+					if [ -f "$ConfigFile" ];then
+						ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
+						cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
+						echo "$ConfigFile" > $Home/Configs/${Project}_Lasted_Config
+						Say="配置 [$ConfigFile] 恢复成功!" && Color_Y
+						sleep 2
+					else
+						Say="未检测到对应的配置文件!" && Color_R
+						sleep 2
+					fi
 				else
-					Say="未检测到对应的配置文件!" && Color_R
+					Say="\n输入错误,请输入正确的数字!" && Color_R
 					sleep 2
 				fi
 			else
@@ -341,12 +311,12 @@ do
 		echo " "
 		cd $Home/Projects
 		if [ ! -d ./$Project/dl ];then
-			Say="未找到'$Home/Projects/$Project/dl',备份失败!" && Color_R
+			Say="未找到'/Projects/$Project/dl',备份失败!" && Color_R
 			sleep 2
 		else
 			echo -ne "\r$Yellow正在备份[dl]库...$White\r"
 			cp -a $Home/Projects/$Project/dl $Home/Backups/
-			Say="备份成功![dl]库已备份到:'$Home/Backups/dl'" && Color_Y
+			Say="备份成功![dl]库已备份到:'/Backups/dl'" && Color_Y
 			Say="存储占用:$(du -sh $Home/Backups/dl | awk '{print $1}')B" && Color_B
 			Enter
 		fi
@@ -355,12 +325,12 @@ do
 		echo " "
 		cd $Home
 		if [ ! -d ./Backups/dl ];then
-			Say="未找到'$Home/Backups/dl',恢复失败!" && Color_R
+			Say="未找到'/Backups/dl',恢复失败!" && Color_R
 			sleep 2
 		else
 			echo -ne "\r$Blue正在恢复[dl]库...$White\r"
 			cp -a $Home/Backups/dl $Home/Projects/$Project
-			Say="恢复成功![dl]库已恢复到:'$Home/Projects/$Project/dl'" && Color_Y
+			Say="恢复成功![dl]库已恢复到:'/Projects/$Project/dl'" && Color_Y
 			Say="存储占用:$(du -sh $Home/Projects/$Project/dl | awk '{print $1}')B" && Color_B
 			Enter
 		fi
@@ -371,8 +341,8 @@ do
 		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
 			rm -rf $Home/Backups/Projects/$Project
 		fi
-		sudo cp -a $Home/Projects/$Project $Home/Backups/Projects
-		Say="备份成功![$Project]源代码已备份到:'$Home/Backups/Projects/$Project'" && Color_Y
+		cp -a $Home/Projects/$Project $Home/Backups/Projects > /dev/null 2>&1
+		Say="备份成功![$Project]源代码已备份到:'/Backups/Projects/$Project'" && Color_Y
 		Say="存储占用:$(du -sh $Home/Backups/Projects/$Project | awk '{print $1}')B" && Color_B
 		Enter
 	;;
@@ -380,8 +350,8 @@ do
 		echo " "
 		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
 			echo -ne "\r$Yellow正在恢复[$Project]源代码...$White\r"
-			sudo cp -a $Home/Backups/Projects/$Project $Home/Projects/
-			Say="恢复成功![$Project]源代码已恢复到:'$Home/Projects/$Project'" && Color_Y
+			cp -a $Home/Backups/Projects/$Project $Home/Projects/ > /dev/null 2>&1
+			Say="恢复成功![$Project]源代码已恢复到:'/Projects/$Project'" && Color_Y
 			Say="存储占用:$(du -sh $Home/Projects/$Project | awk '{print $1}')B" && Color_B
 			Enter
 		else
@@ -393,17 +363,6 @@ do
 done
 }
 
-Make_Menuconfig() {
-if [ -f $Home/Configs/${Project}_Lasted_Config ];then
-	rm -f $Home/Configs/${Project}_Lasted_Config
-fi
-clear
-cd $Home/Projects/$Project
-Say="Loading $Project Configuration..." && Color_B
-make menuconfig
-Enter
-}
-
 Advanced_Options() {
 while :
 do
@@ -412,7 +371,7 @@ do
 	echo " "
 	echo "1.更新系统软件包"
 	Say="2.安装编译环境" && Color_G
-	echo "3.SSH Services"
+	echo "3.SSH 服务"
 	echo "4.同步网络时间"
 	echo "5.存储空间占用统计"
 	echo "6.创建快捷启动"
@@ -421,8 +380,8 @@ do
 	echo "9.系统信息"
 	echo "10.更换软件源"
 	echo " "
-	echo -e "x.$Yellow更新脚本$White"
-	echo "q.返回"
+	Say="x.更新脚本" && Color_Y
+	echo "q.主菜单"
 	GET_Choose
 	case $Choose in
 	q)
@@ -566,7 +525,7 @@ if [ $? -eq 0 ];then
 		mv $Home/Additional $Backups_Dir/Additional
 		mv $Home/Modules $Backups_Dir/Modules
 		cp -a * $Home
-		Say="\nAutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
+		Say="\nAutoBuild 已备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
 		echo -e "$Yellow"
 		read -p "AutoBuild 更新成功!" Key
 		$Home/AutoBuild.sh
@@ -578,6 +537,17 @@ else
 	Say="\n网络连接错误,更新失败!" && Color_R
 	sleep 2
 fi
+}
+
+Make_Menuconfig() {
+if [ -f $Home/Configs/${Project}_Lasted_Config ];then
+	rm -f $Home/Configs/${Project}_Lasted_Config
+fi
+clear
+cd $Home/Projects/$Project
+Say="Loading $Project Configuration..." && Color_B
+make menuconfig
+Enter
 }
 
 Script_Update() {
@@ -598,7 +568,7 @@ if [ $? -eq 0 ];then
 	cp $Home/LICENSE $Backups_Dir/LICENSE
 	cp -a $Home/Additional $Backups_Dir/Additional
 	cp -a $Home/Modules $Backups_Dir/Modules
-	Say="AutoBuild 已自动备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'\n" && Color_B
+	Say="AutoBuild 已备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'\n" && Color_B
 	rm -rf ./TEMP
 	svn checkout https://github.com/Hyy2001X/AutoBuild/trunk ./TEMP
 	if [ -f ./TEMP/AutoBuild.sh ];then
@@ -636,13 +606,15 @@ fi
 
 Sources_Update_Core() {
 clear
-Say="开始更新$Project..." && Color_Y
-echo " "
+Say="开始更新$Project...\n" && Color_Y
 echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Lasted_Update
 cd $Home/Projects/$Project
 if [ $Enforce_Update == 1 ];then
 	git fetch --all
 	git reset --hard origin/$Branch
+	if [ $Project == Lede ];then
+		sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
+	fi
 fi
 Update_Logfile=$Home/Log/Update_${Project}_`(date +%Y%m%d_%H:%M)`.log
 git pull 2>&1 | tee $Update_Logfile
@@ -664,6 +636,60 @@ if [ -f ./Projects/$1/Makefile ];then
 	echo -e "${White}$2.$1$DE$Yellow[已检测到]$Blue	$3"
 else
 	echo -e "${White}$2.$1$DE$Red[未检测到]$Blue	$3"
+fi
+}
+
+Sources_Download() {
+if [ -f $Home/Projects/$Project/Makefile ];then
+	Say="\n已检测到[$Project]源码,当前分支:$Branch" && Color_Y
+	sleep 3
+else
+	clear
+	Say="$Project源码下载-分支选择" && Color_B
+	Github_File=$Home/Additional/GitLink_$Project
+	Github_Source_Link=`sed -n 1p $Github_File`
+	echo -e "Github仓库地址:$Github_Source_Link\n"
+	Max_All_Line=`sed -n '$=' $Github_File`
+	Max_Branch_Line=`expr $Max_All_Line - 1`
+	for ((i=2;i<=$Max_All_Line;i++));
+	do   
+		Github_File_Branch=`sed -n ${i}p $Github_File`
+		x=`expr $i - 1`
+		echo "${x}.${Github_File_Branch}"
+	done
+	echo -e "q.返回\n"
+	read -p '请从上方选择一个分支:' Choose_Branch
+	case $Choose_Branch in
+	q)
+		break
+	;;
+	*)
+		if [ $Choose_Branch -le $Max_Branch_Line ] 2>/dev/null ;then
+			if [ ! $Choose_Branch == 0 ];then
+				clear
+				Branch_Line=`expr $Choose_Branch + 1`
+				Github_Source_Branch=`sed -n ${Branch_Line}p $Github_File`
+				echo -e "$Blue下载地址:$Yellow$Github_Source_Link$White"
+				echo -e "$Blue下载分支:$Yellow$Github_Source_Branch$White"
+				echo " "
+				cd $Home/Projects
+				if [ -d ./$Project ];then
+					rm -rf ./$Project
+				fi
+				git clone -b $Github_Source_Branch $Github_Source_Link $Project
+				Sources_Download_Check
+			else
+				Say="\n输入错误,请选择正确的数字!" && Color_R
+				sleep 2
+				Sources_Download
+			fi
+		else
+			Say="\n输入错误,请输入正确的数字!" && Color_R
+			sleep 2
+			Sources_Download
+		fi
+	;;
+	esac
 fi
 }
 
@@ -699,7 +725,7 @@ done
 
 First_Startup_Check() {
 if [ ! -f $Home/Configs/Username ];then
-	read -p '请创建一个用户名:' Username
+	read -p '首次启动,请创建一个用户名:' Username
 	echo "$Username" > $Home/Configs/Username
 else
 	Username=`cat $Home/Configs/Username`
@@ -725,7 +751,6 @@ if [ $ScriptUpdater ==  0 ];then
 else
 	Script_Update
 fi
-
 }
 
 AutoBuild_Core() {
