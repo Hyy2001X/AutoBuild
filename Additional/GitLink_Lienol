@@ -1,4 +1,5 @@
-https://github.com/Lienol/Openwrt
+https://github.com/Lienol/openwrt
 dev-19.07
 dev-master
-dev
+rebase-19.07-5.4
+rebase-19.07
