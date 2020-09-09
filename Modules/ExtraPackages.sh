@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.08.30
-Module_Version=V4.7.2
+Update=2020.09.09
+Module_Version=V4.7.3
 
 PKG_Home=$Home/Projects/$Project/package
 if [ ! -d $PKG_Home/ExtraPackages ];then
@@ -22,6 +22,7 @@ do
 	echo "5.OpenAppFilter"
 	echo "6.Passwall"
 	echo "7.[依赖包]Passwall"
+	echo "8.MentoHust"
 	Say="w.Li2nOnline's Packages Source" && Color_B
 	echo " "
 	echo "q.返回"
@@ -59,10 +60,7 @@ do
 	;;
 	2)
 		PKG_NAME=luci-app-adguardhome
-		PKG_URL=https://github.com/Lienol/openwrt/branches/dev-master/package/diy/luci-app-adguardhome
-		ExtraPackages_svn
-		PKG_NAME=adguardhome
-		PKG_URL=https://github.com/Lienol/openwrt/branches/dev-master/package/diy/adguardhome
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-app-adguardhome
 		ExtraPackages_svn
 	;;
 	3)
@@ -93,6 +91,14 @@ do
 			PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/package/$PD
 			ExtraPackages_svn
 		done
+	;;
+	8)
+		PKG_NAME=luci-app-mentohust
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-app-mentohust
+		ExtraPackages_svn
+		PKG_NAME=mentohust
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/mentohust
+		ExtraPackages_svn
 	;;
 	esac
 done
@@ -171,17 +177,17 @@ do
 	;;
 	6)
 		PKG_NAME=luci-theme-rosy
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-rosy/
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-rosy
 		ExtraPackages_svn
 	;;
 	7)
 		PKG_NAME=luci-theme-atmaterial
-		PKG_URL=https://github.com/openwrt-develop/luci-theme-atmaterial
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-atmaterial
 		ExtraPackages_git
 	;;
 	8)
 		PKG_NAME=luci-theme-darkmatter
-		PKG_URL=https://github.com/Lienol/luci-theme-darkmatter/trunk/
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-darkmatter
 		ExtraPackages_svn
 	;;
 	9)
@@ -205,6 +211,7 @@ do
 	echo "5.luci-theme-edge"
 	echo "6.luci-theme-argonv2"
 	echo "7.luci-theme-argonv3"
+	echo "8.luci-theme-infinityfreedom"
 	echo -e "\n${White}x.关于主题"
 	echo "q.返回"
 	echo " "
@@ -254,6 +261,11 @@ do
 	7)
 		PKG_NAME=luci-theme-argonv3
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argonv3
+		ExtraPackages_svn
+	;;
+	8)
+		PKG_NAME=luci-theme-infinityfreedom
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-infinityfreedom
 		ExtraPackages_svn
 	;;
 	esac
