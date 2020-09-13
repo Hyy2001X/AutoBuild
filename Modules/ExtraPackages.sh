@@ -1,15 +1,10 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.09.09
-Module_Version=V4.7.3
+Update=2020.09.13
+Module_Version=V4.7.4
 
-PKG_Home=$Home/Projects/$Project/package
-if [ ! -d $PKG_Home/ExtraPackages ];then
-		mkdir $PKG_Home/ExtraPackages
-fi
-PKG_Dir=$PKG_Home/ExtraPackages
-
+ExtraPackages_mkdir
 while :
 do
 	cd $PKG_Dir
@@ -24,9 +19,7 @@ do
 	echo "7.[依赖包]Passwall"
 	echo "8.MentoHust"
 	Say="w.Li2nOnline's Packages Source" && Color_B
-	echo " "
-	echo "q.返回"
-	echo " "
+	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个软件包:' Choose
 	echo " "
 	case $Choose in
@@ -41,10 +34,9 @@ do
 	1)
 		grep "git.openwrt.org/project/luci.git" $Home/Projects/$Project/feeds.conf.default > /dev/null
 		if [ $? -ne 0 ]; then
-			PKG_NAME=openwrt-smartdns
-			PKG_URL=https://github.com/pymumu/openwrt-smartdns
-			ExtraPackages_git
-			mv ./openwrt-smartdns smartdns
+			PKG_NAME=smartdns
+			PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/smartdns
+			ExtraPackages_svn
 			PKG_NAME=luci-app-smartdns
 			if [ $Project == Lede ];then
 				PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
@@ -105,11 +97,7 @@ done
 }
 
 ExtraThemes() {
-PKG_Home=$Home/Projects/$Project/package
-if [ ! -d $PKG_Home/ExtraPackages ];then
-		mkdir $PKG_Home/ExtraPackages
-fi
-PKG_Dir=$PKG_Home/ExtraPackages
+ExtraPackages_mkdir
 
 while :
 do
@@ -125,10 +113,8 @@ do
 	echo "7.luci-theme-atmaterial"
 	echo "8.luci-theme-darkmatter"
 	echo "9.luci-theme-opentomcat"
-	echo -e "\n${Blue}n.查看下一页$White"
-	echo "x.关于主题"
-	echo "q.返回"
-	echo " "
+	echo -e "\n${Blue}n.下一页$White"
+	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个主题包:' Choose
 	echo " "
 	case $Choose in
@@ -137,9 +123,6 @@ do
 	;;
 	n)
 		ExtraThemes_P2
-	;;
-	x)
-		ExtraThemes_info
 	;;
 	1)
 		PKG_NAME=luci-theme-argon
@@ -212,17 +195,12 @@ do
 	echo "6.luci-theme-argonv2"
 	echo "7.luci-theme-argonv3"
 	echo "8.luci-theme-infinityfreedom"
-	echo -e "\n${White}x.关于主题"
-	echo "q.返回"
-	echo " "
+	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个主题包:' Choose
 	echo " "
 	case $Choose in
 	q)
 		break
-	;;
-	x)
-		ExtraThemes_info
 	;;
 	1)
 		PKG_NAME=luci-theme-opentomato
@@ -315,19 +293,10 @@ else
 fi
 }
 
-ExtraThemes_info() {
-clear
-Decoration
-echo -e "${Skyb}主题源码来自以下作者:$Yellow\n"
-echo "https://github.com/jerrykuku"
-echo "https://github.com/project-openwrt"
-echo "https://github.com/Lienol"
-echo "https://github.com/xiaorouji"
-echo "https://github.com/openwrt-develop"
-echo "https://github.com/Leo-Jo-My"
-echo "https://github.com/garypang13"
-echo "https://github.com/rosywrt"
-echo -e "$White "
-Decoration
-Enter
+ExtraPackages_mkdir() {
+PKG_Home=$Home/Projects/$Project/package
+if [ ! -d $PKG_Home/ExtraPackages ];then
+		mkdir -p $PKG_Home/ExtraPackages
+fi
+PKG_Dir=$PKG_Home/ExtraPackages
 }
