@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.09.13
-Module_Version=V4.7.4
+Update=2020.09.14
+Module_Version=V4.8.0-BETA
 
 ExtraPackages_mkdir
 while :
@@ -103,26 +103,22 @@ while :
 do
 	cd $PKG_Dir
 	clear
-	echo -e "${Blue}添加第三方主题包 Page-1${White}\n"
+	Say="添加第三方主题包\n" && Color_B
 	echo "1.luci-theme-argon"
-	echo "2.luci-theme-argon-mc"
-	echo "3.luci-theme-argon-dark-mod"
-	echo "4.luci-theme-argon-light-mod"
-	echo "5.luci-theme-bootstrap-mod"
-	echo "6.luci-theme-rosy"
-	echo "7.luci-theme-atmaterial"
-	echo "8.luci-theme-darkmatter"
-	echo "9.luci-theme-opentomcat"
-	echo -e "\n${Blue}n.下一页$White"
+	echo "2.luci-theme-edge"
+	ExtraThemesList_File=$Home/Additional/ExtraThemes_List
+	List_MaxLine=`sed -n '$=' $ExtraThemesList_File`
+	for ((i=1;i<=$List_MaxLine;i++));
+		do   
+			Theme=`sed -n ${i}p $ExtraThemesList_File | awk '{print $2}'`
+			echo "$(($i + 2)).${Theme}"
+	done
 	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个主题包:' Choose
 	echo " "
 	case $Choose in
 	q)
 		break
-	;;
-	n)
-		ExtraThemes_P2
 	;;
 	1)
 		PKG_NAME=luci-theme-argon
@@ -139,113 +135,33 @@ do
 		fi
 	;;
 	2)
-		PKG_NAME=luci-theme-argon-mc
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argon-mc
-		ExtraPackages_svn
-	;;
-	3)
-		PKG_NAME=luci-theme-argon-dark-mod
-		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-argon-dark-mod
-		ExtraPackages_svn
-	;;
-	4)
-		PKG_NAME=luci-theme-argon-light-mod
-		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-argon-light-mod
-		ExtraPackages_svn
-	;;
-	5)
-		PKG_NAME=luci-theme-bootstrap-mod
-		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-bootstrap-mod
-		ExtraPackages_svn
-	;;
-	6)
-		PKG_NAME=luci-theme-rosy
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-rosy
-		ExtraPackages_svn
-	;;
-	7)
-		PKG_NAME=luci-theme-atmaterial
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-atmaterial
-		ExtraPackages_git
-	;;
-	8)
-		PKG_NAME=luci-theme-darkmatter
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-darkmatter
-		ExtraPackages_svn
-	;;
-	9)
-		PKG_NAME=luci-theme-opentomcat
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-opentomcat
-		ExtraPackages_svn
-	;;
-	esac
-done
-}
-
-ExtraThemes_P2() {
-while :
-do
-	clear
-	echo -e "${Blue}添加第三方主题包 Page-2${White}\n"
-	echo "1.luci-theme-opentomato"
-	echo "2.luci-theme-Butterfly"
-	echo "3.luci-theme-Butterfly-dark"
-	echo "4.luci-theme-netgearv2"
-	echo "5.luci-theme-edge"
-	echo "6.luci-theme-argonv2"
-	echo "7.luci-theme-argonv3"
-	echo "8.luci-theme-infinityfreedom"
-	echo -e "\nq.返回\n"
-	read -p '请从上方选择一个主题包:' Choose
-	echo " "
-	case $Choose in
-	q)
-		break
-	;;
-	1)
-		PKG_NAME=luci-theme-opentomato
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-opentomato
-		ExtraPackages_svn
-	;;
-	2)
-		PKG_NAME=luci-theme-Butterfly
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-Butterfly
-		ExtraPackages_svn
-	;;
-	3)
-		PKG_NAME=luci-theme-Butterfly-dark
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-Butterfly-dark
-		ExtraPackages_svn
-	;;
-	4)
-		PKG_NAME=luci-theme-netgearv2
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-netgearv2
-		ExtraPackages_svn
-	;;
-	5)
 		PKG_NAME=luci-theme-edge
-		if [ $Project == Lede ];then
-			PKG_URL=" -b 18.06 https://github.com/garypang13/luci-theme-edge"
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-edge
+		ExtraPackages_svn
+	;;
+	*)
+		if [ $Choose -gt 0 ] > /dev/null 2>&1 ;then
+			if [ $(($Choose - 2)) -le $List_MaxLine ] > /dev/null 2>&1 ;then
+				Choose=$(($Choose - 2))
+				URL_TYPE=`sed -n ${Choose}p $ExtraThemesList_File | awk '{print $1}'`
+				PKG_NAME=`sed -n ${Choose}p $ExtraThemesList_File | awk '{print $2}'`
+				PKG_URL=`sed -n ${Choose}p $ExtraThemesList_File | awk '{print $3}'`
+				if [ "$URL_TYPE" == git ];then
+					ExtraPackages_git
+				elif [ "$URL_TYPE" == svn ];then
+					ExtraPackages_svn
+				else
+					Say="[第 $Choose 行：$URL_TYPE] 格式错误!请检查'/Additional/ExtraThemes_List'是否填写正确." && Color_R
+					sleep 3
+				fi
+			else
+				Say="输入错误,请输入正确的选项!" && Color_R
+				sleep 2
+			fi
 		else
-			PKG_URL=https://github.com/garypang13/luci-theme-edge
+			Say="输入错误,请输入正确的选项!" && Color_R
+			sleep 2
 		fi
-		ExtraPackages_git
-	;;
-	6)
-		PKG_NAME=luci-theme-argonv2
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argonv2
-		ExtraPackages_svn
-	;;
-	7)
-		PKG_NAME=luci-theme-argonv3
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argonv3
-		ExtraPackages_svn
-	;;
-	8)
-		PKG_NAME=luci-theme-infinityfreedom
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-infinityfreedom
-		ExtraPackages_svn
-	;;
 	esac
 done
 }
