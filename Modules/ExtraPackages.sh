@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.09.14
-Module_Version=V4.8.0-BETA
+Update=2020.09.15
+Module_Version=V4.8.1-BETA
 
 ExtraPackages_mkdir
 while :
@@ -52,7 +52,10 @@ do
 	;;
 	2)
 		PKG_NAME=luci-app-adguardhome
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-app-adguardhome
+		PKG_URL=https://github.com/Lienol/openwrt/trunk/package/diy/luci-app-adguardhome
+		ExtraPackages_svn
+		PKG_NAME=adguardhome
+		PKG_URL=https://github.com/Lienol/openwrt/trunk/package/diy/adguardhome
 		ExtraPackages_svn
 	;;
 	3)
