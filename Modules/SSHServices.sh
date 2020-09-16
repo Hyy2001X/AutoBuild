@@ -2,7 +2,7 @@
 
 SSHServices() {
 Update=2020.09.16
-Module_Version=V1.3
+Module_Version=V1.3.1
 
 while :
 do
@@ -29,8 +29,8 @@ do
 		sleep 2
 	;;
 	*)
-		if [ ! $Choose == 0 ];then
-			if [ $Choose -le $SSHProfileList_MaxLine ];then
+		if [ $Choose -gt 0 ] > /dev/null 2>&1 ;then
+			if [ $Choose -le $SSHProfileList_MaxLine ] > /dev/null 2>&1 ;then
 				SSHProfile_File=`sed -n ${Choose}p $SSHProfileList`
 				SSHServices_Menu
 			else
