@@ -1,13 +1,13 @@
 # AutoBuild Script Module by Hyy2001
 
 SSHServices() {
-Update=2020.08.30
-Module_Version=V1.1-b
+Update=2020.09.16
+Module_Version=V1.3
 
 while :
 do
 	clear
-	Say="SSH Services Script $Module_Version" && Color_B
+	Say="Easy SSH Services Script $Module_Version" && Color_B
 	List_SSHProfile
 	Say="\nn.创建新配置文件" && Color_G
 	if [ ! "`ls -A $Home/Configs/SSH`" = "" ];then
@@ -25,16 +25,18 @@ do
 	;;
 	d)
 		rm -f $Home/Configs/SSH/*  > /dev/null 2>&1
-		Say="\n[All Profiles]删除成功!" && Color_Y
+		Say="\n已删除所有配置文件!" && Color_Y
 		sleep 2
 	;;
 	*)
-		if [ $Choose -le $SSHProfileList_MaxLine ] 2>/dev/null ;then
-			SSHProfile_File=`sed -n ${Choose}p $SSHProfileList`
-			SSHServices_Menu
-		else
-			Say="\n输入错误,请输入正确的数字!" && Color_R
-			sleep 2
+		if [ ! $Choose == 0 ];then
+			if [ $Choose -le $SSHProfileList_MaxLine ];then
+				SSHProfile_File=`sed -n ${Choose}p $SSHProfileList`
+				SSHServices_Menu
+			else
+				Say="\n输入错误,请输入正确的数字!" && Color_R
+				sleep 2
+			fi
 		fi
 	;;
 	esac
@@ -73,10 +75,14 @@ do
 	3)
 		echo " "
 		read -p '请输入新的配置名称:' SSHProfile_RN
-		cd $Home/Configs/SSH
-		mv "$SSHProfile_File" "$SSHProfile_RN" > /dev/null 2>&1
-		Say="\n重命名 [$SSHProfile_File] > [$SSHProfile_RN] 成功!" && Color_Y
-		SSHProfile_File="$SSHProfile_RN"
+		if [ ! "$SSHProfile_RN" == "" ];then
+			cd $Home/Configs/SSH
+			mv "$SSHProfile_File" "$SSHProfile_RN" > /dev/null 2>&1
+			Say="\n重命名 [$SSHProfile_File] > [$SSHProfile_RN] 成功!" && Color_Y
+			SSHProfile_File="$SSHProfile_RN"
+		else
+			Say="\n配置名称不能为空!" && Color_R
+		fi
 		sleep 2
 	;;
 	4)
@@ -86,6 +92,7 @@ do
 		break
 	;;
 	5)
+		
 		ssh-keygen -R $SSH_IP > /dev/null 2>&1
 		Say="\n[RSA Key Fingerprint]重置成功!" && Color_Y
 		sleep 2
@@ -98,17 +105,29 @@ Create_SSHProfile() {
 cd $Home
 echo " "
 if [ $Edit_Mode == 0 ];then
-	read -p '请输入新配置名称:' SSH_Profile
+	read -p '请输入新的配置名称:' SSH_Profile
+	while [ "$SSH_Profile" == "" ]
+	do
+		Say="\n配置名称不能为空!\n" && Color_R
+		read -p '请输入新配置名称:' SSH_Profile
+	done
 fi
 read -p '请输入IP地址:' SSH_IP
-if [ "$SSH_IP" == "" ];then
+while [ "$SSH_IP" == "" ]
+do
 	Say="\nIP地址不能为空!\n" && Color_R
-fi
-read -p '请输入端口号[默认为22]:' SSH_Port
+	read -p '请输入IP地址:' SSH_IP
+done
+read -p '请输入端口号:' SSH_Port
 if [ "$SSH_Port" == "" ];then
 	SSH_Port=22
 fi
 read -p '请输入用户名:' SSH_User
+while [ "$SSH_User" == "" ]
+do
+	Say="\n用户名不能为空!\n" && Color_R
+	read -p '请输入用户名:' SSH_User
+done
 read -p '请输入密码:' SSH_Password
 echo "IP=$SSH_IP" > $Home/Configs/SSH/"$SSH_Profile"
 echo "Port=$SSH_Port" >> $Home/Configs/SSH/"$SSH_Profile"
@@ -129,8 +148,8 @@ if [ ! "`ls -A $Home/Configs/SSH`" = "" ];then
 	SSHProfileList_MaxLine=`sed -n '$=' $SSHProfileList`
 	Say="\n配置文件列表\n" && Color_B
 	for ((i=1;i<=$SSHProfileList_MaxLine;i++));
-		do   
-			SSHProfile=`sed -n ${i}p $SSHProfileList`
+	do   
+		SSHProfile=`sed -n ${i}p $SSHProfileList`
 		echo -e "${i}.$Yellow${SSHProfile}$White"
 	done
 fi
