@@ -1,14 +1,17 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.08.28
-Module_Version=V2.3.9
+Update=2020.09.18
+Module_Version=V2.4
 
 while :
 do
 	if [ -f $Home/Projects/$Project/.config ];then
 		cd $Home/Projects/$Project
 		TARGET_BOARD=`awk -F'[="]+' '/TARGET_BOARD/{print $2}' .config`
+		if [ $TARGET_BOARD == "" ];then
+			make defconfig
+		fi
 		TARGET_SUBTARGET=`awk -F'[="]+' '/TARGET_SUBTARGET/{print $2}' .config`
 		TARGET_ARCH_PACKAGES=`awk -F'[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config`
 		PROFILE=`awk -F'[="]+' '/TARGET_PROFILE/{print $2}' .config`
@@ -35,8 +38,8 @@ do
 		Say="Simple Compilation Script $Module_Version" && Color_B
 		Say="\nCPU 信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP" && Color_Y
 		Decoration
-		if [ -f $Home/Configs/${Project}_Lasted_Config ];then
-			echo -e "当前配置文件:$Blue[$(cat $Home/Configs/${Project}_Lasted_Config)]$White\n"
+		if [ -f $Home/Configs/${Project}_Recently_Config ];then
+			echo -e "当前配置文件:$Blue[$(cat $Home/Configs/${Project}_Recently_Config)]$White\n"
 		fi
 		if [ $MULTI_PROFILE_Check == 0 ];then
 			if [ $Default_Check == 0 ];then
@@ -64,10 +67,10 @@ do
 	echo "6.手动输入参数"
 	echo "q.返回"
 	echo " "
-	if [ -f $Home/Configs/${Project}_Lasted_Compile ];then
-		Lasted_Compile=`awk 'NR==1' $Home/Configs/${Project}_Lasted_Compile`
-		Lasted_Compile_Stat=`awk 'NR==2' $Home/Configs/${Project}_Lasted_Compile`
-		echo -e "$Blue上次编译:$Yellow$Lasted_Compile $Lasted_Compile_Stat"
+	if [ -f $Home/Configs/${Project}_Recently_Compiled ];then
+		Recently_Compiled=`awk 'NR==1' $Home/Configs/${Project}_Recently_Compiled`
+		Recently_Compiled_Stat=`awk 'NR==2' $Home/Configs/${Project}_Recently_Compiled`
+		echo -e "$Blue上次编译:$Yellow$Recently_Compiled $Recently_Compiled_Stat"
 	fi
 	Decoration
 	GET_Choose
@@ -164,7 +167,7 @@ do
 	fi
 	Say="开始编译$Project..." && Color_Y
 	Compile_Start=`date +'%Y-%m-%d %H:%M:%S'`
-	echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Lasted_Compile
+	echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Recently_Compiled
 	cd $Home/Projects/$Project
 	if [ $SaveCompileLog == 0 ];then
 		$Compile_Parameter
@@ -184,7 +187,7 @@ do
 					Packages_Dir=$Home/Projects/$Project/bin
 					cp -a $(find $Packages_Dir/packages -type f -name "*.ipk") ./$TARGET_ARCH_PACKAGES
 					mv -f $(find ./$TARGET_ARCH_PACKAGES/ -type f -name "*all.ipk") ./
-					echo "成功" >> $Home/Configs/${Project}_Lasted_Compile
+					echo "成功" >> $Home/Configs/${Project}_Recently_Compiled
 					Compile_Time_End
 					cd $Home/Projects/$Project
 					mv ./bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET/$Firmware_Name $Home/Firmware/$AutoBuild_Firmware
@@ -205,7 +208,7 @@ do
 					echo " "
 					Compile_Time_End
 					Say="\n编译失败!" && Color_R
-					echo "失败" >> $Home/Configs/${Project}_Lasted_Compile
+					echo "失败" >> $Home/Configs/${Project}_Recently_Compiled
 				fi
 			else
 				Compile_Time_End
