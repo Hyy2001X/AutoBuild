@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.09.15
-Version=V4.0.4
+Update=2020.09.18
+Version=V4.0.5
 
 Second_Menu() {
 while :
@@ -20,9 +20,9 @@ do
 			fi
 		fi
 		cd $Home
-		if [ -f ./Configs/${Project}_Lasted_Update ];then
-			Lasted_Update=`cat ./Configs/${Project}_Lasted_Update`
-			echo -e "$Yellow最近更新:$Blue$Lasted_Update$White"
+		if [ -f ./Configs/${Project}_Recently_Updated ];then
+			Recently_Updated=`cat ./Configs/${Project}_Recently_Updated`
+			echo -e "$Yellow最近更新:$Blue$Recently_Updated$White"
 		fi
 		cd $Home/Projects/$Project
 		Branch=`git branch | sed 's/* //g'`
@@ -137,7 +137,8 @@ do
 			cd $Home/Projects
 			Say="\n正在删除$Project...\n" && Color_B
 			rm -rf $Project
-			rm -f $Home/Configs/${Project}_Lasted_*
+			rm -f $Home/Configs/${Project}_Recently_*
+			rm -f $Home/Log/*_${Project}_*
 			break
 		;;
 		5)
@@ -168,7 +169,8 @@ do
 		if [ $? -eq 0 ];then
 			cd $Home/Projects/$Project
 			clear
-			make -j$CPU_Threads download V=s
+			dl_Logfile=$Home/Log/dl_${Project}_`(date +%Y%m%d_%H:%M)`.log
+			make -j$CPU_Threads download V=s 2>&1 | tee -a $dl_Logfile
 			find dl -size -1024c -exec rm -f {} \;
 			awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
 			Say="\n[dl]库下载结束,存储占用:$(du -sh dl | awk '{print $1}')B" && Color_B
@@ -284,7 +286,7 @@ do
 					if [ -f "$ConfigFile" ];then
 						ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
 						cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
-						echo "$ConfigFile" > $Home/Configs/${Project}_Lasted_Config
+						echo "$ConfigFile" > $Home/Configs/${Project}_Recently_Config
 						Say="配置 [$ConfigFile] 恢复成功!" && Color_Y
 						sleep 2
 					else
@@ -540,8 +542,8 @@ fi
 }
 
 Make_Menuconfig() {
-if [ -f $Home/Configs/${Project}_Lasted_Config ];then
-	rm -f $Home/Configs/${Project}_Lasted_Config
+if [ -f $Home/Configs/${Project}_Recently_Config ];then
+	rm -f $Home/Configs/${Project}_Recently_Config
 fi
 clear
 cd $Home/Projects/$Project
@@ -607,7 +609,7 @@ fi
 Sources_Update_Core() {
 clear
 Say="开始更新$Project...\n" && Color_Y
-echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Lasted_Update
+echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Recently_Updated
 cd $Home/Projects/$Project
 if [ $Enforce_Update == 1 ];then
 	git fetch --all
