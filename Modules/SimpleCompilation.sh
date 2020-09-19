@@ -1,17 +1,14 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.09.18
-Module_Version=V2.4
+Update=2020.09.19
+Module_Version=V2.5
 
 while :
 do
 	if [ -f $Home/Projects/$Project/.config ];then
 		cd $Home/Projects/$Project
 		TARGET_BOARD=`awk -F'[="]+' '/TARGET_BOARD/{print $2}' .config`
-		if [ $TARGET_BOARD == "" ];then
-			make defconfig
-		fi
 		TARGET_SUBTARGET=`awk -F'[="]+' '/TARGET_SUBTARGET/{print $2}' .config`
 		TARGET_ARCH_PACKAGES=`awk -F'[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config`
 		PROFILE=`awk -F'[="]+' '/TARGET_PROFILE/{print $2}' .config`
@@ -63,8 +60,9 @@ do
 	echo "2.make -j2 V=s"
 	echo "3.make -j4"
 	echo -e "4.make -j4 V=s${White}"
-	echo "5.自动选择"
-	echo "6.手动输入参数"
+	echo "5.make defconfig"
+	echo "6.自动选择"
+	echo "7.手动输入参数"
 	echo "q.返回"
 	echo " "
 	if [ -f $Home/Configs/${Project}_Recently_Compiled ];then
@@ -91,9 +89,13 @@ do
 		Compile_Parameter="make -j4 V=s"
 	;;
 	5)
-		Compile_Parameter="make -j$CPU_Threads V=s"
+		make defconfig
+		SimpleCompilation
 	;;
 	6)
+		Compile_Parameter="make -j$CPU_Threads V=s"
+	;;
+	7)
 		read -p '请输入编译参数:' Compile_Parameter
 		if [ "$Compile_Parameter" == "" ];then
 			Say="\n请输入正确的参数!" && Color_R
