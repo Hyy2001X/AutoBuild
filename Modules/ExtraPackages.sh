@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.09.15
-Module_Version=V4.8.1-BETA
+Update=2020.09.20
+Module_Version=V4.8.2
 
 ExtraPackages_mkdir
 while :
@@ -16,8 +16,10 @@ do
 	echo "4.Clash"
 	echo "5.OpenAppFilter"
 	echo "6.Passwall"
-	echo "7.[依赖包]Passwall"
+	echo "7.[依赖包] Passwall"
 	echo "8.MentoHust"
+	echo "9.[微信推送] ServerChan "
+	echo "10.Socat"
 	Say="w.Li2nOnline's Packages Source" && Color_B
 	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个软件包:' Choose
@@ -93,6 +95,16 @@ do
 		ExtraPackages_svn
 		PKG_NAME=mentohust
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/mentohust
+		ExtraPackages_svn
+	;;
+	9)
+		PKG_NAME=luci-app-serverchan
+		PKG_URL=https://github.com/tty228/luci-app-serverchan
+		ExtraPackages_git
+	;;
+	10)
+		PKG_NAME=luci-app-socat
+		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-app-socat
 		ExtraPackages_svn
 	;;
 	esac
