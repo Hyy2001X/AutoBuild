@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SimpleCompilation() {
-Update=2020.09.19
-Module_Version=V2.5
+Update=2020.09.20
+Module_Version=V2.5.1
 
 while :
 do
@@ -166,6 +166,7 @@ do
 		fi
 		cd $Home/Projects/$Project/package/base-files/files/etc
 		echo "$Lede_Version-`date +%Y%m%d`" > openwrt_date
+		echo "$TARGET_PROFILE" > openwrt_device
 	fi
 	Say="开始编译$Project..." && Color_Y
 	Compile_Start=`date +'%Y-%m-%d %H:%M:%S'`
