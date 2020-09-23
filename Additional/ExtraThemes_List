@@ -1,4 +1,4 @@
-svnn luci-theme-atmaterial https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-atmaterial
+svn luci-theme-atmaterial https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-atmaterial
 svn luci-theme-argon-mc https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argon-mc
 svn luci-theme-argon-mod https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argon-mod
 svn luci-theme-argon-dark-mod https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-theme-argon-dark-mod
@@ -14,3 +14,5 @@ svn luci-theme-netgearv2 https://github.com/project-openwrt/openwrt/trunk/packag
 svn luci-theme-argonv2 https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argonv2
 svn luci-theme-argonv3 https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-argonv3
 svn luci-theme-infinityfreedom https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-infinityfreedom
+svn luci-theme-ifit https://github.com/kenzok8/openwrt-packages/trunk
+svn luci-theme-argon_new https://github.com/kenzok8/openwrt-packages/trunk
