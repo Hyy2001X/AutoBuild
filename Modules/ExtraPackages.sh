@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.09.20
-Module_Version=V4.8.2
+Update=2020.09.23
+Module_Version=V4.8.3
 
 ExtraPackages_mkdir
 while :
@@ -19,7 +19,10 @@ do
 	echo "7.[依赖包] Passwall"
 	echo "8.MentoHust"
 	echo "9.[微信推送] ServerChan "
-	echo "10.Socat"
+	echo "10.[端口转发] Socat"
+	echo "11.[Hello World] luci-app-vssr"
+	echo "12.[京东签到] luci-app-jd-dailybonus"
+	echo "13.[Argon配置] luci-app-argon-config"
 	Say="w.Li2nOnline's Packages Source" && Color_B
 	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个软件包:' Choose
@@ -106,6 +109,21 @@ do
 		PKG_NAME=luci-app-socat
 		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-app-socat
 		ExtraPackages_svn
+	;;
+	11)
+		PKG_NAME=luci-app-vssr
+		PKG_URL=https://github.com/jerrykuku/luci-app-vssr
+		ExtraPackages_git
+	;;
+	12)
+		PKG_NAME=luci-app-jd-dailybonus
+		PKG_URL=https://github.com/jerrykuku/luci-app-jd-dailybonus
+		ExtraPackages_git
+	;;
+	13)
+		PKG_NAME=luci-app-argon-config
+		PKG_URL=https://github.com/jerrykuku/luci-app-argon-config
+		ExtraPackages_git
 	;;
 	esac
 done
