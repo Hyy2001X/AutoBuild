@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.09.27
-Version=V4.0.6
+Version=V4.0.7
 
 Second_Menu() {
 while :
@@ -22,7 +22,7 @@ do
 		cd $Home
 		if [ -f ./Configs/${Project}_Recently_Updated ];then
 			Recently_Updated=`cat ./Configs/${Project}_Recently_Updated`
-			echo -e "$Yellow最近更新:$Blue$Recently_Updated$White"
+			Say="最近更新:$Recently_Updated" && Color_Y
 		fi
 		cd $Home/Projects/$Project
 		Branch=`git branch | sed 's/* //g'`
@@ -143,15 +143,15 @@ do
 		;;
 		5)
 			rm -rf $Home/Projects/$Project/tmp
-			Say="\n$Yellow[临时文件/编译缓存]删除成功!" && Color_Y
+			Say="\n[临时文件/编译缓存]删除成功!" && Color_Y
 		;;
 		6)
 			rm -f $Home/Log/Update_${Project}_*
-			Say=\n"$Yellow[更新日志]删除成功!" && Color_Y
+			Say="\n[更新日志]删除成功!" && Color_Y
 		;;
 		7)
 			rm -f $Home/Log/Compile_${Project}_*
-			Say="\n$Yellow[编译日志]删除成功!" && Color_Y
+			Say="\n[编译日志]删除成功!" && Color_Y
 		;;
 		esac
 		sleep 2
@@ -220,7 +220,7 @@ do
 		if [ $Project == Lede ];then
 			echo -e "1.标准名称/$Yellow文件格式:[$Project-版本号-日期_时间]$White"
 		else
-			echo "1.标准名称文件格式:[$Project-日期_时间]"
+			echo "1.标准名称/文件格式:[$Project-日期_时间]"
 		fi
 		echo "2.自定义名称"
 		echo "q.返回"
@@ -646,7 +646,7 @@ else
 	Say="$Project源码下载-分支选择" && Color_B
 	Github_File=$Home/Additional/GitLink_$Project
 	Github_Source_Link=`sed -n 1p $Github_File`
-	echo -e "Github仓库地址:$Github_Source_Link\n"
+	echo -e "仓库地址:$Github_Source_Link\n"
 	Max_All_Line=`sed -n '$=' $Github_File`
 	Max_Branch_Line=`expr $Max_All_Line - 1`
 	for ((i=2;i<=$Max_All_Line;i++));
@@ -667,8 +667,8 @@ else
 				clear
 				Branch_Line=`expr $Choose_Branch + 1`
 				Github_Source_Branch=`sed -n ${Branch_Line}p $Github_File`
-				echo -e "$Blue下载地址:$Yellow$Github_Source_Link$White"
-				echo -e "$Blue下载分支:$Yellow$Github_Source_Branch$White"
+				Say="下载地址:$Yellow$Github_Source_Link" && Color_B
+				Say="下载分支:$Yellow$Github_Source_Branch" && Color_B
 				echo " "
 				cd $Home/Projects
 				if [ -d ./$Project ];then
