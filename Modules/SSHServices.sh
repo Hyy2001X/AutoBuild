@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SSHServices() {
-Update=2020.09.16
-Module_Version=V1.3.1
+Update=2020.09.27
+Module_Version=V1.3.2
 
 while :
 do
@@ -10,9 +10,7 @@ do
 	Say="Easy SSH Services Script $Module_Version" && Color_B
 	List_SSHProfile
 	Say="\nn.创建新配置文件" && Color_G
-	if [ ! "`ls -A $Home/Configs/SSH`" = "" ];then
-		Say="d.删除所有配置文件" && Color_R
-	fi
+	[ ! "`ls -A $Home/Configs/SSH`" = "" ] && Say="d.删除所有配置文件" && Color_R
 	echo -e "q.返回\n"
 	read -p '请从上方选择一个操作:' Choose
 	case $Choose in
@@ -46,10 +44,7 @@ done
 SSHServices_Menu() {
 while :
 do
-	SSH_IP=`awk -F'[="]+' '/IP/{print $2}' "$Home/Configs/SSH/$SSHProfile_File"`
-	SSH_Port=`awk -F'[="]+' '/Port/{print $2}' "$Home/Configs/SSH/$SSHProfile_File"`
-	SSH_User=`awk -F'[="]+' '/Username/{print $2}' "$Home/Configs/SSH/$SSHProfile_File"`
-	SSH_Password=`awk -F'[="]+' '/Password/{print $2}' "$Home/Configs/SSH/$SSHProfile_File"`
+	. $Home/Configs/SSH/$SSHProfile_File
 	clear
 	echo -e "$Blue配置文件:$Yellow[$SSHProfile_File]$White"
 	echo -e "$Blue连接参数:$Yellow[ssh $SSH_User@$SSH_IP -p $SSH_Port]$White\n"
@@ -129,15 +124,13 @@ do
 	read -p '请输入用户名:' SSH_User
 done
 read -p '请输入密码:' SSH_Password
-echo "IP=$SSH_IP" > $Home/Configs/SSH/"$SSH_Profile"
-echo "Port=$SSH_Port" >> $Home/Configs/SSH/"$SSH_Profile"
-echo "Username=$SSH_User" >> $Home/Configs/SSH/"$SSH_Profile"
-echo "Password=$SSH_Password" >> $Home/Configs/SSH/"$SSH_Profile"
+echo "SSH_IP=$SSH_IP" > $Home/Configs/SSH/"$SSH_Profile"
+echo "SSH_Port=$SSH_Port" >> $Home/Configs/SSH/"$SSH_Profile"
+echo "SSH_User=$SSH_User" >> $Home/Configs/SSH/"$SSH_Profile"
+echo "SSH_Password=$SSH_Password" >> $Home/Configs/SSH/"$SSH_Profile"
 Say="\n配置文件已保存到'Configs/SSH/$SSH_Profile'" && Color_Y
 sleep 2
-if [ $Edit_Mode == 0 ];then
-	SSH_Login
-fi
+[ $Edit_Mode == 0 ] && SSH_Login
 }
 
 List_SSHProfile() {
@@ -166,5 +159,4 @@ expect -c "
 	}
 	interact
 "
-Enter
 }
