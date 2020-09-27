@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.08.14
-Module_Version=V2.0-BETA
+Update=2020.09.27
+Module_Version=V2.1
 
 while :
 do
@@ -10,30 +10,25 @@ do
 	ColorfulUI_Check
 	clear
 	Say="脚本设置[实验性]\n" && Color_B
-	if [ $SimpleCompilation == 0 ];then
-		Say="1.高级编译		[关闭]" && Color_R
-	else
-		Say="1.高级编译		[打开]" && Color_Y
-	fi
 	if [ $ColorfulUI == 0 ];then
-		Say="2.高亮显示		[关闭]" && Color_R
+		Say="1.高亮显示		[关闭]" && Color_R
 	else
-		Say="2.高亮显示		[打开]" && Color_Y
+		Say="1.高亮显示		[打开]" && Color_Y
 	fi
 	if [ $DeveloperMode == 0 ];then
-		Say="3.调试模式		[关闭]" && Color_R
+		Say="2.调试模式		[关闭]" && Color_R
 	else
-		Say="3.调试模式		[打开]" && Color_Y
+		Say="2.调试模式		[打开]" && Color_Y
 	fi
 	if [ $SaveCompileLog == 0 ];then
-		Say="4.保存编译日志		[关闭]" && Color_R
+		Say="3.保存编译日志		[关闭]" && Color_R
 	else
-		Say="4.保存编译日志		[打开]" && Color_Y
+		Say="3.保存编译日志		[打开]" && Color_Y
 	fi
 	if [ $ScriptUpdater == 0 ];then
-		Say="5.脚本更新模式		[新版]" && Color_Y
+		Say="4.脚本更新模式		[新版]" && Color_Y
 	else
-		Say="5.脚本更新模式		[旧版]" && Color_B
+		Say="4.脚本更新模式		[旧版]" && Color_B
 	fi
 	echo " "
 	echo "x.恢复所有默认设置"
@@ -47,15 +42,6 @@ do
 		Set_Default_Settings
 	;;
 	1)
-		if [ $SimpleCompilation == 0 ];then
-			SimpleCompilation=1
-			sed -i "s/SimpleCompilation=0/SimpleCompilation=1/g" ./Settings
-		else
-			SimpleCompilation=0
-			sed -i "s/SimpleCompilation=1/SimpleCompilation=0/g" ./Settings
-		fi
-	;;
-	2)
 		if [ $ColorfulUI == 0 ];then
 			ColorfulUI=1
 			sed -i "s/ColorfulUI=0/ColorfulUI=1/g" ./Settings
@@ -64,7 +50,7 @@ do
 			sed -i "s/ColorfulUI=1/ColorfulUI=0/g" ./Settings
 		fi
 	;;
-	3)
+	2)
 		if [ $DeveloperMode == 0 ];then
 			DeveloperMode=1
 			sed -i "s/DeveloperMode=0/DeveloperMode=1/g" ./Settings
@@ -73,7 +59,7 @@ do
 			sed -i "s/DeveloperMode=1/DeveloperMode=0/g" ./Settings
 		fi
 	;;
-	4)
+	3)
 		if [ $SaveCompileLog == 0 ];then
 			SaveCompileLog=1
 			sed -i "s/SaveCompileLog=0/SaveCompileLog=1/g" ./Settings
@@ -82,7 +68,7 @@ do
 			sed -i "s/SaveCompileLog=1/SaveCompileLog=0/g" ./Settings
 		fi
 	;;
-	5)
+	4)
 		if [ $ScriptUpdater == 0 ];then
 			ScriptUpdater=1
 			sed -i "s/ScriptUpdater=0/ScriptUpdater=1/g" ./Settings
@@ -96,7 +82,6 @@ done
 
 Default_Settings() { 
 DeveloperMode=0
-SimpleCompilation=1
 ColorfulUI=1
 SaveCompileLog=0
 ScriptUpdater=0
@@ -105,7 +90,6 @@ ScriptUpdater=0
 Set_Default_Settings() {
 Default_Settings
 echo "DeveloperMode=$DeveloperMode" > $Home/Configs/Settings
-echo "SimpleCompilation=$SimpleCompilation" >> $Home/Configs/Settings
 echo "ColorfulUI=$ColorfulUI" >> $Home/Configs/Settings
 echo "SaveCompileLog=$SaveCompileLog" >> $Home/Configs/Settings
 echo "ScriptUpdater=$ScriptUpdater" >> $Home/Configs/Settings
@@ -116,11 +100,7 @@ cd $Home/Configs
 if [ ! -f $Home/Configs/Settings ];then
 	Set_Default_Settings
 else
-	DeveloperMode=`awk -F'[="]+' '/DeveloperMode/{print $2}' Settings`
-	SimpleCompilation=`awk -F'[="]+' '/SimpleCompilation/{print $2}' Settings`
-	ColorfulUI=`awk -F'[="]+' '/ColorfulUI/{print $2}' Settings`
-	SaveCompileLog=`awk -F'[="]+' '/SaveCompileLog/{print $2}' Settings`
-	ScriptUpdater=`awk -F'[="]+' '/ScriptUpdater/{print $2}' Settings`
+	. $Home/Configs/Settings
 fi
 }
 
@@ -157,12 +137,12 @@ echo -e "$Skyb$Say$White"
 }
 
 GET_Choose() {
-echo " "
+echo -e "$White"
 read -p '请从上方选择一个操作:' Choose
 }
 
 Enter() {
-echo " "
+echo -e "$White"
 read -p "按下[回车]键以继续..." Key
 }
 
