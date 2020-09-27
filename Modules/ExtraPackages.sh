@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.09.23
-Module_Version=V4.8.3
+Update=2020.09.27
+Module_Version=V4.8.4-BETA
 
 ExtraPackages_mkdir
 while :
@@ -138,18 +138,56 @@ do
 	clear
 	Say="添加第三方主题包\n" && Color_B
 	echo "1.luci-theme-argon"
-	echo "2.luci-theme-edge"
 	ExtraThemesList_File=$Home/Additional/ExtraThemes_List
 	List_MaxLine=`sed -n '$=' $ExtraThemesList_File`
+	rm -f $Home/TEMP/Checked_Themes > /dev/null 2>&1
 	for ((i=1;i<=$List_MaxLine;i++));
 		do   
 			Theme=`sed -n ${i}p $ExtraThemesList_File | awk '{print $2}'`
-			echo "$(($i + 2)).${Theme}"
+			if [ -f $PKG_Dir/$Theme/Makefile ];then
+				echo -e "$(($i + 1)).${Yellow}${Theme}${White}"
+				echo "$Theme" >> $Home/TEMP/Checked_Themes
+			else
+				echo "$(($i + 1)).${Theme}"
+			fi
 	done
-	echo -e "\nq.返回\n"
+	Say="\na.添加所有主题包" && Color_G
+	Say="u.更新已安装的主题包" && Color_Y
+	echo -e "q.返回\n"
 	read -p '请从上方选择一个主题包:' Choose
 	echo " "
 	case $Choose in
+	a)
+		clear
+		Say="此操作花费时间较长,请耐心等待...\n" && Color_B
+		for ((i=1;i<=$List_MaxLine;i++));
+		do
+			URL_TYPE=`sed -n ${i}p $ExtraThemesList_File | awk '{print $1}'`
+			PKG_NAME=`sed -n ${i}p $ExtraThemesList_File | awk '{print $2}'`
+			PKG_URL=`sed -n ${i}p $ExtraThemesList_File | awk '{print $3}'`
+			case $URL_TYPE in
+			git)
+				ExtraPackages_git
+			;;
+			svn)
+				ExtraPackages_svn
+			esac
+		done
+		Enter
+	;;
+	u)
+		clear
+		Say="此操作花费时间较长,请耐心等待...\n" && Color_B
+		cat $Home/TEMP/Checked_Themes | while read Theme
+		do
+			echo -e "$Yellow正在更新 $Blue$Theme $Yellow...$White"
+			cd ./$Theme
+			svn update > /dev/null 2>&1
+			git pull > /dev/null 2>&1
+			cd ..
+		done
+		Enter
+	;;
 	q)
 		break
 	;;
@@ -167,26 +205,24 @@ do
 			ExtraPackages_git
 		fi
 	;;
-	2)
-		PKG_NAME=luci-theme-edge
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-theme-edge
-		ExtraPackages_svn
-	;;
 	*)
 		if [ $Choose -gt 0 ] > /dev/null 2>&1 ;then
-			if [ $(($Choose - 2)) -le $List_MaxLine ] > /dev/null 2>&1 ;then
-				Choose=$(($Choose - 2))
+			if [ $(($Choose - 1)) -le $List_MaxLine ] > /dev/null 2>&1 ;then
+				Choose=$(($Choose - 1))
 				URL_TYPE=`sed -n ${Choose}p $ExtraThemesList_File | awk '{print $1}'`
 				PKG_NAME=`sed -n ${Choose}p $ExtraThemesList_File | awk '{print $2}'`
 				PKG_URL=`sed -n ${Choose}p $ExtraThemesList_File | awk '{print $3}'`
-				if [ "$URL_TYPE" == git ];then
+				case $URL_TYPE in
+				git)
 					ExtraPackages_git
-				elif [ "$URL_TYPE" == svn ];then
+				;;
+				svn)
 					ExtraPackages_svn
-				else
+				;;
+				*)
 					Say="[第 $Choose 行：$URL_TYPE] 格式错误!请检查'/Additional/ExtraThemes_List'是否填写正确." && Color_R
 					sleep 3
-				fi
+				esac
 			else
 				Say="输入错误,请输入正确的选项!" && Color_R
 				sleep 2
@@ -197,16 +233,12 @@ do
 		fi
 	esac
 done
-}
 
 ExtraPackages_git() {
-if [ -d $PKG_Dir/$PKG_NAME ];then
-	rm -rf $PKG_Dir/$PKG_NAME
-fi
+[ -d $PKG_Dir/$PKG_NAME ] && rm -rf $PKG_Dir/$PKG_NAME
 git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
 if [ -f $PKG_Dir/$PKG_NAME/Makefile ] || [ -f $PKG_Dir/$PKG_NAME/README.md ];then
 	Say="已添加 $PKG_NAME" && Color_Y
-	rm -rf $PKG_Dir/$PKG_NAME/.git
 else
 	Say="未添加 $PKG_NAME" && Color_R
 fi
@@ -214,13 +246,10 @@ sleep 2
 }
 
 ExtraPackages_svn() {
-if [ -d $PKG_Dir/$PKG_NAME ];then
-	rm -rf $PKG_Dir/$PKG_NAME
-fi
+[ -d $PKG_Dir/$PKG_NAME ] && rm -rf $PKG_Dir/$PKG_NAME
 svn checkout $PKG_URL $PKG_NAME > /dev/null 2>&1
 if [ -f $PKG_Dir/$PKG_NAME/Makefile ] || [ -f $PKG_Dir/$PKG_NAME/README.md ];then
 	Say="已添加 $PKG_NAME" && Color_Y
-	rm -rf ./$PKG_NAME/.svn
 else
 	Say="未添加 $PKG_NAME" && Color_R
 fi
@@ -244,8 +273,6 @@ fi
 
 ExtraPackages_mkdir() {
 PKG_Home=$Home/Projects/$Project/package
-if [ ! -d $PKG_Home/ExtraPackages ];then
-		mkdir -p $PKG_Home/ExtraPackages
-fi
+[ ! -d $PKG_Home/ExtraPackages ] && mkdir -p $PKG_Home/ExtraPackages
 PKG_Dir=$PKG_Home/ExtraPackages
 }
