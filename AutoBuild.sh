@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.09.18
-Version=V4.0.5
+Update=2020.09.27
+Version=V4.0.6
 
 Second_Menu() {
 while :
@@ -57,7 +57,7 @@ do
 		Backup_Restore
 	;;
 	4)
-		SimpleCompilation_Check
+		BuildFirmware_Check
 	;;
 	5)
 		Project_Options
@@ -396,6 +396,7 @@ do
 		clear
 		sudo apt-get update
 		sudo apt-get upgrade
+		sudo apt-get clean
 		Enter
 	;;
 	2)
@@ -410,6 +411,7 @@ do
 			sudo apt-get -y install $Dependency $Extra_Dependency
 			Update_Times=$(($Update_Times + 1))
 		done
+		sudo apt-get clean
 		Enter
 	;;
 	3)
@@ -527,7 +529,6 @@ if [ $? -eq 0 ];then
 		mv $Home/Additional $Backups_Dir/Additional
 		mv $Home/Modules $Backups_Dir/Modules
 		cp -a * $Home
-		Say="\nAutoBuild 已备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'" && Color_B
 		echo -e "$Yellow"
 		read -p "AutoBuild 更新成功!" Key
 		$Home/AutoBuild.sh
@@ -541,23 +542,12 @@ else
 fi
 }
 
-Make_Menuconfig() {
-if [ -f $Home/Configs/${Project}_Recently_Config ];then
-	rm -f $Home/Configs/${Project}_Recently_Config
-fi
-clear
-cd $Home/Projects/$Project
-Say="Loading $Project Configuration..." && Color_B
-make menuconfig
-Enter
-}
-
 Script_Update() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	cd $Home
 	clear
-	Say="开始下载更新...\n" && Color_Y
+	Say="正在下载更新...\n" && Color_Y
 	Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
 	Old_Version_Dir=$Old_Version-`(date +%Y%m%d_%H:%M)`
 	Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir
@@ -570,7 +560,6 @@ if [ $? -eq 0 ];then
 	cp $Home/LICENSE $Backups_Dir/LICENSE
 	cp -a $Home/Additional $Backups_Dir/Additional
 	cp -a $Home/Modules $Backups_Dir/Modules
-	Say="AutoBuild 已备份到'/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir'\n" && Color_B
 	rm -rf ./TEMP
 	svn checkout https://github.com/Hyy2001X/AutoBuild/trunk ./TEMP
 	if [ -f ./TEMP/AutoBuild.sh ];then
@@ -582,7 +571,6 @@ if [ $? -eq 0 ];then
 		chmod +x $Home/AutoBuild.sh
 		chmod +x -R $Home/Modules
 		New_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
-		echo -e "\n${Yellow}AutoBuild_Core ${Blue}$Old_Version --> $New_Version${Yellow}\n"
 		read -p "AutoBuild 更新成功!" Key
 		./AutoBuild.sh
 	else
@@ -604,6 +592,14 @@ else
 	Say="\n网络连接错误,更新失败!" && Color_R
 	sleep 2
 fi
+}
+
+Make_Menuconfig() {
+clear
+cd $Home/Projects/$Project
+Say="Loading $Project Configuration..." && Color_B
+make menuconfig
+Enter
 }
 
 Sources_Update_Core() {
@@ -838,7 +834,7 @@ Home=$(cd $(dirname $0); pwd)
 set -u
 
 Dependency="build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget swig rsync curl"
-Extra_Dependency="ntpdate httping openssh-client lm-sensors net-tools expect"
+Extra_Dependency="ntpdate httping ssh lm-sensors net-tools expect"
 
 CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
 CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
