@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.09.27
-Module_Version=V4.8.4-BETA
+Update=2020.09.28
+Module_Version=V4.8.5-BETA
 
 ExtraPackages_mkdir
 while :
@@ -233,6 +233,7 @@ do
 		fi
 	esac
 done
+}
 
 ExtraPackages_git() {
 [ -d $PKG_Dir/$PKG_NAME ] && rm -rf $PKG_Dir/$PKG_NAME
