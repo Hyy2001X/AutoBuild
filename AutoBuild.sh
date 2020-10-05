@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.09.27
-Version=V4.0.7
+Update=2020.10.05
+Version=V4.1
 
 Second_Menu() {
 while :
@@ -29,14 +29,13 @@ do
 	else
 		Say="未检测到[$Project]源码,请前往[高级选项]下载!" && Color_R
 	fi
-	echo " "
+	echo ""
 	echo "1.更新源代码和Feeds"
 	echo "2.打开固件配置菜单"
 	echo "3.备份与恢复"
 	echo "4.编译选项"
 	echo "5.高级选项"
-	echo " "
-	echo "m.主菜单"
+	Say="\nm.主菜单" && Color_G
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -54,7 +53,7 @@ do
 		Make_Menuconfig
 	;;
 	3)
-		Backup_Restore
+		BackupServices
 	;;
 	4)
 		BuildFirmware_Check
@@ -70,18 +69,16 @@ while :
 do
 	cd $Home/Projects/$Project
 	clear
-	Say="高级选项" && Color_B
-	echo " "
+	Say="源码高级选项\n" && Color_B
 	echo "1.下载源代码"
 	echo "2.强制更新源代码和Feeds"
-	echo "3.添加第三方主题"
-	echo "4.添加软件包"
+	Say="3.添加第三方主题包" && Color_Y
+	Say="4.添加第三方软件包" && Color_Y
 	echo "5.空间清理"
 	echo "6.删除配置文件"
 	echo "7.下载[dl]库"
 	echo "8.源代码更新日志"
-	echo " "
-	echo "m.主菜单"
+	Say="\nm.主菜单" && Color_G
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -108,8 +105,7 @@ do
 	while :
 	do
 		clear
-		Say="空间清理" && Color_B
-		echo " "
+		Say="空间清理\n" && Color_B
 		echo "1.make clean"
 		echo "2.make dirclean"
 		echo "3.make distclean"
@@ -164,7 +160,6 @@ do
 		sleep 2
 	;;
 	7)
-		echo " "
 		timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 		if [ $? -eq 0 ];then
 			cd $Home/Projects/$Project
@@ -172,11 +167,9 @@ do
 			dl_Logfile=$Home/Log/dl_${Project}_`(date +%Y%m%d_%H:%M)`.log
 			make -j$CPU_Threads download V=s 2>&1 | tee -a $dl_Logfile
 			find dl -size -1024c -exec rm -f {} \;
-			awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
-			Say="\n[dl]库下载结束,存储占用:$(du -sh dl | awk '{print $1}')B" && Color_B
 			Enter
 		else
-			Say="网络连接错误,[dl]库下载失败!" && Color_R
+			Say="\n网络连接错误,[dl]库下载失败!" && Color_R
 			sleep 2
 		fi
 	;;
@@ -192,20 +185,17 @@ do
 done
 }
 
-Backup_Restore() {
+BackupServices() {
 while :
 do
 	clear
-	Say="备份与恢复" && Color_B
-	echo " "
+	Say="备份与恢复\n" && Color_B
 	echo "1.备份[.config]"
 	echo "2.恢复[.config]"
-	echo "3.备份[dl]库"
-	echo "4.恢复[dl]库"
-	echo "5.备份[$Project]源代码"
-	echo "6.恢复[$Project]源代码"
-	echo " "
-	echo "q.返回"
+	echo "3.备份[$Project]源码"
+	echo "4.恢复[$Project]源码"
+	Say="5.链接[dl]库" && Color_G
+	echo -e "\nq.返回"
 	GET_Choose
 	case $Choose in
 	q)
@@ -216,16 +206,16 @@ do
 	do
 		cd $Home
 		clear
-		Say="备份[.config]" && Color_Y && echo " "
+		Say="备份[.config]\n" && Color_Y
 		if [ $Project == Lede ];then
 			echo -e "1.标准名称/$Yellow文件格式:[$Project-版本号-日期_时间]$White"
 		else
-			echo "1.标准名称/文件格式:[$Project-日期_时间]"
+			echo -e "1.标准名称/$Yellow文件格式:[$Project-日期_时间]$White"
 		fi
 		echo "2.自定义名称"
-		echo "q.返回"
+		echo -e "\nq.返回"
 		GET_Choose
-		echo " "
+		echo ""
 		case $Choose in
 		q)
 			break
@@ -238,19 +228,18 @@ do
 			fi	
 			if [ -f ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
-				Say="备份成功!备份文件存放于:'/Backups/Configs/$Backup_Config'" && Color_Y
+				Say="备份成功![.config]已备份到:'/Backups/Configs/$Backup_Config'" && Color_Y
 			else
 				Say="备份失败!" && Color_R
 			fi
 		;;
 		2)
 			read -p '请输入自定义名称:' Backup_Config
-			echo " "
 			if [ -f ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/"$Backup_Config"
-				Say="备份成功!备份文件存放于:'/Backups/Configs/$Backup_Config'" && Color_Y
+				Say="\n备份成功![.config]已备份到:'/Backups/Configs/$Backup_Config'" && Color_Y
 			else
-				Say="备份失败!" && Color_R
+				Say="\n备份失败!" && Color_R
 			fi
 		;;	
 		esac
@@ -262,7 +251,7 @@ do
 	while :
 	do
 		clear
-		Say="恢复[.config]" && Color_B && echo " "
+		Say="恢复[.config]\n" && Color_Y
 		cd $Home/Backups/Configs
 		ls -A | cat > $Home/TEMP/Config.List
 		ConfigList_File=$Home/TEMP/Config.List
@@ -281,7 +270,7 @@ do
 		*)
 			if [ $Choose -le $Max_ConfigList_Line ] 2>/dev/null ;then
 				if [ ! $Choose == 0 ] 2>/dev/null ;then
-					echo " "
+					echo ""
 					ConfigFile=`sed -n ${Choose}p $ConfigList_File`
 					if [ -f "$ConfigFile" ];then
 						ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
@@ -305,61 +294,43 @@ do
 		esac
 	done
 	else
-		Say="\n未检测到备份文件!" && Color_R
+		Say="未找到备份文件,恢复失败!" && Color_R
 		sleep 2
 	fi
 	;;
 	3)
-		echo " "
-		cd $Home/Projects
-		if [ ! -d ./$Project/dl ];then
-			Say="未找到'/Projects/$Project/dl',备份失败!" && Color_R
-			sleep 2
-		else
-			echo -ne "\r$Yellow正在备份[dl]库...$White\r"
-			cp -a $Home/Projects/$Project/dl $Home/Backups/
-			Say="备份成功![dl]库已备份到:'/Backups/dl'" && Color_Y
-			Say="存储占用:$(du -sh $Home/Backups/dl | awk '{print $1}')B" && Color_B
-			Enter
-		fi
-	;;
-	4)
-		echo " "
-		cd $Home
-		if [ ! -d ./Backups/dl ];then
-			Say="未找到'/Backups/dl',恢复失败!" && Color_R
-			sleep 2
-		else
-			echo -ne "\r$Blue正在恢复[dl]库...$White\r"
-			cp -a $Home/Backups/dl $Home/Projects/$Project
-			Say="恢复成功![dl]库已恢复到:'/Projects/$Project/dl'" && Color_Y
-			Say="存储占用:$(du -sh $Home/Projects/$Project/dl | awk '{print $1}')B" && Color_B
-			Enter
-		fi
-	;;
-	5)
-		echo " "
-		echo -ne "\r$Yellow正在备份[$Project]源代码...$White\r"
+		echo ""
+		echo -ne "\r$Yellow正在备份[$Project]源码...$White\r"
 		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
 			rm -rf $Home/Backups/Projects/$Project
 		fi
 		cp -a $Home/Projects/$Project $Home/Backups/Projects > /dev/null 2>&1
-		Say="备份成功![$Project]源代码已备份到:'/Backups/Projects/$Project'" && Color_Y
+		Say="备份成功![$Project]源码已备份到:'/Backups/Projects/$Project'" && Color_Y
 		Say="存储占用:$(du -sh $Home/Backups/Projects/$Project | awk '{print $1}')B" && Color_B
 		Enter
 	;;
-	6)
-		echo " "
+	4)
+		echo ""
 		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
-			echo -ne "\r$Yellow正在恢复[$Project]源代码...$White\r"
+			echo -ne "\r$Yellow正在恢复[$Project]源码...$White\r"
 			cp -a $Home/Backups/Projects/$Project $Home/Projects/ > /dev/null 2>&1
-			Say="恢复成功![$Project]源代码已恢复到:'/Projects/$Project'" && Color_Y
+			Say="恢复成功![$Project]源码已恢复到:'/Projects/$Project'" && Color_Y
 			Say="存储占用:$(du -sh $Home/Projects/$Project | awk '{print $1}')B" && Color_B
 			Enter
 		else
-			Say="未找到[$Project]源代码,恢复失败!" && Color_R
+			Say="未找到备份文件,恢复失败!" && Color_R
 			sleep 2
 		fi
+	;;
+	5)
+		cd $Home/Projects
+		if [ ! -h ./$Project/dl ];then
+			[ -d ./$Project/dl ] && mv -f ./$Project/dl/* $Home/Backups/dl
+			rm -rf ./$Project/dl
+			ln -s $Home/Backups/dl $Home/Projects/$Project/dl
+		fi
+		Say="\n已创建软链接'$Home/Backups/dl' -> '$Home/Projects/$Project/dl'" && Color_Y
+		sleep 3
 	;;
 	esac
 done
@@ -369,28 +340,24 @@ Advanced_Options() {
 while :
 do
 	clear
-	Say="高级选项" && Color_B
-	echo " "
-	echo "1.更新系统软件包"
+	Say="高级选项\n" && Color_B
+	Say="1.更新系统软件包" && Color_Y
 	Say="2.安装编译环境" && Color_G
 	echo "3.SSH 服务"
 	echo "4.同步网络时间"
-	echo "5.存储空间占用统计"
-	echo "6.创建快捷启动"
-	echo "7.查看磁盘信息"
-	echo "8.定时任务"
-	echo "9.系统信息"
-	echo "10.更换软件源"
-	echo " "
-	Say="x.更新脚本" && Color_Y
-	echo "q.主菜单"
+	echo "5.存储空间统计"
+	echo "6.快速启动"
+	echo "7.系统信息"
+	echo "8.更换系统下载源"
+	Say="\nx.更新脚本" && Color_Y
+	Say="q.主菜单" && Color_G
 	GET_Choose
 	case $Choose in
 	q)
 		break
 	;;
 	x)
-		Script_Update_Check
+		AutoBuild_Updater
 	;;
 	1)
 		clear
@@ -418,7 +385,7 @@ do
 		SSHServices
 	;;
 	4)
-		echo " "
+		echo ""
 		sudo ntpdate ntp1.aliyun.com
 		sudo hwclock --systohc
 		sleep 2
@@ -427,78 +394,24 @@ do
 		StorageDetails
 	;;
 	6)
-		echo " "
-		cd ~
-		if [ -f .bashrc ];then
-			read -p '请输入快捷启动的名称:' FastOpen		
-			echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
-			source ~/.bashrc
-			Say="\n创建成功!在终端输入 $FastOpen 即可启动AutoBuild[需要重启终端]." && Color_Y
-		else
-			Say="创建失败!" && Color_R
-		fi
+		echo ""
+		read -p '请输入快速启动的名称:' FastOpen		
+		echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
+		source ~/.bashrc
+		Say="\n创建成功!在终端输入 $FastOpen 即可启动 AutoBuild [需要重启终端]." && Color_Y
 		sleep 3
 	;;
 	7)
-		clear
-		df -h
-		Enter
-	;;
-	8)
-	while :
-	do
-		clear
-		Say="定时任务" && Color_B
-		echo " "
-		echo "1.立刻关机"
-		echo "2.立刻重启"
-		echo "3.定时关机"
-		echo "4.定时重启"
-		echo "5.取消所有定时任务"
-		echo "q.返回"
-		GET_Choose
-		echo " "
-		case $Choose in
-		q)
-			break
-		;;
-		1)
-			shutdown -h now
-		;;
-		2)
-			shutdown -r now
-		;;
-		3)
-			read -p '请输入关机等待时间:' Time_wait
-			echo " "
-			shutdown -h $Time_wait
-			Say="系统将在 $Time_wait 分钟后关机." && Color_Y
-		;;
-		4)
-			read -p '请输入重启等待时间:' Time_wait
-			echo " "
-			shutdown -rh $Time_wait
-			Say="系统将在 $Time_wait 分钟后重启." && Color_Y
-		;;
-		5)
-			shutdown -c
-			Say="已取消所有定时任务." && Color_Y
-		;;
-		esac
-		sleep 3
-	done
-	;;
-	9)
 		Systeminfo
 	;;
-	10)
+	8)
 		ReplaceSourcesList
 	;;
 	esac
 done
 }
 
-Script_Update_Beta() {
+AutoBuild_Updater() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	clear
@@ -511,22 +424,16 @@ if [ $? -eq 0 ];then
 	Update_Logfile=$Home/Log/Script_Update_`(date +%Y%m%d_%H:%M)`.log
 	git pull 2>&1 | tee $Update_Logfile
 	if [ $(grep -o "fatal: 无法访问" $Update_Logfile | wc -l) = "0" ];then
-		if [ $(grep -o "已经是最新的" $Update_Logfile | wc -l) = "1" ];then
-			Say="\n强制合并到本地文件..." && Color_Y
-		else
-			Say="\n合并到本地文件..." && Color_Y
-		fi
+		Say="\n合并到本地文件..." && Color_Y
 		Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
 		Old_Version_Dir=$Old_Version-`(date +%Y%m%d_%H:%M)`
 		Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir
-		if [ -d $Backups_Dir ];then
-			rm -rf $Backups_Dir
-		fi
+		[ -d $Backups_Dir ] && rm -rf $Backups_Dir
 		mkdir -p $Backups_Dir
 		mv $Home/AutoBuild.sh $Backups_Dir/AutoBuild.sh
 		mv $Home/README.md $Backups_Dir/README.md
 		mv $Home/LICENSE $Backups_Dir/LICENSE
-		mv $Home/Additional $Backups_Dir/Additional
+		mv $Home/Additional $Backups_Dir/Additional 2>/dev/null 
 		mv $Home/Modules $Backups_Dir/Modules
 		cp -a * $Home
 		echo -e "$Yellow"
@@ -535,47 +442,6 @@ if [ $? -eq 0 ];then
 	else
 		echo -e "$Red"
 		read -p "AutoBuild 更新失败!" Key
-	fi
-else
-	Say="\n网络连接错误,更新失败!" && Color_R
-	sleep 2
-fi
-}
-
-Script_Update() {
-timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
-if [ $? -eq 0 ];then
-	cd $Home
-	clear
-	Say="正在下载更新...\n" && Color_Y
-	Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
-	Old_Version_Dir=$Old_Version-`(date +%Y%m%d_%H:%M)`
-	Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir
-	if [ -d $Backups_Dir ];then
-		rm -rf $Backups_Dir
-	fi
-	mkdir -p $Backups_Dir
-	cp $Home/AutoBuild.sh $Backups_Dir/AutoBuild.sh
-	cp $Home/README.md $Backups_Dir/README.md
-	cp $Home/LICENSE $Backups_Dir/LICENSE
-	cp -a $Home/Additional $Backups_Dir/Additional
-	cp -a $Home/Modules $Backups_Dir/Modules
-	rm -rf ./TEMP
-	svn checkout https://github.com/Hyy2001X/AutoBuild/trunk ./TEMP
-	if [ -f ./TEMP/AutoBuild.sh ];then
-		rm -rf ./Modules
-		rm -rf ./Additional
-		rm -f ./AutoBuild.sh
-		Say="\n合并到本地文件..." && Color_Y
-		mv ./TEMP/* $Home
-		chmod +x $Home/AutoBuild.sh
-		chmod +x -R $Home/Modules
-		New_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
-		read -p "AutoBuild 更新成功!" Key
-		./AutoBuild.sh
-	else
-		Say="\nAutoBuild 更新失败!" && Color_R
-		sleep 2
 	fi
 else
 	Say="\n网络连接错误,更新失败!" && Color_R
@@ -668,12 +534,9 @@ else
 				Branch_Line=`expr $Choose_Branch + 1`
 				Github_Source_Branch=`sed -n ${Branch_Line}p $Github_File`
 				Say="下载地址:$Yellow$Github_Source_Link" && Color_B
-				Say="下载分支:$Yellow$Github_Source_Branch" && Color_B
-				echo " "
+				Say="远程分支:$Yellow$Github_Source_Branch\n" && Color_B
 				cd $Home/Projects
-				if [ -d ./$Project ];then
-					rm -rf ./$Project
-				fi
+				[ -d ./$Project ] && rm -rf ./$Project
 				git clone -b $Github_Source_Branch $Github_Source_Link $Project
 				Sources_Download_Check
 			else
@@ -694,10 +557,8 @@ fi
 Sources_Download_Check() {
 if [ -f $Home/Projects/$Project/Makefile ];then
 	cd $Home/Projects/$Project
-	cp ./feeds.conf.default $Home/Backups/$Project.feeds.conf.default
-	if [ $Project == Lede ];then
-		sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
-	fi
+	[ $Project == Lede ] && sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
+	ln -s $Home/Backups/dl $Home/Projects/$Project/dl
 	echo -e "$Yellow"
 	read -p "[$Project]源代码下载成功!" Key
 	Second_Menu
@@ -710,14 +571,9 @@ fi
 Dir_Check() {
 clear
 cd $Home
-if [ -f ./Configs/SSH ];then
-	rm -f ./Configs/SSH
-fi
 for WD in `cat  ./Additional/Working_Directory`
 do
-	if [ ! -d ./$WD ];then
-		mkdir -p $WD
-	fi
+	[ ! -d ./$WD ] && mkdir -p $WD
 done
 }
 
@@ -740,14 +596,6 @@ else
 	else
 		Sources_Download
 	fi
-fi
-}
-
-Script_Update_Check() {
-if [ $ScriptUpdater ==  0 ];then
-	Script_Update_Beta
-else
-	Script_Update
 fi
 }
 
@@ -774,20 +622,16 @@ do
 	while :
 	do
 		clear
-		Say="AutoBuild Core Script $Version" && Color_B
-		Decoration
+		Say="AutoBuild Core Script $Version\n" && Color_B
 		cd $Home
-		Say="项目名称		[项目状态]	维护者" && Color_G
-		echo " "
+		Say="项目名称		[项目状态]	维护者\n" && Color_G
 		DE="			"
 		Project_Details Lede 1 coolsnowwolf
 		DE="		"
 		Project_Details Openwrt 2 Openwrt_Team	
 		Project_Details Lienol 3 Li2nOnline
 		Say="\nx.更新所有源代码和Feeds" && Color_B
-		echo "q.返回"
-		Decoration
-		echo " "
+		Say="q.主菜单\n" && Color_G
 		read -p '请从上方选择一个项目:' Choose
 		case $Choose in
 		q)

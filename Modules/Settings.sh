@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.09.27
-Module_Version=V2.1
+Update=2020.10.05
+Module_Version=V2.2
 
 while :
 do
@@ -25,13 +25,7 @@ do
 	else
 		Say="3.保存编译日志		[打开]" && Color_Y
 	fi
-	if [ $ScriptUpdater == 0 ];then
-		Say="4.脚本更新模式		[新版]" && Color_Y
-	else
-		Say="4.脚本更新模式		[旧版]" && Color_B
-	fi
-	echo " "
-	echo "x.恢复所有默认设置"
+	Say="\nx.恢复所有默认设置" && Color_G
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -67,15 +61,6 @@ do
 			SaveCompileLog=0
 			sed -i "s/SaveCompileLog=1/SaveCompileLog=0/g" ./Settings
 		fi
-	;;
-	4)
-		if [ $ScriptUpdater == 0 ];then
-			ScriptUpdater=1
-			sed -i "s/ScriptUpdater=0/ScriptUpdater=1/g" ./Settings
-		else
-			SaveCompileLog=0
-			sed -i "s/ScriptUpdater=1/ScriptUpdater=0/g" ./Settings
-		fi
 	esac
 done
 }
@@ -84,7 +69,6 @@ Default_Settings() {
 DeveloperMode=0
 ColorfulUI=1
 SaveCompileLog=0
-ScriptUpdater=0
 }
 
 Set_Default_Settings() {
@@ -92,7 +76,6 @@ Default_Settings
 echo "DeveloperMode=$DeveloperMode" > $Home/Configs/Settings
 echo "ColorfulUI=$ColorfulUI" >> $Home/Configs/Settings
 echo "SaveCompileLog=$SaveCompileLog" >> $Home/Configs/Settings
-echo "ScriptUpdater=$ScriptUpdater" >> $Home/Configs/Settings
 }
 
 Settings_Props() {

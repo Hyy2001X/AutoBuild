@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2020.09.27
-Module_Version=V3.0-BETA
+Update=2020.10.05
+Module_Version=V3.0.1-BETA
 
 while :
 do
@@ -151,7 +151,7 @@ x86)
 	find ./ -size +20480k -exec echo $@ > $Home/TEMP/Compiled_FI {} \;
 	IMAGES_MaxLine=`sed -n '$=' $Home/TEMP/Compiled_FI`
 	echo ""
-	if [ ! $IMAGES_MaxLine == "" ];then
+	if [ ! -z $IMAGES_MaxLine ];then
 		mkdir -p $Home/Firmware/$Firmware_INFO
 		for Compiled_FI in `cat $Home/TEMP/Compiled_FI`
 		do
@@ -236,7 +236,7 @@ Checkout_Package() {
 GET_TARGET_INFO() {
 	rm -rf $Home/TEMP/* > /dev/null 2>&1
 	CPU_TEMP=`sensors | grep 'Core 0' | cut -c17-24`
-	[ $CPU_TEMP == "" ] && CPU_TEMP=0
+	[ -z $CPU_TEMP ] && CPU_TEMP=0
 	cd $Home/Projects/$Project
 	grep "CONFIG_TARGET_x86=y" .config > /dev/null 2>&1
 	if [ ! $? -ne 0 ]; then
@@ -256,7 +256,7 @@ GET_TARGET_INFO() {
 	TARGET_ARCH_PACKAGES=`awk -F'[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config`
 	grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > $Home/TEMP/TARGET_PROFILE
 	PROFILE_MaxLine=`sed -n '$=' $Home/TEMP/TARGET_PROFILE`
-	[ $PROFILE_MaxLine == "" ] && PROFILE_MaxLine=0
+	[ -z $PROFILE_MaxLine ] && PROFILE_MaxLine=0
 }
 
 BuildFirmware_Check() {

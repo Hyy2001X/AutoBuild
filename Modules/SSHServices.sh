@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SSHServices() {
-Update=2020.09.27
-Module_Version=V1.3.2
+Update=2020.10.05
+Module_Version=V1.3.3
 
 while :
 do
@@ -44,7 +44,7 @@ done
 SSHServices_Menu() {
 while :
 do
-	. $Home/Configs/SSH/$SSHProfile_File
+	. "$Home/Configs/SSH/$SSHProfile_File"
 	clear
 	echo -e "$Blue配置文件:$Yellow[$SSHProfile_File]$White"
 	echo -e "$Blue连接参数:$Yellow[ssh $SSH_User@$SSH_IP -p $SSH_Port]$White\n"
@@ -60,6 +60,7 @@ do
 		break
 	;;
 	1)
+		ssh-keygen -R $SSH_IP > /dev/null 2>&1
 		SSH_Login
 	;;
 	2)
@@ -101,24 +102,22 @@ cd $Home
 echo " "
 if [ $Edit_Mode == 0 ];then
 	read -p '请输入新的配置名称:' SSH_Profile
-	while [ "$SSH_Profile" == "" ]
+	while [ -z "$SSH_Profile" ]
 	do
 		Say="\n配置名称不能为空!\n" && Color_R
 		read -p '请输入新配置名称:' SSH_Profile
 	done
 fi
 read -p '请输入IP地址:' SSH_IP
-while [ "$SSH_IP" == "" ]
+while [ -z "$SSH_IP" ]
 do
 	Say="\nIP地址不能为空!\n" && Color_R
 	read -p '请输入IP地址:' SSH_IP
 done
 read -p '请输入端口号:' SSH_Port
-if [ "$SSH_Port" == "" ];then
-	SSH_Port=22
-fi
+[ -z "$SSH_Port" ] && SSH_Port=22
 read -p '请输入用户名:' SSH_User
-while [ "$SSH_User" == "" ]
+while [ -z "$SSH_User" ]
 do
 	Say="\n用户名不能为空!\n" && Color_R
 	read -p '请输入用户名:' SSH_User

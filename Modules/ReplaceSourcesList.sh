@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ReplaceSourcesList() {
-Update=2020.08.14
-Module_Version=V1.3.4
+Update=2020.10.05
+Module_Version=V1.3.5
 
 if [ -f /etc/lsb-release ];then
 	OS_ID=`awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release`
@@ -33,8 +33,12 @@ if [ -f /etc/lsb-release ];then
 				ReplaceSources_mod Ubuntu中国源 Ubuntu-$OS_Version-CN
 			;;
 			4)
-				sudo mv $Home/Backups/sources.list.bak /etc/apt/sources.list
-				Say="\n恢复成功!" && Color_Y
+				if [ -f $Home/Backups/sources.list.bak ];then
+					sudo mv $Home/Backups/sources.list.bak /etc/apt/sources.list
+					Say="\n恢复成功!" && Color_Y
+				else
+					Say="未找到备份文件,恢复失败!" && Color_R
+				fi
 			;;
 			esac
 			sleep 2
@@ -48,8 +52,7 @@ if [ -f /etc/lsb-release ];then
 		sleep 2
 	fi
 else
-	echo " "
-	Say="暂不支持此操作系统!" && Color_R
+	Say="\n暂不支持此操作系统!" && Color_R
 	sleep 2
 fi
 }
