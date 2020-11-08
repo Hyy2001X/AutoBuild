@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.11.08
-Version=V4.2
+Version=V4.2.1
 
 Second_Menu() {
 while :
@@ -27,7 +27,7 @@ do
 		cd $Home/Projects/$Project
 		Branch=`git branch | sed 's/* //g'`
 	else
-		MSG_COM R  "未检测到[$Project]源码,请前往[高级选项]下载!"
+		MSG_COM R "未检测到[$Project]源码,请前往[高级选项]下载!"
 	fi
 	echo ""
 	echo "1.更新源代码和Feeds"
@@ -72,8 +72,8 @@ do
 	MSG_TITLE "源码高级选项"
 	echo "1.下载源代码"
 	echo "2.强制更新源代码和Feeds"
-	MSG_COM "3.添加主题包"
-	MSG_COM "4.添加软件包"
+	MSG_COM Y "3.添加主题包"
+	MSG_COM G "4.添加软件包"
 	echo "5.空间清理"
 	echo "6.删除配置文件"
 	echo "7.下载[dl]库"
@@ -161,6 +161,8 @@ do
 		if [ $? -eq 0 ];then
 			cd $Home/Projects/$Project
 			clear
+			MSG_WAIT "开始下载[dl]库..."
+			echo ""
 			dl_Logfile=$Home/Log/dl_${Project}_`(date +%Y%m%d_%H:%M)`.log
 			make -j$CPU_Threads download V=s 2>&1 | tee -a $dl_Logfile
 			find dl -size -1024c -exec rm -f {} \;
@@ -205,9 +207,9 @@ do
 		clear
 		MSG_TITLE "备份[.config]"
 		if [ $Project == Lede ];then
-			echo -e "1.标准名称/$Yellow文件格式:[$Project-版本号-日期_时间]$White"
+			echo -e "1.标准名称/${Yellow}文件格式:[$Project-版本号-日期_时间]${White}"
 		else
-			echo -e "1.标准名称/$Yellow文件格式:[$Project-日期_时间]$White"
+			echo -e "1.标准名称/${Yellow}文件格式:[$Project-日期_时间]${White}"
 		fi
 		echo "2.自定义名称"
 		echo -e "\nq.返回"
@@ -224,18 +226,18 @@ do
 			fi	
 			if [ -f ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
-				MSG_SUCC "备份成功![.config]已备份到:'/Backups/Configs/$Backup_Config'"
+				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
 			else
-				MSG_ERR "备份失败!"
+				MSG_ERR "[.config] 备份失败!"
 			fi
 		;;
 		2)
 			read -p '请输入自定义名称:' Backup_Config
 			if [ -f ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/"$Backup_Config"
-				MSG_SUCC "备份成功![.config]已备份到:'/Backups/Configs/$Backup_Config'"
+				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
 			else
-				MSG_ERR "备份失败!"
+				MSG_ERR "[.config] 备份失败!"
 			fi
 		;;
 		esac
@@ -255,7 +257,7 @@ do
 		for ((i=1;i<=$Max_ConfigList_Line;i++));
 		do   
 			ConfigFile_Name=`sed -n ${i}p $ConfigList_File`
-			echo -e "${i}.$Yellow${ConfigFile_Name}$White"
+			echo -e "${i}.${Yellow}${ConfigFile_Name}${White}"
 		done
 		echo -e "\nq.返回\n"
 		read -p '请从上方选择一个文件:' Choose
@@ -295,21 +297,21 @@ do
 	;;
 	3)
 		echo ""
-		echo -ne "\r$Yellow正在备份[$Project]源码...$White\r"
+		echo -ne "\r${Yellow}正在备份[$Project]源码...${White}\r"
 		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
 			rm -rf $Home/Backups/Projects/$Project
 		fi
 		cp -a $Home/Projects/$Project $Home/Backups/Projects > /dev/null 2>&1
-		MSG_SUCC "备份成功![$Project]源码已备份到:'/Backups/Projects/$Project'"
+		MSG_SUCC "备份成功![$Project] 源码已备份到:'/Backups/Projects/$Project'"
 		MSG_SUCC "存储占用:$(du -sh $Home/Backups/Projects/$Project | awk '{print $1}')B"
 		Enter
 	;;
 	4)
 		echo ""
 		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
-			echo -ne "\r$Yellow正在恢复[$Project]源码...$White\r"
+			echo -ne "\r${Yellow}正在恢复[$Project]源码...${White}\r"
 			cp -a $Home/Backups/Projects/$Project $Home/Projects/ > /dev/null 2>&1
-			MSG_SUCC "恢复成功![$Project]源码已恢复到:'/Projects/$Project'"
+			MSG_SUCC "恢复成功![$Project] 源码已恢复到:'/Projects/$Project'"
 			MSG_SUCC "存储占用:$(du -sh $Home/Projects/$Project | awk '{print $1}')B"
 			Enter
 		else
@@ -410,7 +412,7 @@ AutoBuild_Updater() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	clear
-	MSG_COM "正在下载更新...\n"
+	MSG_WAIT "正在更新 AutoBuild..."
 	cd $Home/Backups
 	if [ "`ls -A ./AutoBuild-Update`" = "" ];then
 		git clone https://github.com/Hyy2001X/AutoBuild AutoBuild-Update
@@ -431,12 +433,12 @@ if [ $? -eq 0 ];then
 		mv $Home/Additional $Backups_Dir/Additional 2>/dev/null 
 		mv $Home/Modules $Backups_Dir/Modules
 		cp -a * $Home
-		echo -e "$Yellow"
-		read -p "AutoBuild 更新成功!" Key
+		MSG_SUCC "AutoBuild 更新成功!"
+		read -p "" Key
 		$Home/AutoBuild.sh
 	else
-		echo -e "$Red"
-		read -p "AutoBuild 更新失败!" Key
+		MSG_ERR "AutoBuild 更新失败!"
+		read -p "" Key
 	fi
 else
 	MSG_ERR "网络连接错误,更新失败!"
@@ -445,12 +447,17 @@ fi
 }
 
 Sources_Update_Check() {
-timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
-if [ $? -eq 0 ];then
-	Sources_Update_Core
-	Enter
+if [ -f $Home/Projects/$Project/Makefile ];then
+	timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
+	if [ $? -eq 0 ];then
+		Sources_Update_Core
+		read -p "" Key
+	else
+		MSG_ERR "网络连接错误,更新失败!"
+		sleep 2
+	fi
 else
-	MSG_ERR "网络连接错误,更新失败!"
+	MSG_ERR "未检测到[$Project]源代码,更新失败!"
 	sleep 2
 fi
 }
@@ -480,6 +487,7 @@ Update_Logfile=$Home/Log/Update_${Project}_`(date +%Y%m%d_%H:%M)`.log
 git pull 2>&1 | tee $Update_Logfile
 ./scripts/feeds update -a 2>&1 | tee -a $Update_Logfile
 ./scripts/feeds install -a 2>&1 | tee -a $Update_Logfile
+MSG_SUCC "源代码和Feeds 更新结束!"
 }
 
 Multi_Sources_Update() {
@@ -493,9 +501,9 @@ fi
 
 Project_Details() {
 if [ -f ./Projects/$1/Makefile ];then
-	echo -e "${White}$2.$1$DE$Yellow[已检测到]$Blue	$3"
+	echo -e "${White}$2.$1$DE${Yellow}[已检测到]${Blue}	$3"
 else
-	echo -e "${White}$2.$1$DE$Red[未检测到]$Blue	$3"
+	echo -e "${White}$2.$1$DE${Red}[未检测到]${Blue}	$3"
 fi
 }
 
@@ -533,6 +541,8 @@ else
 				echo -e "${Blue}远程分支:${Yellow}$Github_Source_Branch\n"
 				cd $Home/Projects
 				[ -d ./$Project ] && rm -rf ./$Project
+				MSG_WAIT "开始下载[$Project]源代码..."
+				echo ""
 				git clone -b $Github_Source_Branch $Github_Source_Link $Project
 				Sources_Download_Check
 			else
