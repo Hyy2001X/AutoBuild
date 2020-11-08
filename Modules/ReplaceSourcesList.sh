@@ -1,12 +1,12 @@
 # AutoBuild Script Module by Hyy2001
 
 ReplaceSourcesList() {
-Update=2020.10.05
-Module_Version=V1.3.5
+Update=2020.11.08
+Module_Version=V1.3.6
 
 if [ -f /etc/lsb-release ];then
-	OS_ID=`awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release`
-	OS_Version=`awk -F'[="]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release`
+	OS_ID=$(awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release)
+	OS_Version=$(awk -F'[="]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
 	if [ $OS_ID == Ubuntu ];then
 		if [ $OS_Version == 19.10 ] || [ $OS_Version == 18.04 ] || [ $OS_Version == 20.04 ];then
 		while :
@@ -35,24 +35,24 @@ if [ -f /etc/lsb-release ];then
 			4)
 				if [ -f $Home/Backups/sources.list.bak ];then
 					sudo mv $Home/Backups/sources.list.bak /etc/apt/sources.list
-					Say="\n恢复成功!" && Color_Y
+					MSG_SUCC "恢复成功!"
 				else
-					Say="未找到备份文件,恢复失败!" && Color_R
+					MSG_ERR "未找到备份文件,恢复失败!"
 				fi
 			;;
 			esac
 			sleep 2
 		done
 		else
-			Say="\n当前支持的操作系统:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04" && Color_R
+			MSG_ERR "当前支持的操作系统:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04"
 			sleep 2
 		fi
 	else
-		Say="\n暂不支持此操作系统!" && Color_R
+		MSG_ERR "暂不支持此操作系统!"
 		sleep 2
 	fi
 else
-	Say="\n暂不支持此操作系统!" && Color_R
+	MSG_ERR "暂不支持此操作系统!"
 	sleep 2
 fi
 }
@@ -66,8 +66,8 @@ if [ -f /etc/apt/sources.list ];then
 fi
 if [ -f $Home/Additional/Sources_List/$2 ];then
 	sudo cp $Home/Additional/Sources_List/$2 /etc/apt/sources.list
-	Say="\n已切换到$1." && Color_Y
+	MSG_SUCC "已切换到$1"
 else
-	Say="\n未找到对应文件,切换失败!" && Color_R
+	MSG_ERR "未找到对应文件,切换失败!"
 fi
 }

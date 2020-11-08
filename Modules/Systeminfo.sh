@@ -1,22 +1,22 @@
 # AutoBuild Script Module by Hyy2001
 
 Systeminfo() {
-Update=2020.08.14
-Module_Version=V1.7.1
+Update=2020.11.08
+Module_Version=V1.7.2
 
 clear
-Current_Freq=`awk -F'[ :]' '/cpu MHz/ {print $4;exit}' /proc/cpuinfo`
-Current_Temp=`sensors | grep 'Core 0' | cut -c17-24`
-CPU_Base=`uname -m`
-System_Bit=`getconf LONG_BIT`
-Kernel_Version=`uname -r`
-Computer_Name=`hostname`
-Computer_Startup=`awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60} {printf("%d 天 %d 小时 %d 分钟\n",a,b,c)}' /proc/uptime`
-IP_Address=`ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | tr -d "addr:"`
-MemTotal_MB=`free -m | awk  '{print $2}' | awk 'NR==2'`
-MemTotal_GB=`echo "scale=1; $MemTotal_MB / 1000" | bc`
-MemFree=`free -m | awk  '{print $7}' | awk 'NR==2'`
-MemFree_GB=`echo "scale=1; $MemFree / 1000" | bc`
+Current_Freq=$(awk -F'[ :]' '/cpu MHz/ {print $4;exit}' /proc/cpuinfo)
+Current_Temp=$(sensors | grep 'Core 0' | cut -c17-24)
+CPU_Base=$(uname -m)
+System_Bit=$(getconf LONG_BIT)
+Kernel_Version=$(uname -r)
+Computer_Name=$(hostname)
+Computer_Startup=$(awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60} {printf("%d 天 %d 小时 %d 分钟\n",a,b,c)}' /proc/uptime)
+IP_Address=$(ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | tr -d "addr:")
+MemTotal_MB=$(free -m | awk  '{print $2}' | awk 'NR==2')
+MemTotal_GB=$(echo "scale=1; $MemTotal_MB / 1000" | bc)
+MemFree=$(free -m | awk  '{print $7}' | awk 'NR==2')
+MemFree_GB=$(echo "scale=1; $MemFree / 1000" | bc)
 
 Get_OS() {
     [ -f /etc/redhat-release ] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
@@ -26,7 +26,7 @@ Get_OS() {
 OS_INFO=$( Get_OS )
 
 clear
-Say="System info Script $Module_Version" && Color_B
+MSG_TITLE "System info Script $Module_Version"
 Decoration
 echo -e "$Skyb操作系统$Yellow		$OS_INFO"
 echo -e "$Skyb计算机名称$Yellow		$Computer_Name"

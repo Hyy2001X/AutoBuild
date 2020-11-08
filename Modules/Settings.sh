@@ -1,31 +1,31 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.10.05
-Module_Version=V2.2
+Update=2020.11.08
+Module_Version=V2.3
 
 while :
 do
 	Settings_Props
 	ColorfulUI_Check
 	clear
-	Say="脚本设置[实验性]\n" && Color_B
+	MSG_TITLE "脚本设置[实验性]"
 	if [ $ColorfulUI == 0 ];then
-		Say="1.高亮显示		[关闭]" && Color_R
+		MSG_COM  R "1.高亮显示		[关闭]"
 	else
-		Say="1.高亮显示		[打开]" && Color_Y
+		MSG_COM Y "1.高亮显示		[打开]"
 	fi
 	if [ $DeveloperMode == 0 ];then
-		Say="2.调试模式		[关闭]" && Color_R
+		MSG_COM  R "2.调试模式		[关闭]"
 	else
-		Say="2.调试模式		[打开]" && Color_Y
+		MSG_COM Y "2.调试模式		[打开]"
 	fi
 	if [ $SaveCompileLog == 0 ];then
-		Say="3.保存编译日志		[关闭]" && Color_R
+		MSG_COM  R "3.保存编译日志		[关闭]"
 	else
-		Say="3.保存编译日志		[打开]" && Color_Y
+		MSG_COM Y "3.保存编译日志		[打开]"
 	fi
-	Say="\nx.恢复所有默认设置" && Color_G
+	MSG_COM G "\nx.恢复所有默认设置"
 	echo "q.返回"
 	GET_Choose
 	case $Choose in
@@ -103,20 +103,45 @@ else
 fi
 }
 
-Color_Y() {
-echo -e "$Yellow$Say$White"
+MSG_COM() {
+if [ "$#" -gt "1" ];then
+	case $1 in
+	Y)
+		MSG_Color=$Yellow
+	;;
+	R)
+		MSG_Color=$Red
+	;;
+	B)
+		MSG_Color=$Blue
+	;;
+	G)
+		MSG_Color=$Skyb
+	;;
+	esac
+	echo -e "${MSG_Color}${2}${White}"
+else
+	echo -e "${Yellow}${*}${White}"
+fi
 }
 
-Color_R() {
-echo -e "$Red$Say$White"
+MSG_WAIT() {
+	echo -e "${Blue}${*}${White}"
+	echo "[$(date +%Y/%m/%d-%H:%M:%S)] [WAIT] ${*}" >> $Home/Log/AutoBuild.log
 }
 
-Color_B() {
-echo -e "$Blue$Say$White"
+MSG_ERR() {
+	echo -e "\n${Red}${*}${White}"
+	echo "[$(date +%Y/%m/%d-%H:%M:%S)] [ERR] ${*}" >> $Home/Log/AutoBuild.log
 }
 
-Color_G() {
-echo -e "$Skyb$Say$White"
+MSG_SUCC() {
+	echo -e "\n${Yellow}${*}${White}"
+	echo "[$(date +%Y/%m/%d-%H:%M:%S)] [SUCC] ${*}" >> $Home/Log/AutoBuild.log
+}
+
+MSG_TITLE() {
+	echo -e "${Blue}${*}${White}\n"
 }
 
 GET_Choose() {

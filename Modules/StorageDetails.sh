@@ -1,24 +1,24 @@
 # AutoBuild Script Module by Hyy2001
 
 StorageDetails() {
-Update=2020.10.05
-Module_Version=V2.3.2
+Update=2020.11.08
+Module_Version=V2.3.3
 
 clear
 cd $Home
-Say="正在载入统计信息..." && Color_Y
-dl_Size=`du -sh Backups/dl | awk '{print $1}'`
-Backups_Size=`du -sh Backups | awk '{print $1}'`
-Firmware_Size=`du -sh Firmware | awk '{print $1}'`
-Packages_Size=`du -sh Packages | awk '{print $1}'`
-Lede_Size=`du -sh Projects/Lede | awk '{print $1}'`
-Openwrt_Size=`du -sh Projects/Openwrt | awk '{print $1}'`
-Lienol_Size=`du -sh Projects/Lienol | awk '{print $1}'`
+MSG_WAIT "正在载入统计信息..."
+dl_Size=$(du -sh Backups/dl | awk '{print $1}')
+Backups_Size=$(du -sh Backups | awk '{print $1}')
+Firmware_Size=$(du -sh Firmware | awk '{print $1}')
+Packages_Size=$(du -sh Packages | awk '{print $1}')
+Lede_Size=$(du -sh Projects/Lede | awk '{print $1}')
+Openwrt_Size=$(du -sh Projects/Openwrt | awk '{print $1}')
+Lienol_Size=$(du -sh Projects/Lienol | awk '{print $1}')
 
 clear
-Say="Storage Details Script $Module_Version" && Color_B
+MSG_TITLE "Storage Details Script $Module_Version"
 Decoration
-Say="项目名称	存储位置				存储占用\n" && Color_G
+MSG_COM G "项目名称	存储位置				存储占用\n"
 Type_Space="				"
 StorageDetails_Mod Lede /Projects/Lede $Lede_Size
 Type_Space="			"
@@ -34,5 +34,5 @@ Enter
 }
 
 StorageDetails_Mod() {
-Say="$1		$2$Type_Space$3" && Color_Y
+MSG_COM "$1		$2$Type_Space$3"
 }
