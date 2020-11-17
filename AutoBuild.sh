@@ -3,24 +3,24 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.11.08
-Version=V4.2.1
+Update=2020.11.17
+Version=V4.2.2
 
 Second_Menu() {
 while :
 do
 	clear
-	if [ -f $Home/Projects/$Project/Makefile ];then
+	if [ -e $Home/Projects/$Project/Makefile ];then
 		MSG_COM "源码位置:$Home/Projects/$Project"
 		if [ $Project == Lede ];then
-			if [ -f $Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
+			if [ -e $Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd $Home/Projects/$Project/package/lean/default-settings/files
 				Lede_Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" ./zzz-default-settings`
 				MSG_COM "源码版本:$Lede_Version"
 			fi
 		fi
 		cd $Home
-		if [ -f ./Configs/${Project}_Recently_Updated ];then
+		if [ -e ./Configs/${Project}_Recently_Updated ];then
 			Recently_Updated=`cat ./Configs/${Project}_Recently_Updated`
 			MSG_COM "最近更新:$Recently_Updated"
 		fi
@@ -224,7 +224,7 @@ do
 			else
 				Backup_Config=$Project-`(date +%m%d_%H:%M)`
 			fi	
-			if [ -f ./Projects/$Project/.config ];then
+			if [ -e ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
 				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
 			else
@@ -233,7 +233,7 @@ do
 		;;
 		2)
 			read -p '请输入自定义名称:' Backup_Config
-			if [ -f ./Projects/$Project/.config ];then
+			if [ -e ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/"$Backup_Config"
 				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
 			else
@@ -269,7 +269,7 @@ do
 			if [ $Choose -le $Max_ConfigList_Line ] 2>/dev/null ;then
 				if [ ! $Choose == 0 ] 2>/dev/null ;then
 					ConfigFile=`sed -n ${Choose}p $ConfigList_File`
-					if [ -f "$ConfigFile" ];then
+					if [ -e "$ConfigFile" ];then
 						ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
 						cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
 						echo "$ConfigFile" > $Home/Configs/${Project}_Recently_Config
@@ -298,7 +298,7 @@ do
 	3)
 		echo ""
 		echo -ne "\r${Yellow}正在备份[$Project]源码...${White}\r"
-		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
+		if [ -e $Home/Backups/Projects/$Project/Makefile ];then
 			rm -rf $Home/Backups/Projects/$Project
 		fi
 		cp -a $Home/Projects/$Project $Home/Backups/Projects > /dev/null 2>&1
@@ -308,7 +308,7 @@ do
 	;;
 	4)
 		echo ""
-		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
+		if [ -e $Home/Backups/Projects/$Project/Makefile ];then
 			echo -ne "\r${Yellow}正在恢复[$Project]源码...${White}\r"
 			cp -a $Home/Backups/Projects/$Project $Home/Projects/ > /dev/null 2>&1
 			MSG_SUCC "恢复成功![$Project] 源码已恢复到:'/Projects/$Project'"
@@ -447,7 +447,7 @@ fi
 }
 
 Sources_Update_Check() {
-if [ -f $Home/Projects/$Project/Makefile ];then
+if [ -e $Home/Projects/$Project/Makefile ];then
 	timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 	if [ $? -eq 0 ];then
 		Sources_Update_Core
@@ -491,7 +491,7 @@ MSG_SUCC "源代码和Feeds 更新结束!"
 }
 
 Multi_Sources_Update() {
-if [ -f $Home/Projects/$1/Makefile ];then
+if [ -e $Home/Projects/$1/Makefile ];then
 	Project=$1
 	Enforce_Update=0
 	Sources_Update_Core
@@ -500,7 +500,7 @@ fi
 }
 
 Project_Details() {
-if [ -f ./Projects/$1/Makefile ];then
+if [ -e ./Projects/$1/Makefile ];then
 	echo -e "${White}$2.$1$DE${Yellow}[已检测到]${Blue}	$3"
 else
 	echo -e "${White}$2.$1$DE${Red}[未检测到]${Blue}	$3"
@@ -508,7 +508,7 @@ fi
 }
 
 Sources_Download() {
-if [ -f $Home/Projects/$Project/Makefile ];then
+if [ -e $Home/Projects/$Project/Makefile ];then
 	MSG_SUCC "已检测到[$Project]源码,当前分支:$Branch"
 	sleep 3
 else
@@ -561,7 +561,7 @@ fi
 }
 
 Sources_Download_Check() {
-if [ -f $Home/Projects/$Project/Makefile ];then
+if [ -e $Home/Projects/$Project/Makefile ];then
 	cd $Home/Projects/$Project
 	[ $Project == Lede ] && sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
 	ln -s $Home/Backups/dl $Home/Projects/$Project/dl
@@ -595,7 +595,7 @@ fi
 
 Second_Menu_Check() {
 Project=$1
-if [ -f ./Projects/$Project/Makefile ];then
+if [ -e ./Projects/$Project/Makefile ];then
 	Second_Menu
 else
 	if [ $DeveloperMode == 1 ];then

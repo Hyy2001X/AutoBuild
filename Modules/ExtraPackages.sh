@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.11.08
-Module_Version=V4.8.6-BETA
+Update=2020.11.17
+Module_Version=V4.8.7-BETA
 
 ExtraPackages_mkdir
 while :
@@ -144,7 +144,7 @@ do
 	for ((i=1;i<=$List_MaxLine;i++));
 		do   
 			Theme=$(sed -n ${i}p $ExtraThemesList_File | awk '{print $2}')
-			if [ -f $PKG_Dir/$Theme/Makefile ];then
+			if [ -e $PKG_Dir/$Theme/Makefile ];then
 				echo -e "$(($i + 1)).${Yellow}${Theme}${White}"
 				echo "$Theme" >> $Home/TEMP/Checked_Themes
 			else
@@ -235,7 +235,7 @@ done
 ExtraPackages_git() {
 [ -d $PKG_Dir/$PKG_NAME ] && rm -rf $PKG_Dir/$PKG_NAME
 git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -f $PKG_Dir/$PKG_NAME/Makefile ] || [ -f $PKG_Dir/$PKG_NAME/README.md ];then
+if [ -e $PKG_Dir/$PKG_NAME/Makefile ] || [ -e $PKG_Dir/$PKG_NAME/README.md ];then
 	MSG_SUCC "[GIT] 已添加 $PKG_NAME"
 else
 	MSG_ERR "[GIT] 未添加 $PKG_NAME"
@@ -246,7 +246,7 @@ sleep 2
 ExtraPackages_svn() {
 [ -d $PKG_Dir/$PKG_NAME ] && rm -rf $PKG_Dir/$PKG_NAME
 svn checkout $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -f $PKG_Dir/$PKG_NAME/Makefile ] || [ -f $PKG_Dir/$PKG_NAME/README.md ];then
+if [ -e $PKG_Dir/$PKG_NAME/Makefile ] || [ -e $PKG_Dir/$PKG_NAME/README.md ];then
 	MSG_SUCC "[SVN] 已添加 $PKG_NAME"
 else
 	MSG_ERR "[SVN] 未添加 $PKG_NAME"

@@ -1,10 +1,10 @@
 # AutoBuild Script Module by Hyy2001
 
 ReplaceSourcesList() {
-Update=2020.11.08
-Module_Version=V1.3.6
+Update=2020.11.17
+Module_Version=V1.3.7
 
-if [ -f /etc/lsb-release ];then
+if [ -e /etc/lsb-release ];then
 	OS_ID=$(awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release)
 	OS_Version=$(awk -F'[="]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
 	if [ $OS_ID == Ubuntu ];then
@@ -33,7 +33,7 @@ if [ -f /etc/lsb-release ];then
 				ReplaceSources_mod Ubuntu中国源 Ubuntu-$OS_Version-CN
 			;;
 			4)
-				if [ -f $Home/Backups/sources.list.bak ];then
+				if [ -e $Home/Backups/sources.list.bak ];then
 					sudo mv $Home/Backups/sources.list.bak /etc/apt/sources.list
 					MSG_SUCC "恢复成功!"
 				else
@@ -58,13 +58,13 @@ fi
 }
 
 ReplaceSources_mod() {
-if [ -f /etc/apt/sources.list ];then
+if [ -e /etc/apt/sources.list ];then
 	if [ ! -f $Home/Backups/sources.list.bak ];then
 		sudo cp /etc/apt/sources.list $Home/Backups/sources.list.bak
 		sudo chmod 777 $Home/Backups/sources.list.bak
 	fi
 fi
-if [ -f $Home/Additional/Sources_List/$2 ];then
+if [ -e $Home/Additional/Sources_List/$2 ];then
 	sudo cp $Home/Additional/Sources_List/$2 /etc/apt/sources.list
 	MSG_SUCC "已切换到$1"
 else

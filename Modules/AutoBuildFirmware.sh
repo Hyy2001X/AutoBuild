@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2020.11.08
-Module_Version=V3.1-BETA
+Update=2020.11.17
+Module_Version=V3.1.1-BETA
 
 while :
 do
@@ -10,7 +10,7 @@ do
 	clear
 	MSG_TITLE "AutoBuild Firmware Script $Module_Version"
 	MSG_COM G "电脑信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP\n"
-	if [ -f $Home/Configs/${Project}_Recently_Config ];then
+	if [ -e $Home/Configs/${Project}_Recently_Config ];then
 		echo -e "$Yellow最近配置文件:$Blue[$(cat $Home/Configs/${Project}_Recently_Config)]$White\n"
 	fi
 	if [ ! $Firmware_Type == x86 ];then
@@ -40,7 +40,7 @@ do
 	echo -e "8.自动选择[$CPU_Threads 线程]"
 	echo "9.手动输入参数"
 	echo "q.返回"
-	if [ -f $Home/Configs/${Project}_Recently_Compiled ];then
+	if [ -e $Home/Configs/${Project}_Recently_Compiled ];then
 		Recently_Compiled=$(awk 'NR==1' $Home/Configs/${Project}_Recently_Compiled)
 		Recently_Compiled_Stat=$(awk 'NR==2' $Home/Configs/${Project}_Recently_Compiled)
 		echo -e "\n$Yellow最近编译:$Blue$Recently_Compiled $Recently_Compiled_Stat$White"
@@ -169,7 +169,7 @@ x86)
 ;;
 Common)
 	Compile_Stopped
-	if [ -f $Firmware_PATH/$Firmware_Name ];then
+	if [ -e $Firmware_PATH/$Firmware_Name ];then
 		Checkout_Package
 		echo "成功" >> $Home/Configs/${Project}_Recently_Compiled
 		cd $Home/Projects/$Project
