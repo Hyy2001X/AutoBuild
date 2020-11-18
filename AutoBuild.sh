@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
 Update=2020.11.17
-Version=V4.2.2
+Version=V4.2.3
 
 Second_Menu() {
 while :
@@ -15,17 +15,17 @@ do
 		if [ $Project == Lede ];then
 			if [ -e $Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd $Home/Projects/$Project/package/lean/default-settings/files
-				Lede_Version=`egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" ./zzz-default-settings`
+				Lede_Version=$(egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" ./zzz-default-settings)
 				MSG_COM "源码版本:$Lede_Version"
 			fi
 		fi
 		cd $Home
 		if [ -e ./Configs/${Project}_Recently_Updated ];then
-			Recently_Updated=`cat ./Configs/${Project}_Recently_Updated`
+			Recently_Updated=$(cat ./Configs/${Project}_Recently_Updated)
 			MSG_COM "最近更新:$Recently_Updated"
 		fi
 		cd $Home/Projects/$Project
-		Branch=`git branch | sed 's/* //g'`
+		Branch=$(git branch | sed 's/* //g')
 	else
 		MSG_COM R "未检测到[$Project]源码,请前往[高级选项]下载!"
 	fi
@@ -163,7 +163,7 @@ do
 			clear
 			MSG_WAIT "开始下载[dl]库..."
 			echo ""
-			dl_Logfile=$Home/Log/dl_${Project}_`(date +%Y%m%d_%H:%M)`.log
+			dl_Logfile=$Home/Log/dl_${Project}_$(date +%Y%m%d_%H:%M).log
 			make -j$CPU_Threads download V=s 2>&1 | tee -a $dl_Logfile
 			find dl -size -1024c -exec rm -f {} \;
 			Enter
@@ -220,9 +220,9 @@ do
 		;;
 		1)
 			if [ $Project == Lede ];then
-				Backup_Config=$Project-$Lede_Version-`(date +%m%d_%H:%M)`
+				Backup_Config=$Project-$Lede_Version-$(date +%m%d_%H:%M)
 			else
-				Backup_Config=$Project-`(date +%m%d_%H:%M)`
+				Backup_Config=$Project-$(date +%m%d_%H:%M)
 			fi	
 			if [ -e ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
@@ -245,7 +245,7 @@ do
 	done
 	;;
 	2)
-	if [ ! "`ls -A $Home/Backups/Configs`" = "" ];then
+	if [ ! -z "$(ls -A $Home/Backups/Configs)" ];then
 	while :
 	do
 		clear
@@ -253,10 +253,10 @@ do
 		cd $Home/Backups/Configs
 		ls -A | cat > $Home/TEMP/Config.List
 		ConfigList_File=$Home/TEMP/Config.List
-		Max_ConfigList_Line=`sed -n '$=' $ConfigList_File`
+		Max_ConfigList_Line=$(sed -n '$=' $ConfigList_File)
 		for ((i=1;i<=$Max_ConfigList_Line;i++));
-		do   
-			ConfigFile_Name=`sed -n ${i}p $ConfigList_File`
+		do
+			ConfigFile_Name=$(sed -n ${i}p $ConfigList_File)
 			echo -e "${i}.${Yellow}${ConfigFile_Name}${White}"
 		done
 		echo -e "\nq.返回\n"
@@ -268,7 +268,7 @@ do
 		*)
 			if [ $Choose -le $Max_ConfigList_Line ] 2>/dev/null ;then
 				if [ ! $Choose == 0 ] 2>/dev/null ;then
-					ConfigFile=`sed -n ${Choose}p $ConfigList_File`
+					ConfigFile=$(sed -n ${Choose}p $ConfigList_File)
 					if [ -e "$ConfigFile" ];then
 						ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
 						cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
@@ -414,16 +414,16 @@ if [ $? -eq 0 ];then
 	clear
 	MSG_WAIT "正在更新 AutoBuild..."
 	cd $Home/Backups
-	if [ "`ls -A ./AutoBuild-Update`" = "" ];then
+	if [ -z "$(ls -A ./AutoBuild-Update)" ];then
 		git clone https://github.com/Hyy2001X/AutoBuild AutoBuild-Update
 	fi
 	cd ./AutoBuild-Update
-	Update_Logfile=$Home/Log/Script_Update_`(date +%Y%m%d_%H:%M)`.log
+	Update_Logfile=$Home/Log/Script_Update_$(date +%Y%m%d_%H:%M).log
 	git pull 2>&1 | tee $Update_Logfile
 	if [ $(grep -o "fatal: 无法访问" $Update_Logfile | wc -l) = "0" ];then
 		MSG_COM "\n合并到本地文件..."
-		Old_Version=`awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}'`
-		Old_Version_Dir=$Old_Version-`(date +%Y%m%d_%H:%M)`
+		Old_Version=$(awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}')
+		Old_Version_Dir=$Old_Version-$(date +%Y%m%d_%H:%M)
 		Backups_Dir=$Home/Backups/OldVersion/AutoBuild-Core-$Old_Version_Dir
 		[ -d $Backups_Dir ] && rm -rf $Backups_Dir
 		mkdir -p $Backups_Dir
@@ -474,7 +474,7 @@ Sources_Update_Core() {
 clear
 MSG_WAIT "开始更新 $Project..."
 echo ""
-echo `(date +%Y-%m-%d_%H:%M)` > $Home/Configs/${Project}_Recently_Updated
+echo "$(date +%Y-%m-%d_%H:%M)" > $Home/Configs/${Project}_Recently_Updated
 cd $Home/Projects/$Project
 if [ $Enforce_Update == 1 ];then
 	git fetch --all
@@ -483,7 +483,7 @@ if [ $Enforce_Update == 1 ];then
 		sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
 	fi
 fi
-Update_Logfile=$Home/Log/Update_${Project}_`(date +%Y%m%d_%H:%M)`.log
+Update_Logfile=$Home/Log/Update_${Project}_$(date +%Y%m%d_%H:%M).log
 git pull 2>&1 | tee $Update_Logfile
 ./scripts/feeds update -a 2>&1 | tee -a $Update_Logfile
 ./scripts/feeds install -a 2>&1 | tee -a $Update_Logfile
@@ -515,14 +515,14 @@ else
 	clear
 	MSG_TITLE "$Project源码下载-分支选择"
 	Github_File=$Home/Additional/GitLink_$Project
-	Github_Source_Link=`sed -n 1p $Github_File`
+	Github_Source_Link=$(sed -n 1p $Github_File)
 	MSG_COM "仓库地址:$Github_Source_Link\n"
-	Max_All_Line=`sed -n '$=' $Github_File`
-	Max_Branch_Line=`expr $Max_All_Line - 1`
+	Max_All_Line=$(sed -n '$=' $Github_File)
+	Max_Branch_Line=$(expr $Max_All_Line - 1)
 	for ((i=2;i<=$Max_All_Line;i++));
-	do   
-		Github_File_Branch=`sed -n ${i}p $Github_File`
-		x=`expr $i - 1`
+	do
+		Github_File_Branch=$(sed -n ${i}p $Github_File)
+		x=$(expr $i - 1)
 		echo "${x}.${Github_File_Branch}"
 	done
 	echo -e "q.返回\n"
@@ -535,8 +535,8 @@ else
 		if [ $Choose_Branch -le $Max_Branch_Line ] 2>/dev/null ;then
 			if [ ! $Choose_Branch == 0 ];then
 				clear
-				Branch_Line=`expr $Choose_Branch + 1`
-				Github_Source_Branch=`sed -n ${Branch_Line}p $Github_File`
+				Branch_Line=$(expr $Choose_Branch + 1)
+				Github_Source_Branch=$(sed -n ${Branch_Line}p $Github_File)
 				echo -e "${Blue}下载地址:${Yellow}$Github_Source_Link"
 				echo -e "${Blue}远程分支:${Yellow}$Github_Source_Branch\n"
 				cd $Home/Projects
@@ -577,7 +577,7 @@ fi
 Dir_Check() {
 clear
 cd $Home
-for WD in `cat  ./Additional/Working_Directory`
+for WD in $(cat ./Additional/Working_Directory)
 do
 	[ ! -d ./$WD ] && mkdir -p $WD
 done
@@ -589,7 +589,7 @@ if [ ! -f $Home/Configs/Username ];then
 	read -p '首次启动,请创建一个用户名:' Username
 	echo "$Username" > $Home/Configs/Username
 else
-	Username=`cat $Home/Configs/Username`
+	Username=$(cat $Home/Configs/Username)
 fi
 }
 
@@ -682,15 +682,14 @@ done
 }
 
 Home=$(cd $(dirname $0); pwd)
-set -u
 
 Dependency="build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget swig rsync curl"
 Extra_Dependency="ntpdate httping ssh lm-sensors net-tools expect"
 
-CPU_Model=`awk -F':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo`
-CPU_Cores=`cat /proc/cpuinfo | grep processor | wc -l`
-CPU_Threads=`grep 'processor' /proc/cpuinfo | sort -u | wc -l`
-CPU_Freq=`awk '/model name/{print ""$NF;exit}' /proc/cpuinfo`
+CPU_Model=$(awk -F ':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo)
+CPU_Cores=$(cat /proc/cpuinfo | grep processor | wc -l)
+CPU_Threads=$(grep 'processor' /proc/cpuinfo | sort -u | wc -l)
+CPU_Freq=$(awk '/model name/{print ""$NF;exit}' /proc/cpuinfo)
 
 chmod +x -R $Home/Modules
 for Module in $Home/Modules/*.sh

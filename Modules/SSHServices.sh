@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SSHServices() {
-Update=2020.11.08
-Module_Version=V1.3.4
+Update=2020.11.17
+Module_Version=V1.3.5
 
 while :
 do
@@ -71,7 +71,7 @@ do
 	3)
 		echo " "
 		read -p '请输入新的配置名称:' SSHProfile_RN
-		if [ ! "$SSHProfile_RN" == "" ];then
+		if [ ! -z "$SSHProfile_RN" ];then
 			cd $Home/Configs/SSH
 			mv "$SSHProfile_File" "$SSHProfile_RN" > /dev/null 2>&1
 			MSG_SUCC "重命名 [$SSHProfile_File] > [$SSHProfile_RN] 成功!"
@@ -83,7 +83,7 @@ do
 	;;
 	4)
 		rm -f $Home/Configs/SSH/"$SSHProfile_File"
-		MSG_SUCC "配置[$SSHProfile_File]删除成功!"
+		MSG_SUCC "[SSH] 配置[$SSHProfile_File]删除成功!"
 		sleep 2
 		break
 	;;
@@ -104,7 +104,7 @@ if [ $Edit_Mode == 0 ];then
 	read -p '请输入新的配置名称:' SSH_Profile
 	while [ -z "$SSH_Profile" ]
 	do
-		MSG_ERR "配置名称不能为空!"
+		MSG_ERR "[SSH] 配置名称不能为空!"
 		echo ""
 		read -p '请输入新配置名称:' SSH_Profile
 	done
@@ -112,7 +112,7 @@ fi
 read -p '请输入IP地址:' SSH_IP
 while [ -z "$SSH_IP" ]
 do
-	MSG_ERR "IP地址不能为空!"
+	MSG_ERR "[SSH] IP地址不能为空!"
 	echo ""
 	read -p '请输入IP地址:' SSH_IP
 done
@@ -121,22 +121,22 @@ read -p '请输入端口号:' SSH_Port
 read -p '请输入用户名:' SSH_User
 while [ -z "$SSH_User" ]
 do
-	MSG_ERR "用户名不能为空!"
+	MSG_ERR "[SSH] 用户名不能为空!"
 	echo ""
-	read -p '请输入用户名:' SSH_User
+	read -p '[SSH] 请输入用户名:' SSH_User
 done
 read -p '请输入密码:' SSH_Password
 echo "SSH_IP=$SSH_IP" > $Home/Configs/SSH/"$SSH_Profile"
 echo "SSH_Port=$SSH_Port" >> $Home/Configs/SSH/"$SSH_Profile"
 echo "SSH_User=$SSH_User" >> $Home/Configs/SSH/"$SSH_Profile"
 echo "SSH_Password=$SSH_Password" >> $Home/Configs/SSH/"$SSH_Profile"
-MSG_SUCC "配置文件已保存到'Configs/SSH/$SSH_Profile'"
+MSG_SUCC "[SSH] 配置文件已保存到'Configs/SSH/$SSH_Profile'"
 sleep 2
 [ $Edit_Mode == 0 ] && SSH_Login
 }
 
 List_SSHProfile() {
-if [ ! "`ls -A $Home/Configs/SSH`" = "" ];then
+if [ ! -z "`ls -A $Home/Configs/SSH`" ];then
 	cd $Home/Configs/SSH
 	ls -A | cat > $Home/TEMP/SSHProfileList
 	SSHProfileList=$Home/TEMP/SSHProfileList
