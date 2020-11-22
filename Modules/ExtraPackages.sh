@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.11.17
-Module_Version=V4.8.7-BETA
+Update=2020.11.22
+Module_Version=V4.8.8-BETA
 
 ExtraPackages_mkdir
 while :
@@ -26,7 +26,6 @@ do
 	MSG_COM B "w.Li2nOnline's Packages Source"
 	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个软件包:' Choose
-	echo " "
 	case $Choose in
 	q)
 		break
@@ -57,10 +56,10 @@ do
 	;;
 	2)
 		PKG_NAME=luci-app-adguardhome
-		PKG_URL=https://github.com/Lienol/openwrt/trunk/package/diy/luci-app-adguardhome
-		ExtraPackages_svn
-		PKG_NAME=adguardhome
-		PKG_URL=https://github.com/Lienol/openwrt/trunk/package/diy/adguardhome
+		PKG_URL=https://github.com/Hyy2001X/luci-app-adguardhome
+		ExtraPackages_git
+		PKG_NAME=AdGuardHome
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/AdGuardHome
 		ExtraPackages_svn
 	;;
 	3)
