@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.11.08
-Module_Version=V2.3
+Update=2020.11.23
+Module_Version=V2.3.1
 
 while :
 do
@@ -107,16 +107,16 @@ MSG_COM() {
 if [ "$#" -gt "1" ];then
 	case $1 in
 	Y)
-		MSG_Color=$Yellow
+		MSG_Color=${Yellow}
 	;;
 	R)
-		MSG_Color=$Red
+		MSG_Color=${Red}
 	;;
 	B)
-		MSG_Color=$Blue
+		MSG_Color=${Blue}
 	;;
 	G)
-		MSG_Color=$Skyb
+		MSG_Color=${Skyb}
 	;;
 	esac
 	echo -e "${MSG_Color}${2}${White}"
@@ -145,17 +145,17 @@ MSG_TITLE() {
 }
 
 GET_Choose() {
-echo -e "$White"
+echo -e "${White}"
 read -p '请从上方选择一个操作:' Choose
 }
 
 Enter() {
-echo -e "$White"
+echo -e "${White}"
 read -p "按下[回车]键以继续..." Key
 }
 
 Decoration() {
-echo -ne "$Skyb"
+echo -ne "${Skyb}"
 printf "%-70s\n" "-" | sed 's/\s/-/g'
-echo -ne "$White"
+echo -ne "${White}"
 }

@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SSHServices() {
-Update=2020.11.17
-Module_Version=V1.3.5
+Update=2020.11.23
+Module_Version=V1.3.6
 
 while :
 do
@@ -46,8 +46,8 @@ while :
 do
 	. "$Home/Configs/SSH/$SSHProfile_File"
 	clear
-	echo -e "$Blue配置文件:$Yellow[$SSHProfile_File]$White"
-	echo -e "$Blue连接参数:$Yellow[ssh $SSH_User@$SSH_IP -p $SSH_Port]$White\n"
+	echo -e "${Blue}配置文件:${Yellow}[$SSHProfile_File]${White}"
+	echo -e "${Blue}连接参数:${Yellow}[ssh $SSH_User@$SSH_IP -p $SSH_Port]${White}\n"
 	MSG_COM "1.连接SSH"
 	echo "2.编辑"
 	echo "3.重命名"
@@ -146,7 +146,7 @@ if [ ! -z "`ls -A $Home/Configs/SSH`" ];then
 	for ((i=1;i<=$SSHProfileList_MaxLine;i++));
 	do   
 		SSHProfile=$(sed -n ${i}p $SSHProfileList)
-		echo -e "${i}.$Yellow${SSHProfile}$White"
+		echo -e "${i}.${Yellow}${SSHProfile}${White}"
 	done
 else
 	MSG_COM R "无任何配置文件"

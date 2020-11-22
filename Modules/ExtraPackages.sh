@@ -2,7 +2,7 @@
 
 ExtraPackages() {
 Update=2020.11.22
-Module_Version=V4.8.8-BETA
+Module_Version=V4.8.9
 
 ExtraPackages_mkdir
 while :
@@ -176,7 +176,7 @@ do
 		clear
 		cat $Home/TEMP/Checked_Themes | while read Theme
 		do
-			echo -e "$Yellow正在更新 $Blue$Theme $Yellow...$White"
+			echo -e "$Yellow正在更新 ${Blue}$Theme ${Yellow}...${White}"
 			cd ./$Theme
 			svn update > /dev/null 2>&1
 			git pull > /dev/null 2>&1

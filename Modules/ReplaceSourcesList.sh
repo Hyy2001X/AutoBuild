@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ReplaceSourcesList() {
-Update=2020.11.17
-Module_Version=V1.3.7
+Update=2020.11.22
+Module_Version=V1.3.8
 
 if [ -e /etc/lsb-release ];then
 	OS_ID=$(awk -F'[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release)
@@ -12,7 +12,7 @@ if [ -e /etc/lsb-release ];then
 		while :
 		do
 			clear
-			echo -e "$Skyb当前操作系统$Yellow:$OS_ID $OS_Version$White\n"
+			echo -e "${Skyb}当前操作系统${Yellow}:$OS_ID $OS_Version${White}\n"
 			echo "1.阿里源"
 			echo "2.清华源"
 			echo "3.Ubuntu 中国服务器"
