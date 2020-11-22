@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2020.11.17
-Module_Version=V3.1.1-BETA
+Update=2020.11.22
+Module_Version=V3.1.2
 
 while :
 do
@@ -11,7 +11,7 @@ do
 	MSG_TITLE "AutoBuild Firmware Script $Module_Version"
 	MSG_COM G "电脑信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP\n"
 	if [ -e $Home/Configs/${Project}_Recently_Config ];then
-		echo -e "$Yellow最近配置文件:$Blue[$(cat $Home/Configs/${Project}_Recently_Config)]$White\n"
+		echo -e "${Yellow}最近配置文件:${Blue}[$(cat $Home/Configs/${Project}_Recently_Config)]${White}\n"
 	fi
 	if [ ! $Firmware_Type == x86 ];then
 		if [ $PROFILE_MaxLine -gt 1 ];then
@@ -23,9 +23,9 @@ do
 		fi
 	fi
 	if [ $DEFCONFIG == 0 ];then
-		echo -e "CPU 架构:${Yellow}$TARGET_BOARD$White"
-		echo -e "CPU 型号:${Yellow}$TARGET_SUBTARGET$White"
-		echo -e "软件架构:${Yellow}$TARGET_ARCH_PACKAGES$White"
+		echo -e "CPU 架构:${Yellow}$TARGET_BOARD${White}"
+		echo -e "CPU 型号:${Yellow}$TARGET_SUBTARGET${White}"
+		echo -e "软件架构:${Yellow}$TARGET_ARCH_PACKAGES${White}"
 		echo -e "编译类型:${Blue}$Firmware_Type"
 	else
 		MSG_COM R "Please run 'make defconfig' first!"
@@ -37,13 +37,13 @@ do
 	echo "5.make menuconfig"
 	echo "6.make kernel_menuconfig"
 	echo "7.make defconfig"
-	echo -e "8.自动选择[$CPU_Threads 线程]"
+	echo -e "8.自动选择[${CPU_Threads} 线程]"
 	echo "9.手动输入参数"
 	echo "q.返回"
 	if [ -e $Home/Configs/${Project}_Recently_Compiled ];then
 		Recently_Compiled=$(awk 'NR==1' $Home/Configs/${Project}_Recently_Compiled)
 		Recently_Compiled_Stat=$(awk 'NR==2' $Home/Configs/${Project}_Recently_Compiled)
-		echo -e "\n$Yellow最近编译:$Blue$Recently_Compiled $Recently_Compiled_Stat$White"
+		echo -e "\n${Yellow}最近编译:${Blue}$Recently_Compiled $Recently_Compiled_Stat${White}"
 	fi
 	GET_Choose
 	case $Choose in
@@ -67,6 +67,7 @@ do
 	;;
 	6)
 		clear
+		MSG_WAIT "正在执行 [make kernel_menuconfig],请耐心等待..."
 		make kernel_menuconfig
 	;;
 	7)
@@ -75,7 +76,7 @@ do
 		make defconfig
 	;;
 	8)
-		Compile_Threads="make -j$CPU_Threads || make -j$CPU_Threads V=s"
+		Compile_Threads="make -j${CPU_Threads} || make -j${CPU_Threads} V=s"
 	;;
 	9)
 		read -p '请输入编译参数:' Compile_Threads
@@ -85,7 +86,7 @@ done
 }
 
 BuildFirmware_Core() {
-Firmware_PATH=$Home/Projects/$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET
+Firmware_PATH="$Home/Projects/$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET"
 rm -rf $Firmware_PATH > /dev/null 2>&1
 clear
 case $Firmware_Type in
@@ -97,22 +98,22 @@ x86)
 		MSG_COM B "	$TARGET_IMAGES"
 	done
 	if [ $Project == Lede ];then
-		Firmware_INFO=AutoBuild-$TARGET_BOARD-$TARGET_SUBTARGET-$Project-$Lede_Version-$(date +%Y%m%d-%H:%M:%S)
+		Firmware_INFO="AutoBuild-$TARGET_BOARD-$TARGET_SUBTARGET-$Project-$Lede_Version-$(date +%Y%m%d-%H:%M:%S)"
 	else
-		Firmware_INFO=AutoBuild-$TARGET_BOARD-$TARGET_SUBTARGET-$Project-$(date +%Y%m%d-%H:%M:%S)
+		Firmware_INFO="AutoBuild-$TARGET_BOARD-$TARGET_SUBTARGET-$Project-$(date +%Y%m%d-%H:%M:%S)"
 	fi
 	echo ""
 ;;
 Common)
-	Firmware_Name=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin
+	Firmware_Name="openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin"
 	if [ $Project == Lede ];then
-		Firmware_INFO=AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version-$(date +%Y%m%d-%H:%M:%S)
+		Firmware_INFO="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version-$(date +%Y%m%d-%H:%M:%S)"
 	else
-		Firmware_INFO=AutoBuild-$TARGET_PROFILE-$Project-$(date +%Y%m%d-%H:%M:%S)
+		Firmware_INFO="AutoBuild-$TARGET_PROFILE-$Project-$(date +%Y%m%d-%H:%M:%S)"
 	fi
-	AB_Firmware=${Firmware_INFO}.bin
-	Firmware_Detail=$Home/Firmware/Details/${Firmware_INFO}.detail
-	echo -e "$Yellow固件名称:$Blue$AB_Firmware$White\n"
+	AB_Firmware="${Firmware_INFO}.bin"
+	Firmware_Detail="$Home/Firmware/Details/${Firmware_INFO}.detail"
+	echo -e "${Yellow}固件名称:${Blue}$AB_Firmware${White}\n"
 ;;
 Multi_Profile)
 	rm -f $Home/TEMP/Multi_TARGET > /dev/null 2>&1
@@ -137,7 +138,7 @@ if [ $Project == Lede ];then
 fi
 MSG_WAIT "开始编译$Project..."
 cd $Home/Projects/$Project
-Compile_Started=$(date +'%Y-%m-%d %H:%M:%S')
+Compile_Started=$(date +"%Y-%m-%d %H:%M:%S")
 Compile_Date=$(date +%Y%m%d_%H:%M)
 echo $Compile_Started > $Home/Configs/${Project}_Recently_Compiled
 if [ $SaveCompileLog == 0 ];then
@@ -176,9 +177,9 @@ Common)
 		mv $Firmware_PATH/$Firmware_Name $Home/Firmware/$AB_Firmware
 		cd $Home/Firmware
 		MSG_SUCC "固件位置:$Home/Firmware"
-		echo -e "$Yellow固件名称:$Blue$AB_Firmware"
+		echo -e "${Yellow}固件名称:${Blue}$AB_Firmware"
 		Size=$(awk 'BEGIN{printf "%.2fMB\n",'$((`ls -l $AB_Firmware | awk '{print $5}'`))'/1000000}')
-		echo -e "$Yellow固件大小:$Blue$Size$White"
+		echo -e "${Yellow}固件大小:${Blue}$Size${White}"
 		MD5=$(md5sum $AB_Firmware | cut -d ' ' -f1)
 		SHA256=$(sha256sum $AB_Firmware | cut -d ' ' -f1)
 		MSG_COM B "\nMD5:$MD5"
@@ -203,7 +204,7 @@ X86_Images_Check() {
 	egrep -e "IMAGES*=y" -e "IMAGES_GZIP=y" -e "ROOTFS_SQUASHFS=y" .config > $Home/TEMP/X86_IMAGES
 	source $Home/TEMP/X86_IMAGES
 	touch $Home/TEMP/Choosed_FI
-	Firmware_INFO=openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE
+	Firmware_INFO="openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE"
 	if [ ! $CONFIG_TARGET_ROOTFS_SQUASHFS == n ];then
 		if [ $CONFIG_GRUB_IMAGES == y ];then
 			[ $CONFIG_ISO_IMAGES == y ] && echo "$Firmware_INFO-image.iso" >> $Home/TEMP/Choosed_FI
@@ -247,16 +248,16 @@ GET_TARGET_INFO() {
 	else
 		Firmware_Type=Common
 	fi
-	TARGET_BOARD=$(awk -F'[="]+' '/TARGET_BOARD/{print $2}' .config | awk 'NR==1')
+	TARGET_BOARD=$(awk -F '[="]+' '/TARGET_BOARD/{print $2}' .config | awk 'NR==1')
 	grep 'TARGET_BOARD' .config > /dev/null 2>&1
 	if [ ! $? -eq 0 ];then
 		DEFCONFIG=1
 	else
 		DEFCONFIG=0
 	fi
-	TARGET_SUBTARGET=$(awk -F'[="]+' '/TARGET_SUBTARGET/{print $2}' .config)
+	TARGET_SUBTARGET=$(awk -F '[="]+' '/TARGET_SUBTARGET/{print $2}' .config)
 	TARGET_PROFILE=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
-	TARGET_ARCH_PACKAGES=$(awk -F'[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config)
+	TARGET_ARCH_PACKAGES=$(awk -F '[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config)
 	egrep -o "CONFIG_TARGET.*DEVICE.*=y" .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > $Home/TEMP/TARGET_PROFILE
 	PROFILE_MaxLine=$(sed -n '$=' $Home/TEMP/TARGET_PROFILE)
 	[ -z $PROFILE_MaxLine ] && PROFILE_MaxLine=0
@@ -272,7 +273,7 @@ fi
 }
 
 Compile_Stopped() {
-	Compile_Ended=$(date +'%Y-%m-%d %H:%M:%S')
+	Compile_Ended=$(date +"%Y-%m-%d %H:%M:%S")
 	Start_Seconds=$(date -d "$Compile_Started" +%s)
 	End_Seconds=$(date -d "$Compile_Ended" +%s)
 	let Compile_Cost=($End_Seconds-$Start_Seconds)/60
