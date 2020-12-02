@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.11.22
-Version=V4.2.4
+Update=2020.12.02
+Version=V4.2.5
 
 Second_Menu() {
 while :
@@ -120,17 +120,24 @@ do
 		q)
 			break
 		;;
-		1)	
-			make clean
+		1)
+			echo ""
+			MSG_WAIT "正在执行[make clean],请耐心等待..."
+			make clean > /dev/null 2>&1
 		;;
 		2)
-			make dirclean
+			echo ""
+			MSG_WAIT "正在执行[make dirclean],请耐心等待..."
+			make dirclean > /dev/null 2>&1
 		;;
 		3)
-			make distclean
+			echo ""
+			MSG_WAIT "正在执行[make distclean],请耐心等待..."
+			make distclean > /dev/null 2>&1
 		;;
 		4)
-			MSG_WAIT "正在删除$Project..."
+			echo ""
+			MSG_WAIT "正在删除[$Project],请耐心等待..."
 			rm -rf $Home/Projects/$Project/*
 			rm -f $Home/Configs/${Project}_Recently_*
 			rm -f $Home/Log/*_${Project}_*
@@ -326,7 +333,7 @@ do
 			rm -rf ./$Project/dl
 			ln -s $Home/Backups/dl $Home/Projects/$Project/dl
 		fi
-		MSG_SUCC "已创建软链接'$Home/Backups/dl' -> '$Home/Projects/$Project/dl'"
+		MSG_SUCC "已创建链接 '$Home/Backups/dl' -> '$Home/Projects/$Project/dl'"
 		sleep 3
 	;;
 	esac
@@ -370,7 +377,7 @@ do
 		while [ $Update_Times -le 3 ];
 		do
 			clear
-			MSG_WAIT "开始第$Update_Times次安装..."
+			MSG_WAIT "开始第 $Update_Times 次安装..."
 			sleep 2
 			sudo apt-get -y install $Dependency $Extra_Dependency
 			Update_Times=$(($Update_Times + 1))
@@ -412,7 +419,7 @@ AutoBuild_Updater() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
 	clear
-	MSG_WAIT "正在更新 AutoBuild..."
+	MSG_WAIT "正在更新[AutoBuild],请耐心等待..."
 	cd $Home/Backups
 	if [ -z "$(ls -A ./AutoBuild-Update)" ];then
 		git clone https://github.com/Hyy2001X/AutoBuild AutoBuild-Update
@@ -472,7 +479,7 @@ Enter
 
 Sources_Update_Core() {
 clear
-MSG_WAIT "开始更新 $Project..."
+MSG_WAIT "开始更新[$Project],请耐心等待..."
 echo ""
 echo "$(date +%Y-%m-%d_%H:%M)" > $Home/Configs/${Project}_Recently_Updated
 cd $Home/Projects/$Project
@@ -487,7 +494,7 @@ Update_Logfile=$Home/Log/Update_${Project}_$(date +%Y%m%d_%H:%M).log
 git pull 2>&1 | tee $Update_Logfile
 ./scripts/feeds update -a 2>&1 | tee -a $Update_Logfile
 ./scripts/feeds install -a 2>&1 | tee -a $Update_Logfile
-MSG_SUCC "源代码和Feeds 更新结束!"
+MSG_SUCC "[源代码和Feeds]更新结束!"
 }
 
 Multi_Sources_Update() {
