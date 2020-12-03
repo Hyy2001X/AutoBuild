@@ -1,13 +1,13 @@
 # AutoBuild Script Module by Hyy2001
 
 SSHServices() {
-Update=2020.11.23
-Module_Version=V1.3.6
+Update=2020.12.03
+Module_Version=V1.3.7
 
 while :
 do
 	clear
-	MSG_TITLE "Easy SSH Services Script $Module_Version"
+	MSG_TITLE "SSH Services Script $Module_Version"
 	List_SSHProfile
 	MSG_COM G "\nn.创建新配置文件"
 	[ ! "`ls -A $Home/Configs/SSH`" = "" ] && MSG_COM R "d.删除所有配置文件"
@@ -32,7 +32,7 @@ do
 				SSHProfile_File=$(sed -n ${Choose}p $SSHProfileList)
 				SSHServices_Menu
 			else
-				MSG_ERR "输入错误,请输入正确的数字!"
+				MSG_ERR "[SSH] 输入错误,请输入正确的数字!"
 				sleep 2
 			fi
 		fi
@@ -51,7 +51,7 @@ do
 	MSG_COM "1.连接SSH"
 	echo "2.编辑"
 	echo "3.重命名"
-	MSG_COM R "4.删除配置文件"
+	MSG_COM R "4.删除配置文件[$SSHProfile_File]"
 	echo "5.重置[RSA Key Fingerprint]"
 	echo -e "\nq.返回"
 	GET_Choose
@@ -70,7 +70,7 @@ do
 	;;
 	3)
 		echo " "
-		read -p '请输入新的配置名称:' SSHProfile_RN
+		read -p '[SSH] 请输入新的配置名称:' SSHProfile_RN
 		if [ ! -z "$SSHProfile_RN" ];then
 			cd $Home/Configs/SSH
 			mv "$SSHProfile_File" "$SSHProfile_RN" > /dev/null 2>&1
@@ -83,14 +83,14 @@ do
 	;;
 	4)
 		rm -f $Home/Configs/SSH/"$SSHProfile_File"
-		MSG_SUCC "[SSH] 配置[$SSHProfile_File]删除成功!"
+		MSG_SUCC "[SSH] 配置文件[$SSHProfile_File]删除成功!"
 		sleep 2
 		break
 	;;
 	5)
 		
 		ssh-keygen -R $SSH_IP > /dev/null 2>&1
-		MSG_SUCC "[RSA Key Fingerprint]重置成功!"
+		MSG_SUCC "[SSH] [RSA Key Fingerprint]重置成功!"
 		sleep 2
 	;;
 	esac
@@ -101,7 +101,7 @@ Create_SSHProfile() {
 cd $Home
 echo " "
 if [ $Edit_Mode == 0 ];then
-	read -p '请输入新的配置名称:' SSH_Profile
+	read -p '[SSH] 请输入新的配置名称:' SSH_Profile
 	while [ -z "$SSH_Profile" ]
 	do
 		MSG_ERR "[SSH] 配置名称不能为空!"
@@ -109,23 +109,18 @@ if [ $Edit_Mode == 0 ];then
 		read -p '请输入新配置名称:' SSH_Profile
 	done
 fi
-read -p '请输入IP地址:' SSH_IP
-while [ -z "$SSH_IP" ]
-do
-	MSG_ERR "[SSH] IP地址不能为空!"
-	echo ""
-	read -p '请输入IP地址:' SSH_IP
-done
-read -p '请输入端口号:' SSH_Port
+read -p '[SSH] 请输入IP地址:' SSH_IP
+[ -z "$SSH_IP" ] && SSH_IP="192.168.1.1"
+read -p '[SSH] 请输入端口号:' SSH_Port
 [ -z "$SSH_Port" ] && SSH_Port=22
-read -p '请输入用户名:' SSH_User
+read -p '[SSH] 请输入用户名:' SSH_User
 while [ -z "$SSH_User" ]
 do
 	MSG_ERR "[SSH] 用户名不能为空!"
 	echo ""
 	read -p '[SSH] 请输入用户名:' SSH_User
 done
-read -p '请输入密码:' SSH_Password
+read -p '[SSH] 请输入密码:' SSH_Password
 echo "SSH_IP=$SSH_IP" > $Home/Configs/SSH/"$SSH_Profile"
 echo "SSH_Port=$SSH_Port" >> $Home/Configs/SSH/"$SSH_Profile"
 echo "SSH_User=$SSH_User" >> $Home/Configs/SSH/"$SSH_Profile"
@@ -149,12 +144,13 @@ if [ ! -z "`ls -A $Home/Configs/SSH`" ];then
 		echo -e "${i}.${Yellow}${SSHProfile}${White}"
 	done
 else
-	MSG_COM R "无任何配置文件"
+	MSG_COM R "[未检测到配置文件]"
 fi
 }
 
 SSH_Login() {
 clear
+echo -e "${Blue}连接参数:${Yellow}[ssh $SSH_User@$SSH_IP -p $SSH_Port]${White}\n"
 expect -c "
 	set timeout 1
 	spawn ssh $SSH_User@$SSH_IP -p $SSH_Port
