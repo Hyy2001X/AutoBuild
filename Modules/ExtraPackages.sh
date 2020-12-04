@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.11.22
-Module_Version=V4.8.9
+Update=2020.12.04
+Module_Version=V4.9.1
 
 ExtraPackages_mkdir
 while :
@@ -23,17 +23,11 @@ do
 	echo "11.[Hello World] luci-app-vssr"
 	echo "12.[京东签到] luci-app-jd-dailybonus"
 	echo "13.[Argon配置] luci-app-argon-config"
-	MSG_COM B "w.Li2nOnline's Packages Source"
 	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个软件包:' Choose
 	case $Choose in
 	q)
 		break
-	;;
-	w)
-		SRC_NAME=lienol
-		SRC_URL=https://github.com/xiaorouji/openwrt-package
-		ExtraPackages_src-git
 	;;
 	1)
 		grep "git.openwrt.org/project/luci.git" $Home/Projects/$Project/feeds.conf.default > /dev/null
@@ -79,15 +73,16 @@ do
 	;;
 	6)
 		PKG_NAME=luci-app-passwall
-		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-app-passwall
+		PKG_URL=https://github.com/xiaorouji/openwrt-passwall/trunk/luci-app-passwall
 		ExtraPackages_svn
 	;;
 	7)
 		clear
+		MSG_WAIT "正在添加 [依赖包] Passwall,请耐心等待..."
 		for PD in $(cat  $Home/Additional/Passwall_Dependency)
 		do
 			PKG_NAME=$PD
-			PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/package/$PD
+			PKG_URL=https://github.com/xiaorouji/openwrt-passwall/trunk/$PD
 			ExtraPackages_svn
 		done
 	;;
