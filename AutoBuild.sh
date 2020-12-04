@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.12.02
-Version=V4.2.5
+Update=2020.12.04
+Version=V4.2.6
 
 Second_Menu() {
 while :
@@ -27,7 +27,7 @@ do
 		cd $Home/Projects/$Project
 		Branch=$(git branch | sed 's/* //g')
 	else
-		MSG_COM R "未检测到[$Project]源码,请前往[高级选项]下载!"
+		MSG_COM R "警告:未检测到[$Project]源码,请前往[高级选项]下载!"
 	fi
 	echo ""
 	echo "1.更新源代码和Feeds"
@@ -102,61 +102,7 @@ do
 		ExtraPackages
 	;;
 	5)
-	while :
-	do
-		clear
-		MSG_TITLE "空间清理"
-		echo "1.make clean"
-		echo "2.make dirclean"
-		echo "3.make distclean"
-		MSG_COM R "4.删除[$Project]项目"
-		echo "5.清理[临时文件/编译缓存]"
-		echo "6.清理[更新日志]"
-		echo "7.清理[编译日志]"
-		echo "q.返回"
-		GET_Choose
-		cd $Home/Projects/$Project
-		case $Choose in
-		q)
-			break
-		;;
-		1)
-			echo ""
-			MSG_WAIT "正在执行[make clean],请耐心等待..."
-			make clean > /dev/null 2>&1
-		;;
-		2)
-			echo ""
-			MSG_WAIT "正在执行[make dirclean],请耐心等待..."
-			make dirclean > /dev/null 2>&1
-		;;
-		3)
-			echo ""
-			MSG_WAIT "正在执行[make distclean],请耐心等待..."
-			make distclean > /dev/null 2>&1
-		;;
-		4)
-			echo ""
-			MSG_WAIT "正在删除[$Project],请耐心等待..."
-			rm -rf $Home/Projects/$Project/*
-			rm -f $Home/Configs/${Project}_Recently_*
-			rm -f $Home/Log/*_${Project}_*
-		;;
-		5)
-			rm -rf $Home/Projects/$Project/tmp
-			MSG_SUCC "[临时文件/编译缓存]删除成功!"
-		;;
-		6)
-			rm -f $Home/Log/Update_${Project}_*
-			MSG_SUCC "[更新日志]删除成功!"
-		;;
-		7)
-			rm -f $Home/Log/Compile_${Project}_*
-			MSG_SUCC "[编译日志]删除成功!"
-		;;
-		esac
-		sleep 2
-	done
+		Space_Cleaner
 	;;
 	6)
 		rm -f $Home/Projects/$Project/.config*
@@ -164,20 +110,7 @@ do
 		sleep 2
 	;;
 	7)
-		timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
-		if [ $? -eq 0 ];then
-			cd $Home/Projects/$Project
-			clear
-			MSG_WAIT "开始下载[dl]库..."
-			echo ""
-			dl_Logfile=$Home/Log/dl_${Project}_$(date +%Y%m%d_%H:%M).log
-			make -j$CPU_Threads download V=s 2>&1 | tee -a $dl_Logfile
-			find dl -size -1024c -exec rm -f {} \;
-			Enter
-		else
-			MSG_ERR "网络连接错误,[dl]库下载失败!"
-			sleep 2
-		fi
+		Make_Download
 	;;
 	8)
 		clear
@@ -314,8 +247,8 @@ do
 		Enter
 	;;
 	4)
-		echo ""
 		if [ -e $Home/Backups/Projects/$Project/Makefile ];then
+			echo ""
 			echo -ne "\r${Yellow}正在恢复[$Project]源码...${White}\r"
 			cp -a $Home/Backups/Projects/$Project $Home/Projects/ > /dev/null 2>&1
 			MSG_SUCC "恢复成功![$Project] 源码已恢复到:'/Projects/$Project'"
@@ -415,6 +348,64 @@ do
 done
 }
 
+Space_Cleaner() {
+while :
+do
+	clear
+	MSG_TITLE "空间清理"
+	echo "1.make clean"
+	echo "2.make dirclean"
+	echo "3.make distclean"
+	MSG_COM R "4.删除[$Project]项目"
+	echo "5.清理[临时文件/编译缓存]"
+	echo "6.清理[更新日志]"
+	echo "7.清理[编译日志]"
+	echo "q.返回"
+	GET_Choose
+	cd $Home/Projects/$Project
+	case $Choose in
+	q)
+		break
+	;;
+	1)
+		echo ""
+		MSG_WAIT "正在执行[make clean],请耐心等待..."
+		make clean > /dev/null 2>&1
+	;;
+	2)
+		echo ""
+		MSG_WAIT "正在执行[make dirclean],请耐心等待..."
+		make dirclean > /dev/null 2>&1
+	;;
+	3)
+		echo ""
+		MSG_WAIT "正在执行[make distclean],请耐心等待..."
+		make distclean > /dev/null 2>&1
+	;;
+	4)
+		echo ""
+		MSG_WAIT "正在删除[$Project],请耐心等待..."
+		rm -rf $Home/Projects/$Project/*
+		rm -f $Home/Configs/${Project}_Recently_*
+		rm -f $Home/Log/*_${Project}_*
+	;;
+	5)
+		rm -rf $Home/Projects/$Project/tmp
+		MSG_SUCC "[临时文件/编译缓存] 删除成功!"
+	;;
+	6)
+		rm -f $Home/Log/Update_${Project}_*
+		MSG_SUCC "[更新日志] 删除成功!"
+	;;
+	7)
+		rm -f $Home/Log/Compile_${Project}_*
+		MSG_SUCC "[编译日志] 删除成功!"
+	;;
+	esac
+	sleep 2
+done
+}
+
 AutoBuild_Updater() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
@@ -440,15 +431,15 @@ if [ $? -eq 0 ];then
 		mv $Home/Additional $Backups_Dir/Additional 2>/dev/null 
 		mv $Home/Modules $Backups_Dir/Modules
 		cp -a * $Home
-		MSG_SUCC "AutoBuild 更新成功!"
+		MSG_SUCC "[AutoBuild] 更新成功!"
 		read -p "" Key
 		$Home/AutoBuild.sh
 	else
-		MSG_ERR "AutoBuild 更新失败!"
+		MSG_ERR "[AutoBuild] 更新失败!"
 		read -p "" Key
 	fi
 else
-	MSG_ERR "网络连接错误,更新失败!"
+	MSG_ERR "网络连接错误,[AutoBuild] 更新失败!"
 	sleep 2
 fi
 }
@@ -460,11 +451,39 @@ if [ -e $Home/Projects/$Project/Makefile ];then
 		Sources_Update_Core
 		read -p "" Key
 	else
-		MSG_ERR "网络连接错误,更新失败!"
+		MSG_ERR "网络连接错误,[$Project]源代码更新失败!"
 		sleep 2
 	fi
 else
 	MSG_ERR "未检测到[$Project]源代码,更新失败!"
+	sleep 2
+fi
+}
+
+Make_Download() {
+if [ -f $Home/Projects/$Project/.config ];then
+	timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
+	if [ $? -eq 0 ];then
+		cd $Home/Projects/$Project
+		clear
+		MSG_WAIT "开始执行 [make download]..."
+		echo ""
+		dl_Logfile=$Home/Log/dl_${Project}_$(date +%Y%m%d_%H:%M).log
+		if [ -d dl ];then
+			mv dl/* $Home/Backups/dl > /dev/null 2>&1
+			rm -rf dl
+		fi
+		ln -s $Home/Backups/dl $Home/Projects/$Project/dl > /dev/null 2>&1
+		make -j$CPU_Threads download V=s 2>&1 | tee -a $dl_Logfile
+		find dl -size -1024c -exec rm -f {} \;
+		ln -s $Home/Backups/dl $Home/Projects/$Project/dl > /dev/null 2>&1
+		Enter
+	else
+		MSG_ERR "网络连接错误,执行失败!"
+		sleep 2
+	fi
+else
+	MSG_ERR "未检测到[.config]文件,无法执行 [make download]!"
 	sleep 2
 fi
 }
@@ -630,7 +649,7 @@ do
 	q)
 		rm -rf $Home/TEMP
 		clear
-		break
+		exit
 	;;
 	1)
 	while :
