@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2020.11.22
-Module_Version=V3.1.2
+Update=2020.12.04
+Module_Version=V3.1.3-TEST
 
 while :
 do
@@ -10,43 +10,49 @@ do
 	clear
 	MSG_TITLE "AutoBuild Firmware Script $Module_Version"
 	MSG_COM G "电脑信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP\n"
-	if [ -e $Home/Configs/${Project}_Recently_Config ];then
-		echo -e "${Yellow}最近配置文件:${Blue}[$(cat $Home/Configs/${Project}_Recently_Config)]${White}\n"
-	fi
-	if [ ! $Firmware_Type == x86 ];then
-		if [ $PROFILE_MaxLine -gt 1 ];then
-			echo -e "设备数量:$PROFILE_MaxLine"
-			Firmware_Type=Multi_Profile
-		else
-			echo -e "设备名称:${Yellow}$TARGET_PROFILE${White}"
-			Firmware_Type=Common
+	if [ -e $Home/Projects/$Project/.config ];then
+		if [ -e $Home/Configs/${Project}_Recently_Config ];then
+			echo -e "${Yellow}最近配置文件:${Blue}[$(cat $Home/Configs/${Project}_Recently_Config)]${White}\n"
 		fi
-	fi
-	if [ $DEFCONFIG == 0 ];then
-		echo -e "CPU 架构:${Yellow}$TARGET_BOARD${White}"
-		echo -e "CPU 型号:${Yellow}$TARGET_SUBTARGET${White}"
-		echo -e "软件架构:${Yellow}$TARGET_ARCH_PACKAGES${White}"
-		echo -e "编译类型:${Blue}$Firmware_Type"
+		if [ ! $Firmware_Type == x86 ];then
+			if [ $PROFILE_MaxLine -gt 1 ];then
+				echo -e "设备数量:$PROFILE_MaxLine"
+				Firmware_Type=Multi_Profile
+			else
+				echo -e "设备名称:${Yellow}$TARGET_PROFILE${White}"
+				Firmware_Type=Common
+			fi
+		fi
+		if [ $DEFCONFIG == 0 ];then
+			echo -e "CPU 架构:${Yellow}$TARGET_BOARD${White}"
+			echo -e "CPU 型号:${Yellow}$TARGET_SUBTARGET${White}"
+			echo -e "软件架构:${Yellow}$TARGET_ARCH_PACKAGES${White}"
+			echo -e "编译类型:${Blue}$Firmware_Type"
+		else
+			echo ""
+			MSG_COM R "Warning: Please run 'make defconfig' first!"
+		fi
 	else
-		MSG_COM R "Please run 'make defconfig' first!"
+		MSG_COM R "警告:未检测到[.config]文件,部分操作将不可用!"
 	fi
+	
 	echo -e "${Yellow}\n1.make -j1 V=s"
 	echo "2.make -j2 V=s"
 	echo "3.make -j4"
 	echo -e "4.make -j4 V=s${White}"
 	echo "5.make menuconfig"
-	echo "6.make kernel_menuconfig"
-	echo "7.make defconfig"
-	echo -e "8.自动选择[${CPU_Threads} 线程]"
-	echo "9.手动输入参数"
+	echo "6.make defconfig"
+	echo "7.手动输入参数"
+	MSG_COM G "8.高级选项"
 	echo "q.返回"
 	if [ -e $Home/Configs/${Project}_Recently_Compiled ];then
 		Recently_Compiled=$(awk 'NR==1' $Home/Configs/${Project}_Recently_Compiled)
 		Recently_Compiled_Stat=$(awk 'NR==2' $Home/Configs/${Project}_Recently_Compiled)
 		echo -e "\n${Yellow}最近编译:${Blue}$Recently_Compiled $Recently_Compiled_Stat${White}"
 	fi
-	GET_Choose
-	case $Choose in
+	echo ""
+	read -p '请从上方选择一个操作:' Choose_1
+	case $Choose_1 in
 	q)
 		break
 	;;
@@ -66,22 +72,18 @@ do
 		Make_Menuconfig
 	;;
 	6)
-		clear
-		MSG_WAIT "正在执行 [make kernel_menuconfig],请耐心等待..."
-		make kernel_menuconfig
-	;;
-	7)
 		echo ""
 		MSG_WAIT "正在执行 [make defconfig],请耐心等待..."
 		make defconfig
 	;;
-	8)
-		Compile_Threads="make -j${CPU_Threads} || make -j${CPU_Threads} V=s"
-	;;
-	9)
+	7)
 		read -p '请输入编译参数:' Compile_Threads
+	;;
+	8)
+		BuildFirmware_Adv
+	;;
 	esac
-	[ $Choose -gt 0 ]&&[ ! $Choose == 5 ]&&[ ! $Choose == 6 ]&&[ ! $Choose == 7 ]&&[ $Choose -le 9 ] && BuildFirmware_Core
+	[ $Choose_1 -gt 0 ]&&[ ! $Choose_1 == 5 ]&&[ ! $Choose_1 == 5 ]&&[ ! $Choose_1 == 6 ]&&[ ! $Choose_1 == 8 ]&&[ $Choose_1 -le 8 ] && BuildFirmware_Core
 done
 }
 
@@ -196,6 +198,59 @@ Multi_Profile)
 ;;
 esac
 Enter
+}
+
+BuildFirmware_Adv() {
+while :
+do
+	clear
+	MSG_TITLE "AutoBuild Firmware 高级选项"
+	echo "1.执行 [make kernel_menuconfig]"
+	echo "2.执行 [make download]"
+	echo "3.分离[.config] > defconfig"
+	echo "4.删除[.config]"
+	echo "5.空间清理"
+	echo -e "\nq.返回"
+	MSG_COM G "m.主菜单"
+	GET_Choose
+	case $Choose in
+	1)
+		clear
+		MSG_WAIT "正在执行 [make kernel_menuconfig],请耐心等待..."
+		make kernel_menuconfig
+	;;
+	2)
+		Make_Download
+	;;
+	3)
+		if [ -e .config ];then
+			./scripts/diffconfig.sh > $Home/Backups/Configs/defconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)
+			MSG_SUCC "配置文件已保存到:'Backups/Configs/defconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)'"
+		else
+			MSG_ERR "未检测到[.config]文件,无法分离!"
+		fi
+		sleep 2
+	;;
+	4)
+		if [ -e .config* ];then
+			rm -f $Home/Projects/$Project/.config*
+			MSG_SUCC "[配置文件] 删除成功!"
+		else
+			MSG_ERR "未检测到[.config]文件,无法删除!"
+		fi
+		sleep 2
+	;;
+	5)
+		Space_Cleaner
+	;;
+	q)
+		break
+	;;
+	m)
+		AutoBuild_Core
+	;;
+	esac
+done
 }
 
 X86_Images_Check() {
