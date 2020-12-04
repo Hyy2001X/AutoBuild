@@ -1,5 +1,6 @@
 https://github.com/Lienol/openwrt
-dev-19.07
-dev-master
+19.07
+main
 rebase-19.07-5.4
 rebase-19.07
+rebase-main
