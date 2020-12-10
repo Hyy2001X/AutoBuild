@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.12.04
-Module_Version=V4.9.1
+Update=2020.12.10
+Module_Version=V4.9.3
 
 ExtraPackages_mkdir
 while :
@@ -77,14 +77,19 @@ do
 		ExtraPackages_svn
 	;;
 	7)
-		clear
-		MSG_WAIT "正在添加 [依赖包] Passwall,请耐心等待..."
-		for PD in $(cat  $Home/Additional/Passwall_Dependency)
-		do
-			PKG_NAME=$PD
-			PKG_URL=https://github.com/xiaorouji/openwrt-passwall/trunk/$PD
-			ExtraPackages_svn
-		done
+		if [ -e $Home/Additional/Depends_Passwall ];then
+			clear
+			MSG_WAIT "正在添加 [依赖包] Passwall,请耐心等待..."
+			for PD in $(cat  $Home/Additional/Depends_Passwall)
+			do
+				PKG_NAME=$PD
+				PKG_URL=https://github.com/xiaorouji/openwrt-passwall/trunk/$PD
+				ExtraPackages_svn
+			done
+		else
+			MSG_ERR "未检测到 Passwall 依赖列表: 'Additional/Depends_Passwall'"
+			sleep 2
+		fi
 	;;
 	8)
 		PKG_NAME=luci-app-mentohust
