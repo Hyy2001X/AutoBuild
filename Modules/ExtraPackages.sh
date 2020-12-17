@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.12.10
-Module_Version=V4.9.3
+Update=2020.12.17
+Module_Version=V4.9.4
 
 ExtraPackages_mkdir
 while :
@@ -106,7 +106,7 @@ do
 	;;
 	10)
 		PKG_NAME=luci-app-socat
-		PKG_URL=https://github.com/xiaorouji/openwrt-package/trunk/lienol/luci-app-socat
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/lienol/luci-app-socat
 		ExtraPackages_svn
 	;;
 	11)
