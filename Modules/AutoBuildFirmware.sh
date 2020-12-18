@@ -1,12 +1,14 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2020.12.04
-Module_Version=V3.1.3-TEST
+Update=2020.12.18
+Module_Version=V3.2-TEST
 
 while :
 do
 	GET_TARGET_INFO
+	CPU_TEMP=$(sensors | grep 'Core 0' | cut -c17-24)
+	[ -z $CPU_TEMP ] && CPU_TEMP=0
 	clear
 	MSG_TITLE "AutoBuild Firmware Script $Module_Version"
 	MSG_COM G "电脑信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP\n"
@@ -27,7 +29,7 @@ do
 			echo -e "CPU 架构:${Yellow}$TARGET_BOARD${White}"
 			echo -e "CPU 型号:${Yellow}$TARGET_SUBTARGET${White}"
 			echo -e "软件架构:${Yellow}$TARGET_ARCH_PACKAGES${White}"
-			echo -e "编译类型:${Blue}$Firmware_Type"
+			echo -e "编译类型:${Blue}$Firmware_Type/${Firmware_sfx}"
 		else
 			echo ""
 			MSG_COM R "Warning: Please run 'make defconfig' first!"
@@ -107,13 +109,13 @@ x86)
 	echo ""
 ;;
 Common)
-	Firmware_Name="openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin"
+	Firmware_Name="openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.${Firmware_sfx}"
 	if [ $Project == Lede ];then
 		Firmware_INFO="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version-$(date +%Y%m%d-%H:%M:%S)"
 	else
 		Firmware_INFO="AutoBuild-$TARGET_PROFILE-$Project-$(date +%Y%m%d-%H:%M:%S)"
 	fi
-	AB_Firmware="${Firmware_INFO}.bin"
+	AB_Firmware="${Firmware_INFO}.${Firmware_sfx}"
 	Firmware_Detail="$Home/Firmware/Details/${Firmware_INFO}.detail"
 	echo -e "${Yellow}固件名称:${Blue}$AB_Firmware${White}\n"
 ;;
@@ -121,7 +123,7 @@ Multi_Profile)
 	rm -f $Home/TEMP/Multi_TARGET > /dev/null 2>&1
 	for TARGET_PROFILE in $(cat  $Home/TEMP/TARGET_PROFILE)
 	do
-		echo "openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.bin" >> $Home/TEMP/Multi_TARGET
+		echo "openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.${Firmware_sfx}" >> $Home/TEMP/Multi_TARGET
 	done
 ;;
 esac
@@ -286,16 +288,19 @@ Checkout_Package() {
 	awk 'BEGIN { cmd="cp -ri ./dl/* ../../Backups/dl/"; print "n" |cmd; }' > /dev/null 2>&1
 	MSG_WAIT "检出软件包到'$Home/Packages'..."
 	cd $Home/Packages
-	mkdir -p $TARGET_ARCH_PACKAGES
 	Packages_Dir=$Home/Projects/$Project/bin
-	cp -a $(find $Packages_Dir/packages -type f -name "*.ipk") ./$TARGET_ARCH_PACKAGES
-	mv -f $(find ./$TARGET_ARCH_PACKAGES/ -type f -name "*all.ipk") ./
+	[ ! -d $TARGET_ARCH_PACKAGES ] && mkdir -p $Home/Packages/$TARGET_ARCH_PACKAGES
+	[ ! -d luci-app-common ] && mkdir -p $Home/Packages/luci-app-common
+	[ ! -d luci-theme-common ] && mkdir -p $Home/Packages/luci-theme-common
+	cp -a $(find $Packages_Dir/packages/$TARGET_ARCH_PACKAGES -type f -name "*.ipk") ./
+	mv -f $(find ./ -type f -name "*_$TARGET_ARCH_PACKAGES.ipk") ./$TARGET_ARCH_PACKAGES
+	mv -f $(find ./ -type f -name "luci-app-*.ipk") ./luci-app-common
+	mv -f $(find ./ -type f -name "luci-theme-*.ipk") ./luci-theme-common
+	cp -a $(find $Packages_Dir/targets/$TARGET_BOARD/$TARGET_SUBTARGET/ -type f -name "*.ipk") ./$TARGET_ARCH_PACKAGES
 }
 
 GET_TARGET_INFO() {
 	rm -rf $Home/TEMP/* > /dev/null 2>&1
-	CPU_TEMP=$(sensors | grep 'Core 0' | cut -c17-24)
-	[ -z $CPU_TEMP ] && CPU_TEMP=0
 	cd $Home/Projects/$Project
 	grep "CONFIG_TARGET_x86=y" .config > /dev/null 2>&1
 	if [ ! $? -ne 0 ]; then
@@ -316,6 +321,12 @@ GET_TARGET_INFO() {
 	egrep -o "CONFIG_TARGET.*DEVICE.*=y" .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > $Home/TEMP/TARGET_PROFILE
 	PROFILE_MaxLine=$(sed -n '$=' $Home/TEMP/TARGET_PROFILE)
 	[ -z $PROFILE_MaxLine ] && PROFILE_MaxLine=0
+	GET_CONFIG_ARCH=$(awk -F '[="]+' '/CONFIG_ARCH/{print $2}' .config | awk 'END {print}')
+	if [ $GET_CONFIG_ARCH == aarch64 ];then
+		Firmware_sfx=img.gz
+	else
+		Firmware_sfx=bin
+	fi
 }
 
 BuildFirmware_Check() {
