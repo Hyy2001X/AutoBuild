@@ -2,7 +2,7 @@
 
 BuildFirmware_UI() {
 Update=2020.12.19
-Module_Version=V3.2.1-BETA
+Module_Version=V3.2.2
 
 while :
 do
@@ -39,8 +39,8 @@ do
 	fi
 	echo -e "${Yellow}\n1.make -j1 V=s"
 	echo "2.make -j2 V=s"
-	echo "3.make -j4"
-	echo -e "4.make -j4 V=s${White}"
+	echo "3.make -j$CPU_Threads"
+	echo -e "4.make -j$CPU_Threads V=s${White}"
 	echo "5.make menuconfig"
 	echo "6.make defconfig"
 	echo "7.手动输入参数"
@@ -64,10 +64,10 @@ do
 		Compile_Threads="make -j2 V=s"
 	;;
 	3)
-		Compile_Threads="make -j4"
+		Compile_Threads="make -j${CPU_Threads}"
 	;;
 	4)
-		Compile_Threads="make -j4 V=s"
+		Compile_Threads="make -j${CPU_Threads} V=s"
 	;;
 	5)
 		Make_Menuconfig
