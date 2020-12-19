@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2020.12.18
-Module_Version=V3.2-TEST
+Update=2020.12.19
+Module_Version=V3.2.1-BETA
 
 while :
 do
@@ -37,7 +37,6 @@ do
 	else
 		MSG_COM R "警告:未检测到[.config]文件,部分操作将不可用!"
 	fi
-	
 	echo -e "${Yellow}\n1.make -j1 V=s"
 	echo "2.make -j2 V=s"
 	echo "3.make -j4"
@@ -209,9 +208,9 @@ do
 	MSG_TITLE "AutoBuild Firmware 高级选项"
 	echo "1.执行 [make kernel_menuconfig]"
 	echo "2.执行 [make download]"
-	echo "3.分离[.config] > defconfig"
-	echo "4.删除[.config]"
-	echo "5.空间清理"
+	echo "3.分离 [.config] > defconfig"
+	echo "4.删除 [.config]"
+	echo "5.更多空间清理"
 	echo -e "\nq.返回"
 	MSG_COM G "m.主菜单"
 	GET_Choose
@@ -227,9 +226,9 @@ do
 	3)
 		if [ -e .config ];then
 			./scripts/diffconfig.sh > $Home/Backups/Configs/defconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)
-			MSG_SUCC "配置文件已保存到:'Backups/Configs/defconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)'"
+			MSG_SUCC "新配置文件已保存到:'Backups/Configs/defconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)'"
 		else
-			MSG_ERR "未检测到[.config]文件,无法分离!"
+			MSG_ERR "未检测到[.config]文件,无法执行!"
 		fi
 		sleep 2
 	;;
