@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.12.04
-Version=V4.2.6
+Update=2020.12.19
+Version=V4.2.7
 
 Second_Menu() {
 while :
@@ -106,7 +106,7 @@ do
 	;;
 	6)
 		rm -f $Home/Projects/$Project/.config*
-		MSG_SUCC "[配置文件]删除成功!"
+		MSG_SUCC "[配置文件] 删除成功!"
 		sleep 2
 	;;
 	7)
@@ -131,8 +131,8 @@ do
 	MSG_TITLE "备份与恢复"
 	echo "1.备份[.config]"
 	echo "2.恢复[.config]"
-	echo "3.备份[$Project]源码"
-	echo "4.恢复[$Project]源码"
+	echo "3.备份[$Project]源代码"
+	echo "4.恢复[$Project]源代码"
 	MSG_COM G "5.链接[dl]库"
 	echo -e "\nq.返回"
 	GET_Choose
@@ -236,23 +236,24 @@ do
 	fi
 	;;
 	3)
-		echo ""
-		echo -ne "\r${Yellow}正在备份[$Project]源码...${White}\r"
-		if [ -e $Home/Backups/Projects/$Project/Makefile ];then
-			rm -rf $Home/Backups/Projects/$Project
-		fi
-		cp -a $Home/Projects/$Project $Home/Backups/Projects > /dev/null 2>&1
-		MSG_SUCC "备份成功![$Project] 源码已备份到:'/Backups/Projects/$Project'"
+		MSG_WAIT "正在备份[$Project]源代码..."
+		[ ! -d $Home/Backups/Projects/$Project ] && mkdir -p $Home/Backups/Projects/$Project
+		cd $Home/Backups/Projects/$Project
+		for LB in $(cat $Home/Additional/Backup_List)
+		do
+			cp -a $Home/Projects/$Project/$LB ./
+		done
+		chmod 777 -R $Home/Backups/Projects/$Project
+		MSG_SUCC "备份成功![$Project]源代码已备份到:'Backups/Projects/$Project'"
 		MSG_SUCC "存储占用:$(du -sh $Home/Backups/Projects/$Project | awk '{print $1}')B"
 		Enter
 	;;
 	4)
 		if [ -e $Home/Backups/Projects/$Project/Makefile ];then
 			echo ""
-			echo -ne "\r${Yellow}正在恢复[$Project]源码...${White}\r"
+			MSG_WAIT "正在恢复[$Project]源代码..."
 			cp -a $Home/Backups/Projects/$Project $Home/Projects/ > /dev/null 2>&1
-			MSG_SUCC "恢复成功![$Project] 源码已恢复到:'/Projects/$Project'"
-			MSG_SUCC "存储占用:$(du -sh $Home/Projects/$Project | awk '{print $1}')B"
+			MSG_SUCC "恢复成功![$Project]源代码已恢复到:'Projects/$Project'"
 			Enter
 		else
 			MSG_ERR "未找到备份文件,恢复失败!"
@@ -266,7 +267,7 @@ do
 			rm -rf ./$Project/dl
 			ln -s $Home/Backups/dl $Home/Projects/$Project/dl
 		fi
-		MSG_SUCC "已创建链接 '$Home/Backups/dl' -> '$Home/Projects/$Project/dl'"
+		MSG_SUCC "已创建链接:'$Home/Backups/dl' -> '$Home/Projects/$Project/dl'"
 		sleep 3
 	;;
 	esac
@@ -283,9 +284,9 @@ do
 	echo "3.SSH 服务"
 	echo "4.同步网络时间"
 	echo "5.存储空间统计"
-	echo "6.快速启动"
+	echo "6.快捷指令启动"
 	echo "7.系统信息"
-	echo "8.更换系统下载源"
+	echo "8.系统下载源"
 	MSG_COM "\nx.更新脚本"
 	MSG_COM G "q.主菜单"
 	GET_Choose
@@ -332,7 +333,7 @@ do
 	;;
 	6)
 		echo ""
-		read -p '请输入快速启动的名称:' FastOpen		
+		read -p '请输入快速启动的指令:' FastOpen		
 		echo "alias $FastOpen='$Home/AutoBuild.sh'" >> ~/.bashrc
 		source ~/.bashrc
 		MSG_SUCC "创建成功!在终端输入 $FastOpen 即可启动 AutoBuild [需要重启终端]."
@@ -353,13 +354,13 @@ while :
 do
 	clear
 	MSG_TITLE "空间清理"
-	echo "1.make clean"
-	echo "2.make dirclean"
-	echo "3.make distclean"
-	MSG_COM R "4.删除[$Project]项目"
-	echo "5.清理[临时文件/编译缓存]"
-	echo "6.清理[更新日志]"
-	echo "7.清理[编译日志]"
+	echo "1.执行 [make clean]"
+	echo "2.执行 [make dirclean]"
+	echo "3.执行 [make distclean]"
+	MSG_COM R "4.删除 [$Project] 项目"
+	echo "5.清理 [临时文件/编译缓存]"
+	echo "6.清理 [更新日志]"
+	echo "7.清理 [编译日志]"
 	echo "q.返回"
 	GET_Choose
 	cd $Home/Projects/$Project
@@ -394,11 +395,11 @@ do
 		MSG_SUCC "[临时文件/编译缓存] 删除成功!"
 	;;
 	6)
-		rm -f $Home/Log/Update_${Project}_*
+		rm -f $Home/Log/SourceUpdate_${Project}_*
 		MSG_SUCC "[更新日志] 删除成功!"
 	;;
 	7)
-		rm -f $Home/Log/Compile_${Project}_*
+		rm -f $Home/Log/BuildOpenWrt_${Project}_*
 		MSG_SUCC "[编译日志] 删除成功!"
 	;;
 	esac
@@ -509,7 +510,7 @@ if [ $Enforce_Update == 1 ];then
 		sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
 	fi
 fi
-Update_Logfile=$Home/Log/Update_${Project}_$(date +%Y%m%d_%H:%M).log
+Update_Logfile=$Home/Log/SourceUpdate_${Project}_$(date +%Y%m%d_%H:%M).log
 git pull 2>&1 | tee $Update_Logfile
 ./scripts/feeds update -a 2>&1 | tee -a $Update_Logfile
 ./scripts/feeds install -a 2>&1 | tee -a $Update_Logfile
@@ -535,7 +536,7 @@ fi
 
 Sources_Download() {
 if [ -e $Home/Projects/$Project/Makefile ];then
-	MSG_SUCC "已检测到[$Project]源码,当前分支:$Branch"
+	MSG_SUCC "已检测到[$Project]源代码,当前分支:[$Branch]"
 	sleep 3
 else
 	clear
