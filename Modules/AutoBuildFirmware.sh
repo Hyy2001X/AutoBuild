@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2020.12.19
-Module_Version=V3.2.2
+Update=2020.12.20
+Module_Version=V3.2.3
 
 while :
 do
@@ -49,7 +49,7 @@ do
 	if [ -e $Home/Configs/${Project}_Recently_Compiled ];then
 		Recently_Compiled=$(awk 'NR==1' $Home/Configs/${Project}_Recently_Compiled)
 		Recently_Compiled_Stat=$(awk 'NR==2' $Home/Configs/${Project}_Recently_Compiled)
-		echo -e "\n${Yellow}最近编译:${Blue}$Recently_Compiled $Recently_Compiled_Stat${White}"
+		echo -e "\n${Yellow}最近编译时间:${Blue}[${Recently_Compiled}${Recently_Compiled_Stat}]${White}"
 	fi
 	echo ""
 	read -p '请从上方选择一个操作:' Choose_1
@@ -79,12 +79,17 @@ do
 	;;
 	7)
 		read -p '请输入编译参数:' Compile_Threads
+		clear
+		MSG_WAIT "即将执行自定义参数 [$Compile_Threads]..."
+		echo "" && $Compile_Threads && echo ""
+		MSG_WAIT "自定义参数执行结束!"
+		Enter
 	;;
 	8)
 		BuildFirmware_Adv
 	;;
 	esac
-	[ $Choose_1 -gt 0 ]&&[ ! $Choose_1 == 5 ]&&[ ! $Choose_1 == 5 ]&&[ ! $Choose_1 == 6 ]&&[ ! $Choose_1 == 8 ]&&[ $Choose_1 -le 8 ] && BuildFirmware_Core
+	[ $Choose_1 -gt 0 ]&&[ ! $Choose_1 == 5 ]&&[ ! $Choose_1 == 5 ]&&[ ! $Choose_1 == 6 ]&&[ ! $Choose_1 == 7 ]&&[ ! $Choose_1 == 8 ]&&[ $Choose_1 -le 8 ] && BuildFirmware_Core
 done
 }
 
@@ -142,8 +147,8 @@ fi
 MSG_WAIT "开始编译$Project..."
 cd $Home/Projects/$Project
 Compile_Started=$(date +"%Y-%m-%d %H:%M:%S")
-Compile_Date=$(date +%Y%m%d_%H:%M)
-echo $Compile_Started > $Home/Configs/${Project}_Recently_Compiled
+Compile_Date=$(date +"%Y%m%d_%H:%M")
+echo "$Compile_Started" > $Home/Configs/${Project}_Recently_Compiled
 if [ $SaveCompileLog == 0 ];then
 	$Compile_Threads
 else
@@ -175,7 +180,7 @@ Common)
 	Compile_Stopped
 	if [ -e $Firmware_PATH/$Firmware_Name ];then
 		Checkout_Package
-		echo "成功" >> $Home/Configs/${Project}_Recently_Compiled
+		echo " 成功" >> $Home/Configs/${Project}_Recently_Compiled
 		cd $Home/Projects/$Project
 		mv $Firmware_PATH/$Firmware_Name $Home/Firmware/$AB_Firmware
 		cd $Home/Firmware
@@ -190,6 +195,7 @@ Common)
 		echo -e "编译日期:$Compile_Started\n固件大小:$Size\n" > $Firmware_Detail
 		echo -e "MD5:$MD5\nSHA256:$SHA256" >> $Firmware_Detail
 	else
+		echo " 失败" >> $Home/Configs/${Project}_Recently_Compiled
 		MSG_ERR "编译失败!"
 	fi
 ;;
