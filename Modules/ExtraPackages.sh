@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.12.17
-Module_Version=V4.9.4
+Update=2020.12.25
+Module_Version=V4.9.5
 
 ExtraPackages_mkdir
 while :
@@ -30,23 +30,17 @@ do
 		break
 	;;
 	1)
-		grep "git.openwrt.org/project/luci.git" $Home/Projects/$Project/feeds.conf.default > /dev/null
-		if [ $? -ne 0 ]; then
-			PKG_NAME=smartdns
-			PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/smartdns
-			ExtraPackages_svn
-			PKG_NAME=luci-app-smartdns
-			if [ $Project == Lede ];then
-				PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
-			else
-				PKG_URL="https://github.com/pymumu/luci-app-smartdns"
-			fi
-			ExtraPackages_git
-			rm -rf $Home/Projects/$Project/tmp
+		PKG_NAME=smartdns
+		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/smartdns
+		ExtraPackages_svn
+		PKG_NAME=luci-app-smartdns
+		if [ $Project == Lede ];then
+			PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
 		else
-			MSG_ERR "无法添加 SmartDNS"
-			sleep 2
+			PKG_URL="https://github.com/pymumu/luci-app-smartdns"
 		fi
+		ExtraPackages_git
+		rm -rf $Home/Projects/$Project/tmp
 	;;
 	2)
 		PKG_NAME=luci-app-adguardhome
@@ -133,18 +127,33 @@ ExtraPackages_mkdir
 
 while :
 do
-	cd $PKG_Dir
 	clear
 	MSG_TITLE "添加第三方主题包"
-	echo "1.luci-theme-argon"
+	if [ -e $PKG_Home/lean/luci-theme-argon/Makefile ];then
+		Theme_Version="$(cat $PKG_Home/lean/luci-theme-argon/Makefile | grep 'PKG_VERSION' | cut -c14-20)"
+		echo -e "1.${Yellow}luci-theme-argon [${Theme_Version}]${White}"
+	else
+		echo "1.luci-theme-argon"
+	fi
+	cd $PKG_Dir
 	ExtraThemesList_File=$Home/Additional/ExtraThemes_List
 	List_MaxLine=$(sed -n '$=' $ExtraThemesList_File)
 	rm -f $Home/TEMP/Checked_Themes > /dev/null 2>&1
 	for ((i=1;i<=$List_MaxLine;i++));
-		do   
+		do
 			Theme=$(sed -n ${i}p $ExtraThemesList_File | awk '{print $2}')
 			if [ -e $PKG_Dir/$Theme/Makefile ];then
-				echo -e "$(($i + 1)).${Yellow}${Theme}${White}"
+				if [[ "$(cat $PKG_Dir/$Theme/Makefile)" =~ "PKG_VERSION" ]];then
+					GET_Version="$(cat $PKG_Dir/$Theme/Makefile | grep 'PKG_VERSION' | cut -c14-20)"
+					Theme_Version=" [${GET_Version}]"
+					if [[ "$(cat $PKG_Dir/$Theme/Makefile)" =~ "PKG_RELEASE" ]];then
+						GET_Release="$(cat $PKG_Dir/$Theme/Makefile | grep 'PKG_RELEASE' | cut -c14-20)"
+						Theme_Version=" [${GET_Version}-${GET_Release}]"
+					fi
+					echo -e "$(($i + 1)).${Yellow}${Theme}${Theme_Version}${White}"
+				else
+					echo -e "$(($i + 1)).${Yellow}${Theme}${White}"
+				fi
 				echo "$Theme" >> $Home/TEMP/Checked_Themes
 			else
 				echo "$(($i + 1)).${Theme}"
@@ -173,16 +182,21 @@ do
 		Enter
 	;;
 	u)
-		clear
-		cat $Home/TEMP/Checked_Themes | while read Theme
-		do
-			echo -e "$Yellow正在更新 ${Blue}$Theme ${Yellow}...${White}"
-			cd ./$Theme
-			svn update > /dev/null 2>&1
-			git pull > /dev/null 2>&1
-			cd ..
-		done
-		Enter
+		if [ -e $Home/TEMP/Checked_Themes ];then
+			clear
+			cat $Home/TEMP/Checked_Themes | while read Theme
+			do
+				MSG_WAIT "正在更新 $Theme ..."
+				cd ./$Theme
+				svn update > /dev/null 2>&1
+				git pull > /dev/null 2>&1
+				cd ..
+			done
+			Enter
+		else
+			MSG_ERR "未安装任何主题包!"
+			sleep 2
+		fi
 	;;
 	q)
 		break
@@ -254,8 +268,7 @@ sleep 2
 }
 
 ExtraPackages_src-git() {
-grep "$SRC_NAME" $Home/Projects/$Project/feeds.conf.default > /dev/null
-if [ $? -ne 0 ]; then
+if [[ ! "$(cat $Home/Projects/$Project/feeds.conf.default)" =~ "src-git $SRC_NAME" ]];then
 	cd $Home/Projects/$Project
 	clear
 	echo "src-git $SRC_NAME $SRC_URL" >> feeds.conf.default
