@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2020.12.20
-Module_Version=V3.2.3
+Update=2021.01.20
+Module_Version=V3.2.5
 
 while :
 do
@@ -12,8 +12,8 @@ do
 	clear
 	MSG_TITLE "AutoBuild Firmware Script $Module_Version"
 	MSG_COM G "电脑信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP\n"
-	if [ -e $Home/Projects/$Project/.config ];then
-		if [ -e $Home/Configs/${Project}_Recently_Config ];then
+	if [ -f $Home/Projects/$Project/.config ];then
+		if [ -f $Home/Configs/${Project}_Recently_Config ];then
 			echo -e "${Yellow}最近配置文件:${Blue}[$(cat $Home/Configs/${Project}_Recently_Config)]${White}\n"
 		fi
 		if [ ! $Firmware_Type == x86 ];then
@@ -46,7 +46,7 @@ do
 	echo "7.手动输入参数"
 	MSG_COM G "8.高级选项"
 	echo "q.返回"
-	if [ -e $Home/Configs/${Project}_Recently_Compiled ];then
+	if [ -f $Home/Configs/${Project}_Recently_Compiled ];then
 		Recently_Compiled=$(awk 'NR==1' $Home/Configs/${Project}_Recently_Compiled)
 		Recently_Compiled_Stat=$(awk 'NR==2' $Home/Configs/${Project}_Recently_Compiled)
 		echo -e "\n${Yellow}最近编译时间:${Blue}[${Recently_Compiled}${Recently_Compiled_Stat}]${White}"
@@ -178,7 +178,7 @@ x86)
 ;;
 Common)
 	Compile_Stopped
-	if [ -e $Firmware_PATH/$Firmware_Name ];then
+	if [ -f $Firmware_PATH/$Firmware_Name ];then
 		Checkout_Package
 		echo " 成功" >> $Home/Configs/${Project}_Recently_Compiled
 		cd $Home/Projects/$Project
@@ -230,7 +230,7 @@ do
 		Make_Download
 	;;
 	3)
-		if [ -e .config ];then
+		if [ -f .config ];then
 			./scripts/diffconfig.sh > $Home/Backups/Configs/defconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)
 			MSG_SUCC "新配置文件已保存到:'Backups/Configs/defconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)'"
 		else
@@ -239,12 +239,8 @@ do
 		sleep 2
 	;;
 	4)
-		if [ -e .config* ];then
-			rm -f $Home/Projects/$Project/.config*
-			MSG_SUCC "[配置文件] 删除成功!"
-		else
-			MSG_ERR "未检测到[.config]文件,无法删除!"
-		fi
+		rm -f $Home/Projects/$Project/.config*
+		MSG_SUCC "[配置文件] 删除成功!"
 		sleep 2
 	;;
 	5)
@@ -297,11 +293,11 @@ Checkout_Package() {
 	[ ! -d $TARGET_ARCH_PACKAGES ] && mkdir -p $Home/Packages/$TARGET_ARCH_PACKAGES
 	[ ! -d luci-app-common ] && mkdir -p $Home/Packages/luci-app-common
 	[ ! -d luci-theme-common ] && mkdir -p $Home/Packages/luci-theme-common
-	cp -a $(find $Packages_Dir/packages/$TARGET_ARCH_PACKAGES -type f -name "*.ipk") ./
-	mv -f $(find ./ -type f -name "*_$TARGET_ARCH_PACKAGES.ipk") ./$TARGET_ARCH_PACKAGES
-	mv -f $(find ./ -type f -name "luci-app-*.ipk") ./luci-app-common
-	mv -f $(find ./ -type f -name "luci-theme-*.ipk") ./luci-theme-common
-	cp -a $(find $Packages_Dir/targets/$TARGET_BOARD/$TARGET_SUBTARGET/ -type f -name "*.ipk") ./$TARGET_ARCH_PACKAGES
+	cp -a $(find $Packages_Dir/packages/$TARGET_ARCH_PACKAGES -type f -name "*.ipk") ./ > /dev/null 2>&1
+	mv -f $(find ./ -type f -name "*_$TARGET_ARCH_PACKAGES.ipk") ./$TARGET_ARCH_PACKAGES > /dev/null 2>&1
+	mv -f $(find ./ -type f -name "luci-app-*.ipk") ./luci-app-common > /dev/null 2>&1
+	mv -f $(find ./ -type f -name "luci-theme-*.ipk") ./luci-theme-common > /dev/null 2>&1
+	cp -a $(find $Packages_Dir/targets/$TARGET_BOARD/$TARGET_SUBTARGET/ -type f -name "*.ipk") ./$TARGET_ARCH_PACKAGES > /dev/null 2>&1
 }
 
 GET_TARGET_INFO() {
