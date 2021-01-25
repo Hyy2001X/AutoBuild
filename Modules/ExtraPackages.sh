@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2020.12.25
-Module_Version=V4.9.5
+Update=2021.01.25
+Module_Version=V4.9.6
 
 ExtraPackages_mkdir
 while :
@@ -16,13 +16,12 @@ do
 	echo "4.Clash"
 	echo "5.OpenAppFilter"
 	echo "6.Passwall"
-	echo "7.[依赖包] Passwall"
-	echo "8.MentoHust"
-	echo "9.[微信推送] ServerChan "
-	echo "10.[端口转发] Socat"
-	echo "11.[Hello World] luci-app-vssr"
-	echo "12.[京东签到] luci-app-jd-dailybonus"
-	echo "13.[Argon配置] luci-app-argon-config"
+	echo "7.MentoHust"
+	echo "8.[微信推送] ServerChan "
+	echo "9.[端口转发] Socat"
+	echo "10.[Hello World] luci-app-vssr"
+	echo "11.[京东签到] luci-app-jd-dailybonus"
+	echo "12.[Argon配置] luci-app-argon-config"
 	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个软件包:' Choose
 	case $Choose in
@@ -31,7 +30,7 @@ do
 	;;
 	1)
 		PKG_NAME=smartdns
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/smartdns
+		PKG_URL=https://github.com/kenzok8/openwrt-packages/trunk/smartdns
 		ExtraPackages_svn
 		PKG_NAME=luci-app-smartdns
 		if [ $Project == Lede ];then
@@ -46,9 +45,6 @@ do
 		PKG_NAME=luci-app-adguardhome
 		PKG_URL=https://github.com/Hyy2001X/luci-app-adguardhome
 		ExtraPackages_git
-		PKG_NAME=AdGuardHome
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/AdGuardHome
-		ExtraPackages_svn
 	;;
 	3)
 		SRC_NAME=OpenClash
@@ -67,25 +63,10 @@ do
 	;;
 	6)
 		PKG_NAME=luci-app-passwall
-		PKG_URL=https://github.com/xiaorouji/openwrt-passwall/trunk/luci-app-passwall
-		ExtraPackages_svn
+		PKG_URL=https://github.com/xiaorouji/openwrt-passwall
+		ExtraPackages_git
 	;;
 	7)
-		if [ -e $Home/Additional/Depends_Passwall ];then
-			clear
-			MSG_WAIT "正在添加 [依赖包] Passwall,请耐心等待..."
-			for PD in $(cat  $Home/Additional/Depends_Passwall)
-			do
-				PKG_NAME=$PD
-				PKG_URL=https://github.com/xiaorouji/openwrt-passwall/trunk/$PD
-				ExtraPackages_svn
-			done
-		else
-			MSG_ERR "未检测到 Passwall 依赖列表: 'Additional/Depends_Passwall'"
-			sleep 2
-		fi
-	;;
-	8)
 		PKG_NAME=luci-app-mentohust
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-app-mentohust
 		ExtraPackages_svn
@@ -93,27 +74,27 @@ do
 		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/mentohust
 		ExtraPackages_svn
 	;;
-	9)
+	8)
 		PKG_NAME=luci-app-serverchan
 		PKG_URL=https://github.com/tty228/luci-app-serverchan
 		ExtraPackages_git
 	;;
-	10)
+	9)
 		PKG_NAME=luci-app-socat
-		PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/lienol/luci-app-socat
+		PKG_URL=https://github.com/Lienol/openwrt-package/trunk/luci-app-socat
 		ExtraPackages_svn
 	;;
-	11)
+	10)
 		PKG_NAME=luci-app-vssr
 		PKG_URL=https://github.com/jerrykuku/luci-app-vssr
 		ExtraPackages_git
 	;;
-	12)
+	11)
 		PKG_NAME=luci-app-jd-dailybonus
 		PKG_URL=https://github.com/jerrykuku/luci-app-jd-dailybonus
 		ExtraPackages_git
 	;;
-	13)
+	12)
 		PKG_NAME=luci-app-argon-config
 		PKG_URL=https://github.com/jerrykuku/luci-app-argon-config
 		ExtraPackages_git
@@ -129,7 +110,7 @@ while :
 do
 	clear
 	MSG_TITLE "添加第三方主题包"
-	if [ -e $PKG_Home/lean/luci-theme-argon/Makefile ];then
+	if [ -f $PKG_Home/lean/luci-theme-argon/Makefile ];then
 		Theme_Version="$(cat $PKG_Home/lean/luci-theme-argon/Makefile | grep 'PKG_VERSION' | cut -c14-20)"
 		echo -e "1.${Yellow}luci-theme-argon [${Theme_Version}]${White}"
 	else
@@ -142,7 +123,7 @@ do
 	for ((i=1;i<=$List_MaxLine;i++));
 		do
 			Theme=$(sed -n ${i}p $ExtraThemesList_File | awk '{print $2}')
-			if [ -e $PKG_Dir/$Theme/Makefile ];then
+			if [ -f $PKG_Dir/$Theme/Makefile ];then
 				if [[ "$(cat $PKG_Dir/$Theme/Makefile)" =~ "PKG_VERSION" ]];then
 					GET_Version="$(cat $PKG_Dir/$Theme/Makefile | grep 'PKG_VERSION' | cut -c14-20)"
 					Theme_Version=" [${GET_Version}]"
@@ -182,7 +163,7 @@ do
 		Enter
 	;;
 	u)
-		if [ -e $Home/TEMP/Checked_Themes ];then
+		if [ -f $Home/TEMP/Checked_Themes ];then
 			clear
 			cat $Home/TEMP/Checked_Themes | while read Theme
 			do
@@ -248,7 +229,7 @@ done
 ExtraPackages_git() {
 [ -d $PKG_Dir/$PKG_NAME ] && rm -rf $PKG_Dir/$PKG_NAME
 git clone $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -e $PKG_Dir/$PKG_NAME/Makefile ] || [ -e $PKG_Dir/$PKG_NAME/README.md ];then
+if [ -f $PKG_Dir/$PKG_NAME/Makefile ] || [ -f $PKG_Dir/$PKG_NAME/README.md ] || [ ! "$(ls -A $PKG_Dir/$PKG_NAME)" = "" ];then
 	MSG_SUCC "[GIT] 已添加 $PKG_NAME"
 else
 	MSG_ERR "[GIT] 未添加 $PKG_NAME"
@@ -259,7 +240,7 @@ sleep 2
 ExtraPackages_svn() {
 [ -d $PKG_Dir/$PKG_NAME ] && rm -rf $PKG_Dir/$PKG_NAME
 svn checkout $PKG_URL $PKG_NAME > /dev/null 2>&1
-if [ -e $PKG_Dir/$PKG_NAME/Makefile ] || [ -e $PKG_Dir/$PKG_NAME/README.md ];then
+if [ -f $PKG_Dir/$PKG_NAME/Makefile ] || [ -f $PKG_Dir/$PKG_NAME/README.md ] || [ ! "$(ls -A $PKG_Dir/$PKG_NAME)" = "" ];then
 	MSG_SUCC "[SVN] 已添加 $PKG_NAME"
 else
 	MSG_ERR "[SVN] 未添加 $PKG_NAME"
@@ -282,7 +263,7 @@ fi
 }
 
 ExtraPackages_mkdir() {
-PKG_Home=$Home/Projects/$Project/package
-[ ! -d $PKG_Home/ExtraPackages ] && mkdir -p $PKG_Home/ExtraPackages
-PKG_Dir=$PKG_Home/ExtraPackages
+	PKG_Home=$Home/Projects/$Project/package
+	[ ! -d $PKG_Home/ExtraPackages ] && mkdir -p $PKG_Home/ExtraPackages
+	PKG_Dir=$PKG_Home/ExtraPackages
 }
