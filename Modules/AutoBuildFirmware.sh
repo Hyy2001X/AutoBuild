@@ -8,39 +8,29 @@ while :
 do
 	GET_TARGET_INFO
 	CPU_TEMP=$(sensors | grep 'Core 0' | cut -c17-24)
-	[ -z $CPU_TEMP ] && CPU_TEMP=0
+	[[ -z "$CPU_TEMP" ]] && CPU_TEMP=0
 	clear
-	MSG_TITLE "AutoBuild Firmware Script $Module_Version"
-	MSG_COM G "电脑信息:$CPU_Model $CPU_Cores核心$CPU_Threads线程 $CPU_TEMP\n"
+	MSG_TITLE "AutoBuild Firmware Script ${Module_Version}"
+	MSG_COM G "电脑信息:${CPU_Model} ${CPU_Cores}核心${CPU_Threads}线程 ${CPU_TEMP}\n"
 	if [ -f $Home/Projects/$Project/.config ];then
 		if [ -f $Home/Configs/${Project}_Recently_Config ];then
 			echo -e "${Yellow}最近配置文件:${Blue}[$(cat $Home/Configs/${Project}_Recently_Config)]${White}\n"
 		fi
-		if [ ! $Firmware_Type == x86 ];then
-			if [ $PROFILE_MaxLine -gt 1 ];then
-				echo -e "设备数量:$PROFILE_MaxLine"
-				Firmware_Type=Multi_Profile
-			else
-				echo -e "设备名称:${Yellow}$TARGET_PROFILE${White}"
-				Firmware_Type=Common
-			fi
-		fi
 		if [ $DEFCONFIG == 0 ];then
-			echo -e "CPU 架构:${Yellow}$TARGET_BOARD${White}"
-			echo -e "CPU 型号:${Yellow}$TARGET_SUBTARGET${White}"
-			echo -e "软件架构:${Yellow}$TARGET_ARCH_PACKAGES${White}"
-			echo -e "编译类型:${Blue}$Firmware_Type/${Firmware_sfx}"
+			echo -e "设备名称:${Yellow}${TARGET_PROFILE}${White}"
+			echo -e "CPU 架构:${Yellow}${TARGET_BOARD}${White}"
+			echo -e "CPU 型号:${Yellow}${TARGET_SUBTARGET}${White}"
+			echo -e "软件架构:${Yellow}${TARGET_ARCH_PACKAGES}${White}"
 		else
-			echo ""
-			MSG_COM R "Warning: Please run 'make defconfig' first!"
+			MSG_COM R "Warning: Please run 'make defconfig' First!"
 		fi
 	else
-		MSG_COM R "警告:未检测到[.config]文件,部分操作将不可用!"
+		MSG_COM R "警告:未检测到配置文件,部分操作将不可用!"
 	fi
 	echo -e "${Yellow}\n1.make -j1 V=s"
 	echo "2.make -j2 V=s"
-	echo "3.make -j$CPU_Threads"
-	echo -e "4.make -j$CPU_Threads V=s${White}"
+	echo "3.make -j${CPU_Threads}"
+	echo -e "4.make -j${CPU_Threads} V=s${White}"
 	echo "5.make menuconfig"
 	echo "6.make defconfig"
 	echo "7.手动输入参数"
@@ -88,8 +78,11 @@ do
 	8)
 		BuildFirmware_Adv
 	;;
+	esac	
+	case $Choose_1 in
+	1 | 2 | 3 | 4)
+		BuildFirmware_Core
 	esac
-	[ $Choose_1 -gt 0 ]&&[ ! $Choose_1 == 5 ]&&[ ! $Choose_1 == 5 ]&&[ ! $Choose_1 == 6 ]&&[ ! $Choose_1 == 7 ]&&[ ! $Choose_1 == 8 ]&&[ $Choose_1 -le 8 ] && BuildFirmware_Core
 done
 }
 
@@ -99,18 +92,11 @@ rm -rf $Firmware_PATH > /dev/null 2>&1
 clear
 case $Firmware_Type in
 x86)
-	X86_Images_Check
-	MSG_TITLE "已选择的X86固件:"
-	for TARGET_IMAGES in $(cat $Home/TEMP/Choosed_FI)
-	do
-		MSG_COM B "	$TARGET_IMAGES"
-	done
 	if [ $Project == Lede ];then
 		Firmware_INFO="AutoBuild-$TARGET_BOARD-$TARGET_SUBTARGET-$Project-$Lede_Version-$(date +%Y%m%d-%H:%M:%S)"
 	else
 		Firmware_INFO="AutoBuild-$TARGET_BOARD-$TARGET_SUBTARGET-$Project-$(date +%Y%m%d-%H:%M:%S)"
 	fi
-	echo ""
 ;;
 Common)
 	Firmware_Name="openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.${Firmware_sfx}"
@@ -122,13 +108,6 @@ Common)
 	AB_Firmware="${Firmware_INFO}.${Firmware_sfx}"
 	Firmware_Detail="$Home/Firmware/Details/${Firmware_INFO}.detail"
 	echo -e "${Yellow}固件名称:${Blue}$AB_Firmware${White}\n"
-;;
-Multi_Profile)
-	rm -f $Home/TEMP/Multi_TARGET > /dev/null 2>&1
-	for TARGET_PROFILE in $(cat  $Home/TEMP/TARGET_PROFILE)
-	do
-		echo "openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.${Firmware_sfx}" >> $Home/TEMP/Multi_TARGET
-	done
 ;;
 esac
 if [ $Project == Lede ];then
@@ -161,20 +140,26 @@ x86)
 	find ./ -size +20480k -exec echo $@ > $Home/TEMP/Compiled_FI {} \;
 	IMAGES_MaxLine=$(sed -n '$=' $Home/TEMP/Compiled_FI)
 	echo ""
-	if [ ! -z $IMAGES_MaxLine ];then
+	if [[ ! -z $IMAGES_MaxLine ]];then
+		Checkout_Package
+		cd $Firmware_PATH
 		mkdir -p $Home/Firmware/$Firmware_INFO
 		for Compiled_FI in $(cat $Home/TEMP/Compiled_FI)
 		do
 			Compiled_FI=${Compiled_FI##*/}
-			MSG_SUCC "已检测到: $Compiled_FI"
+			echo ""
+			MSG_COM "已检测到: $Compiled_FI"
 			mv $Compiled_FI $Home/Firmware/$Firmware_INFO
-			MD5=$(md5sum $Compiled_FI | cut -d ' ' -f1)
-			SHA256=$(sha256sum $Compiled_FI | cut -d ' ' -f1)
+			MD5=$(md5sum $Home/Firmware/$Firmware_INFO/$Compiled_FI | cut -d ' ' -f1)
+			SHA256=$(sha256sum $Home/Firmware/$Firmware_INFO/$Compiled_FI | cut -d ' ' -f1)
 			echo -e "MD5:$MD5\nSHA256:$SHA256" > $Home/Firmware/$Firmware_INFO/${Compiled_FI}.detail
 		done
 		MSG_SUCC "固件位置:Firmware/$Firmware_INFO"
+		MSG_SUCC "x86 设备编译结束!"
+	else
+		MSG_ERR "编译失败!"
 	fi
-	MSG_SUCC "编译结束!"
+	
 ;;
 Common)
 	Compile_Stopped
@@ -198,10 +183,6 @@ Common)
 		echo " 失败" >> $Home/Configs/${Project}_Recently_Compiled
 		MSG_ERR "编译失败!"
 	fi
-;;
-Multi_Profile)
-	Compile_Stopped
-	MSG_SUCC "编译结束!"
 ;;
 esac
 Enter
@@ -256,32 +237,6 @@ do
 done
 }
 
-X86_Images_Check() {
-	cd $Home/Projects/$Project
-	source $Home/Additional/X86_IMAGES
-	egrep -e "IMAGES*=y" -e "IMAGES_GZIP=y" -e "ROOTFS_SQUASHFS=y" .config > $Home/TEMP/X86_IMAGES
-	source $Home/TEMP/X86_IMAGES
-	touch $Home/TEMP/Choosed_FI
-	Firmware_INFO="openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE"
-	if [ ! $CONFIG_TARGET_ROOTFS_SQUASHFS == n ];then
-		if [ $CONFIG_GRUB_IMAGES == y ];then
-			[ $CONFIG_ISO_IMAGES == y ] && echo "$Firmware_INFO-image.iso" >> $Home/TEMP/Choosed_FI
-			[ $CONFIG_VDI_IMAGES == y ] && echo "$Firmware_INFO-squashfs-combind.vdi" >> $Home/TEMP/Choosed_FI
-			[ $CONFIG_VMDK_IMAGES == y ] && echo "$Firmware_INFO-squashfs-combind.vmdk" >> $Home/TEMP/Choosed_FI
-			if [ $CONFIG_TARGET_IMAGES_GZIP == y ];then
-				echo "$Firmware_INFO-squashfs-combind.img.gz" >> $Home/TEMP/Choosed_FI
-				echo "$Firmware_INFO-squashfs-rootfs.img.gz" >> $Home/TEMP/Choosed_FI
-			fi
-		fi
-		if [ $CONFIG_GRUB_EFI_IMAGES == y ];then
-			[ $CONFIG_ISO_IMAGES == y ] && echo "$Firmware_INFO-image-efi.iso" >> $Home/TEMP/Choosed_FI
-			[ $CONFIG_VDI_IMAGES == y ] && echo "$Firmware_INFO-squashfs-combind-efi.vdi" >> $Home/TEMP/Choosed_FI
-			[ $CONFIG_VMDK_IMAGES == y ] && echo "$Firmware_INFO-squashfs-combind-efi.vmdk" >> $Home/TEMP/Choosed_FI
-			[ $CONFIG_TARGET_IMAGES_GZIP == y ] && echo "$Firmware_INFO-squashfs-combind-efi.img.gz" >> $Home/TEMP/Choosed_FI
-		fi
-	fi
-}
-
 Checkout_Package() {
 	cd $Home/Projects/$Project
 	echo ""
@@ -301,17 +256,16 @@ Checkout_Package() {
 }
 
 GET_TARGET_INFO() {
-	rm -rf $Home/TEMP/* > /dev/null 2>&1
+	rm -rf $Home/TEMP/*
 	cd $Home/Projects/$Project
-	grep "CONFIG_TARGET_x86=y" .config > /dev/null 2>&1
-	if [ ! $? -ne 0 ]; then
+	if [[ "$(cat .config)" =~ "CONFIG_TARGET_x86=y" ]];then
 		Firmware_Type=x86
 	else
 		Firmware_Type=Common
+		Firmware_sfx=bin
 	fi
 	TARGET_BOARD=$(awk -F '[="]+' '/TARGET_BOARD/{print $2}' .config | awk 'NR==1')
-	grep 'TARGET_BOARD' .config > /dev/null 2>&1
-	if [ ! $? -eq 0 ];then
+	if [[ ! "$(cat .config)" =~ "TARGET_BOARD" ]];then
 		DEFCONFIG=1
 	else
 		DEFCONFIG=0
@@ -320,14 +274,6 @@ GET_TARGET_INFO() {
 	TARGET_PROFILE=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
 	TARGET_ARCH_PACKAGES=$(awk -F '[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config)
 	egrep -o "CONFIG_TARGET.*DEVICE.*=y" .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > $Home/TEMP/TARGET_PROFILE
-	PROFILE_MaxLine=$(sed -n '$=' $Home/TEMP/TARGET_PROFILE)
-	[ -z $PROFILE_MaxLine ] && PROFILE_MaxLine=0
-	GET_CONFIG_ARCH=$(awk -F '[="]+' '/CONFIG_ARCH/{print $2}' .config | awk 'END {print}')
-	if [ $GET_CONFIG_ARCH == aarch64 ];then
-		Firmware_sfx=img.gz
-	else
-		Firmware_sfx=bin
-	fi
 }
 
 BuildFirmware_Check() {
