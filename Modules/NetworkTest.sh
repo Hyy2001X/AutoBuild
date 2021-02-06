@@ -1,32 +1,51 @@
 # AutoBuild Script Module by Hyy2001
 
 Network_Test() {
-Update=2020.11.22
-Module_Version=V2.9.1
+Update=2021.02.07
+Module_Version=V3.0
 
-clear
-MSG_TITLE "Network Test Script $Module_Version"
-Decoration
-MSG_COM G "${Skyb}网址			IP地址			状态		延迟${White}\n"
-Network_Mod www.baidu.com 2
-Network_Mod www.github.com 2
-Network_Mod www.google.com 2
-Network_Mod git.openwrt.org 2
-Network_Mod dl.google.com 2
+	clear
+	TMP_FILE=$Home/TEMP/NetworkTest_Core.log
+	MSG_TITLE "Network Test Script $Module_Version"
+	MSG_COM G "网址			次数	延迟/Min	延迟/Avg	延迟/Max	状态\n"
 
-echo " " && Decoration
-Enter
+	TestCore www.baidu.com 2
+	TestCore git.openwrt.com 3
+	TestCore www.google.com 3
+	TestCore www.github.com 3
+
+	Enter
 }
 
-Network_Mod() {
-echo -ne "\r${Blue}检测中...${White}\r"
-timeout 3 httping -c 1  $1 > /dev/null 2>&1
-if [ $? -eq 0 ];then
-	timeout $(($2*3)) httping -c $2 $1 > $Home/TEMP/Network_Test
-	Net_IP=$(awk 'NR==2' $Home/TEMP/Network_Test | egrep -o "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+")
-	Net_PING=$(egrep -o "/[0-9]+\.[0-9]+\/" $Home/TEMP/Network_Test | egrep -o "[0-9]+\.[0-9]+")
-	echo -e "$1		$Net_IP		${Yellow}正常${White} 		$Net_PING"
-else
-	echo -e "$1		${Red}无法获取		错误		错误${White}"
-fi
+TestCore() {
+	_URL=$1
+	_COUNT=$2
+	_TIMEOUT=$((${_COUNT}*2+1))
+	[[ -z $1 ]] || [[ -z $2 ]] && return
+	[ ! ${_COUNT} -gt 0 ] 2>/dev/null && return
+	timeout 3 httping ${_URL} -c 1 > /dev/null 2>&1
+	if [ $? -eq 0 ];then
+		echo -ne "\r${Skyb}测试中...${White}\r"
+		timeout ${_TIMEOUT} httping ${_URL} -c ${_COUNT} > ${TMP_FILE}
+		_IP=$(egrep -o "[0-9]+.[0-9]+.[0-9]+.[0-9]" ${TMP_FILE} | awk 'NR==1')
+		_PING=$(egrep -o "[0-9].+/[0-9]+.[0-9]" ${TMP_FILE})
+		_PING_MIN=$(echo ${_PING} | egrep -o "[0-9]+.[0-9]" | awk 'NR==1')
+		_PING_AVG=$(echo ${_PING} | egrep -o "[0-9]+.[0-9]" | awk 'NR==2')
+		_PING_MAX=$(echo ${_PING} | egrep -o "[0-9]+.[0-9]" | awk 'NR==3')
+		_PING_PROC=$(echo ${_PING_AVG} | egrep -o "[0-9]+" | awk 'NR==1')
+		if [[ ${_PING_PROC} -le 50 ]];then
+			_TYPE="${Yellow}优秀"
+		elif [[ ${_PING_PROC} -le 100 ]];then
+			_TYPE="${Blue}良好"
+		elif [[ ${_PING_PROC} -le 200 ]];then
+			_TYPE="${Skyb}一般"
+		elif [[ ${_PING_PROC} -le 250 ]];then
+			_TYPE="${Red}较差"
+		else
+			_TYPE="${Red}很差"
+		fi
+		echo -e "${_URL}		${_COUNT}	${_PING_MIN}		${_PING_AVG}		${_PING_MAX}		${_TYPE}${White}"
+	else
+		echo -e "${_URL}	${Red}错误${White}"	
+	fi
 }
