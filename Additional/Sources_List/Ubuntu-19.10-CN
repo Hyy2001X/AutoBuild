@@ -1,11 +1,11 @@
 #Ubuntu 19.10 Ubuntu_CN Sources
-deb http://cn.archive.ubuntu.com/ubuntu/ eoan main restricted
-deb http://cn.archive.ubuntu.com/ubuntu/ eoan-updates main restricted
-deb http://cn.archive.ubuntu.com/ubuntu/ eoan universe
-deb http://cn.archive.ubuntu.com/ubuntu/ eoan-updates universe
-deb http://cn.archive.ubuntu.com/ubuntu/ eoan multiverse
-deb http://cn.archive.ubuntu.com/ubuntu/ eoan-updates multiverse
+deb http://cn.archive.ubuntu.com/ubuntu/ eoan main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu/ eoan-security main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu/ eoan-updates main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu/ eoan-proposed main restricted universe multiverse
 deb http://cn.archive.ubuntu.com/ubuntu/ eoan-backports main restricted universe multiverse
-deb http://cn.archive.ubuntu.com/ubuntu/ eoan-security main restricted
-deb http://cn.archive.ubuntu.com/ubuntu/ eoan-security universe
-deb http://cn.archive.ubuntu.com/ubuntu/ eoan-security multiverse
+#deb-src http://cn.archive.ubuntu.com/ubuntu/ eoan main restricted universe multiverse
+#deb-src http://cn.archive.ubuntu.com/ubuntu/ eoan-security main restricted universe multiverse
+#deb-src http://cn.archive.ubuntu.com/ubuntu/ eoan-updates main restricted universe multiverse
+#deb-src http://cn.archive.ubuntu.com/ubuntu/ eoan-proposed main restricted universe multiverse
+#deb-src http://cn.archive.ubuntu.com/ubuntu/ eoan-backports main restricted universe multiverse
