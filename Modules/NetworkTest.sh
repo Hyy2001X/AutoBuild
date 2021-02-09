@@ -1,16 +1,17 @@
 # AutoBuild Script Module by Hyy2001
 
 Network_Test() {
-Update=2021.02.07
-Module_Version=V3.0.1
+Update=2021.02.09
+Module_Version=V3.0.2
 
 	clear
-	TMP_FILE=$Home/TEMP/NetworkTest_Core.log
-	MSG_TITLE "Network Test Script $Module_Version"
+	[[ -z "${PingMode}" ]] && PingMode=httping
+	[[ -z "${Home}" ]] && Home=/tmp
+	TMP_PATH=${Home}/TEMP
+	TMP_FILE=${TMP_PATH}/NetworkTest.log
+	PING_MODE=${PingMode}
+	MSG_TITLE "Network Test Script $Module_Version [${PING_MODE}]"
 	MSG_COM G "网址			次数	延迟/Min	延迟/Avg	延迟/Max	状态\n"
-	
-	PING_MODE=httping
-	# PING_MODE=ping
 
 	TestCore www.baidu.com 2
 	TestCore git.openwrt.com 3
