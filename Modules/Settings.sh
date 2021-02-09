@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Settings() {
-Update=2020.11.23
-Module_Version=V2.3.1
+Update=2021.02.09
+Module_Version=V2.3.2
 
 while :
 do
@@ -11,9 +11,9 @@ do
 	clear
 	MSG_TITLE "脚本设置[实验性]"
 	if [ $ColorfulUI == 0 ];then
-		MSG_COM  R "1.高亮显示		[关闭]"
+		MSG_COM  R "1.彩色 UI		[关闭]"
 	else
-		MSG_COM Y "1.高亮显示		[打开]"
+		MSG_COM Y "1.彩色 UI		[打开]"
 	fi
 	if [ $DeveloperMode == 0 ];then
 		MSG_COM  R "2.调试模式		[关闭]"
@@ -24,6 +24,11 @@ do
 		MSG_COM  R "3.保存编译日志		[关闭]"
 	else
 		MSG_COM Y "3.保存编译日志		[打开]"
+	fi
+	if [ $PingMode == httping ];then
+		MSG_COM  B "4.Ping Mode		[httping]"
+	else
+		MSG_COM Y "4.Ping Mode		[ping]"
 	fi
 	MSG_COM G "\nx.恢复所有默认设置"
 	echo "q.返回"
@@ -61,6 +66,16 @@ do
 			SaveCompileLog=0
 			sed -i "s/SaveCompileLog=1/SaveCompileLog=0/g" ./Settings
 		fi
+	;;
+	4)
+		if [ $PingMode == httping ];then
+			PingMode=ping
+			sed -i "s/PingMode=httping/PingMode=ping/g" ./Settings
+		else
+			PingMode=httping
+			sed -i "s/PingMode=ping/PingMode=httping/g" ./Settings
+		fi
+	;;
 	esac
 done
 }
@@ -69,6 +84,7 @@ Default_Settings() {
 DeveloperMode=0
 ColorfulUI=1
 SaveCompileLog=0
+PingMode=httping
 }
 
 Set_Default_Settings() {
@@ -76,6 +92,7 @@ Default_Settings
 echo "DeveloperMode=$DeveloperMode" > $Home/Configs/Settings
 echo "ColorfulUI=$ColorfulUI" >> $Home/Configs/Settings
 echo "SaveCompileLog=$SaveCompileLog" >> $Home/Configs/Settings
+echo "PingMode=$PingMode" >> $Home/Configs/Settings
 }
 
 Settings_Props() {
