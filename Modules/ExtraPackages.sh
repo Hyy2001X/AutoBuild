@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 ExtraPackages() {
-Update=2021.01.25
-Module_Version=V4.9.6
+Update=2021.02.13
+Module_Version=V4.9.7
 
 ExtraPackages_mkdir
 while :
@@ -22,6 +22,7 @@ do
 	echo "10.[Hello World] luci-app-vssr"
 	echo "11.[京东签到] luci-app-jd-dailybonus"
 	echo "12.[Argon配置] luci-app-argon-config"
+	echo "13.[关机/重启] luci-app-shutdown"
 	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个软件包:' Choose
 	case $Choose in
@@ -97,6 +98,11 @@ do
 	12)
 		PKG_NAME=luci-app-argon-config
 		PKG_URL=https://github.com/jerrykuku/luci-app-argon-config
+		ExtraPackages_git
+	;;
+	13)
+		PKG_NAME=luci-app-shutdown
+		PKG_URL=https://github.com/Hyy2001X/luci-app-shutdown
 		ExtraPackages_git
 	;;
 	esac
