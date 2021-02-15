@@ -1,112 +1,110 @@
 # AutoBuild Script Module by Hyy2001
 
 ReplaceSourcesList() {
-	Update=2021.02.09
-	Module_Version=V1.4
+	Update=2021.02.15
+	Module_Version=V2.0-BETA
 
-	SOURCE_PATH=${Home}/Additional/Sources_List
+	SERVER_LIST=${Home}/Additional/ReplaceSourcesList/Server_List
+	CODENAME_LIST=${Home}/Additional/ReplaceSourcesList/Codename_List
+	TEMPLATE=${Home}/Additional/ReplaceSourcesList/ServerUrl_Template
 	BAK_FILE=${Home}/Backups/sources.list.bak
-	SOURCE_LIB=${Home}/Additional/Sources_List.check
-	SOURCE_DL=https://raw.githubusercontent.com/Hyy2001X/AutoBuild/master/Additional/Sources_List
 
 	if [ ! -f /etc/lsb-release ];then
-		MSG_ERR "暂不支持此操作系统!"
+		MSG_ERR "暂不支持此操作系统,当前支持的操作系统: [Ubuntu]"
 		sleep 2 && return
 	else
 		OS_ID=$(awk -F '[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release)
 		OS_Version=$(awk -F '[="]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
 		if [[ ! "${OS_ID}" == Ubuntu ]];then
-			MSG_ERR "暂不支持此操作系统!"
+			MSG_ERR "暂不支持此操作系统,当前支持的操作系统: [Ubuntu]"
 			sleep 2 && return
 		fi
+		if [[ ! "$(cat ${CODENAME_LIST} | awk '{print $1}')" =~ "${OS_Version}" ]];then
+			MSG_ERR "暂不支持当前 [Ubuntu] 版本: [${OS_Version}]"
+			echo -ne "${Red}当前支持的 [Ubuntu] 版本:"
+			for CN in $(cat ${CODENAME_LIST} | awk '{print $1}')
+			do
+				echo -n "${CN} "
+			done
+			sleep 3 && return
+		fi	
 	fi
-	case ${OS_Version} in
-	19.10 | 18.04 | 20.04 | 20.10)
-		while :
-		do
+	while :
+	do
+		clear
+		MSG_TITLE "Replace SourcesList Script ${Module_Version}"
+		echo -e "${Skyb}操作系统${Yellow}: [${OS_ID} ${OS_Version}]${White}"
+		Current_Server=$(egrep -o "[a-z]+[.][a-z]+[.][a-z]+" /etc/apt/sources.list | awk 'NR==1')
+		echo -e "${Skyb}当前系统源${Yellow}: [${Current_Server}]${White}\n"
+		if [ -f "${SERVER_LIST}" ];then
+			Server_Count=$(sed -n '$=' ${SERVER_LIST})
+			for ((i=1;i<=${Server_Count};i++));
+			do   
+				ServerName=$(sed -n ${i}p ${SERVER_LIST} | awk '{print $1}')
+				echo -e "${i}.${Yellow}${ServerName}${White}"
+			done
+		else
+			MSG_COM R "[未检测到 ${SERVER_LIST}]"
+		fi
+		MSG_COM G "\nx.恢复默认源"
+		MSG_COM B "u.更新软件源"
+		echo "q.返回"
+		GET_Choose
+		case ${Choose} in
+		q)
+			break
+		;;
+		x)
+			if [ -f ${BAK_FILE} ];then
+				sudo mv ${BAK_FILE} /etc/apt/sources.list
+				MSG_SUCC "[默认源] 恢复成功!"
+			else
+				MSG_ERR "未找到备份: [${BAK_FILE}],恢复失败!"
+			fi
+			sleep 2
+		;;
+		u)
 			clear
-			echo -e "${Skyb}当前操作系统${Yellow}:${OS_ID} ${OS_Version}${White}\n"
-			echo "1.阿里源"
-			echo "2.清华源"
-			echo -e "3.Ubuntu 中国服务器\n"
-			MSG_COM Y "c.检查列表完整性"
-			MSG_COM G "x.恢复默认源"
-			echo -e "\nq.返回"
-			GET_Choose
-			case ${Choose} in
-			q)
-				break
-			;;
-			x)
-				if [ -f ${BAK_FILE} ];then
-					sudo mv ${BAK_FILE} /etc/apt/sources.list
-					MSG_SUCC "[默认源] 恢复成功!"
-				else
-					MSG_ERR "未找到备份: [${BAK_FILE}],恢复失败!"
-				fi
-				sleep 2
-			;;
-			c)
-				Check_Sources_List
-			;;
-			1)
-				ReplaceSources_mod 阿里源 Ubuntu-${OS_Version}-Aliyun
-			;;
-			2)
-				ReplaceSources_mod 清华源 Ubuntu-${OS_Version}-Tuna
-			;;
-			3)
-				ReplaceSources_mod Ubuntu中国源 Ubuntu-${OS_Version}-CN
-			;;
-			esac
-		done
-	;;
-	*)
-		MSG_ERR "当前支持的操作系统:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04"
-		sleep 2
-	;;
-	esac
+			sudo apt update
+			Enter
+		;;
+		*)
+			Choose_Server
+		;;
+		esac
+	done
 }
 
-ReplaceSources_mod() {
+Choose_Server() {
+	if [ ${Choose} -gt 0 ] > /dev/null 2>&1 ;then
+		if [ ${Choose} -le ${Server_Count} ] > /dev/null 2>&1 ;then
+			ServerUrl=$(sed -n ${Choose}p ${SERVER_LIST} | awk '{print $2}')
+			ServerName=$(sed -n ${Choose}p ${SERVER_LIST} | awk '{print $1}')
+			Codename=$(cat ${CODENAME_LIST} | grep "${OS_Version}" | awk '{print $2}')
+			if [[ -z ${Codename} ]] || [[ -z ${ServerUrl} ]] || [[ -z ${ServerName} ]];then
+				MSG_ERR "重要参数获取失败,请尝试更新 [AutoBuild] 后重试!"
+			fi
+			Replace_Server
+		else
+			MSG_ERR "输入错误,请输入正确的选项!"
+			sleep 1
+		fi
+	fi
+}
+
+Replace_Server() {
 	if [ -f /etc/apt/sources.list ];then
 		if [ ! -f ${BAK_FILE} ];then
 			sudo cp /etc/apt/sources.list ${BAK_FILE}
 			sudo chmod 777 ${BAK_FILE}
 			MSG_SUCC "未检测到备份,当前系统源已自动备份至 [${BAK_FILE}] !"
 		fi
-	fi
-	if [ -f ${SOURCE_PATH}/$2 ] && [ -s ${SOURCE_PATH}/$2 ];then
-		sudo cp ${SOURCE_PATH}/$2 /etc/apt/sources.list
-		MSG_SUCC "当前已切换到: [$1]"
 	else
-		MSG_ERR "未找到对应文件或文件损坏: [$2],切换失败!"
+		MSG_ERR "未检测到: [/etc/apt/sources.list],备份失败!"
 	fi
+	sudo cp ${TEMPLATE} /etc/apt/sources.list
+	sudo sed -i "s?ServerUrl?${ServerUrl}?g" /etc/apt/sources.list
+	sudo sed -i "s?Codename?${Codename}?g" /etc/apt/sources.list
+	MSG_SUCC "当前已切换到: [${ServerName}]"
 	sleep 2
-}
-
-Check_Sources_List() {
-	if [ ! -f ${SOURCE_LIB} ];then
-		MSG_ERR "未检测到列表文件: [${SOURCE_LIB}],检查失败!"
-		sleep 2 && return
-	fi
-	clear
-	MSG_TITLE "Source List 完整性检查工具"
-	for SL in $(cat ${SOURCE_LIB})
-	do
-		if [ -f ${SOURCE_PATH}/${SL} ] && [ -s ${SOURCE_PATH}/${SL} ];then
-			MSG_COM Y "[Check] 已检测到: [${SL}]"
-		else
-			MSG_COM R "[Check] 未检测到: [${SL}],开始下载..."
-			rm -f ${SOURCE_PATH}/${SL}
-			wget -q ${SOURCE_DL}/${SL} -O ${SOURCE_PATH}/${SL}
-			if [[ $? -eq 0 ]];then
-				MSG_COM Y "[DL] 已检测到: [${SL}]"
-			else
-				MSG_COM R "[DL] [${SL}] 下载失败!"
-				rm -f ${SOURCE_PATH}/${SL}
-			fi
-		fi
-	done
-	Enter
 }
