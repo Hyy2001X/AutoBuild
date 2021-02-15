@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2020.12.19
-Version=V4.2.7
+Update=2021.2.15
+Version=V4.2.8
 
 Second_Menu() {
 while :
@@ -541,7 +541,7 @@ if [ -e $Home/Projects/$Project/Makefile ];then
 else
 	clear
 	MSG_TITLE "$Project源码下载-分支选择"
-	Github_File=$Home/Additional/GitLink_$Project
+	Github_File=$Home/Additional/Projects/GitLink_$Project
 	Github_Source_Link=$(sed -n 1p $Github_File)
 	MSG_COM "仓库地址:$Github_Source_Link\n"
 	Max_All_Line=$(sed -n '$=' $Github_File)
