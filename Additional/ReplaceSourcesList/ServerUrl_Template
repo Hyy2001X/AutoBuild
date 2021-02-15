@@ -1,0 +1,10 @@
+deb ServerUrl Codename main restricted universe multiverse
+deb ServerUrl Codename-updates main restricted universe multiverse
+deb ServerUrl Codename-proposed main restricted universe multiverse
+deb ServerUrl Codename-security main restricted universe multiverse
+deb ServerUrl Codename-backports main restricted universe multiverse
+#deb-src ServerUrl Codename main restricted universe multiverse
+#deb-src ServerUrl Codename-updates main restricted universe multiverse
+#deb-src ServerUrl Codename-proposed main restricted universe multiverse
+#deb-src ServerUrl Codename-security main restricted universe multiverse
+#deb-src ServerUrl Codename-backports main restricted universe multiverse

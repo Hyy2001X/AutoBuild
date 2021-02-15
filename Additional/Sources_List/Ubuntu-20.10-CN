@@ -1,7 +1,0 @@
-#Ubuntu 20.10 Ubuntu_CN Sources
-deb http://cn.archive.ubuntu.com/ubuntu/ groovy main universe restricted multiverse
-#deb-src http://cn.archive.ubuntu.com/ubuntu/ groovy main universe restricted multiverse
-deb http://security.ubuntu.com/ubuntu/ groovy-security main universe restricted multiverse
-#deb-src http://cn.archive.ubuntu.com/ubuntu/ groovy-security main universe restricted multiverse
-deb http://cn.archive.ubuntu.com/ubuntu/ groovy-updates main universe restricted multiverse
-#deb-src http://cn.archive.ubuntu.com/ubuntu/ groovy-updates main universe restricted multiverse
