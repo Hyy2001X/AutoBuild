@@ -2,9 +2,9 @@
 # Project	AutoBuild
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
-# Supported System:Ubuntu 20.04、Ubuntu 19.10、Ubuntu 18.04、Deepin 20
-Update=2021.2.15
-Version=V4.2.8
+# Supported System:Ubuntu 16.04-20.10 LTS、Deepin 20、CentOS[Test]
+Update=2021.3.25
+Version=V4.3.0
 
 Second_Menu() {
 while :
@@ -490,48 +490,48 @@ fi
 }
 
 Make_Menuconfig() {
-clear
-cd $Home/Projects/$Project
-MSG_COM B "Loading $Project Configuration..."
-make menuconfig
-Enter
+	clear
+	cd $Home/Projects/$Project
+	MSG_COM B "Loading $Project Configuration..."
+	make menuconfig
+	Enter
 }
 
 Sources_Update_Core() {
-clear
-MSG_WAIT "开始更新[$Project],请耐心等待..."
-echo ""
-echo "$(date +%Y-%m-%d_%H:%M)" > $Home/Configs/${Project}_Recently_Updated
-cd $Home/Projects/$Project
-if [ $Enforce_Update == 1 ];then
-	git fetch --all
-	git reset --hard origin/$Branch
-	if [ $Project == Lede ];then
-		sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
+	clear
+	MSG_WAIT "开始更新[$Project],请耐心等待..."
+	echo ""
+	echo "$(date +%Y-%m-%d_%H:%M)" > $Home/Configs/${Project}_Recently_Updated
+	cd $Home/Projects/$Project
+	if [ $Enforce_Update == 1 ];then
+		git fetch --all
+		git reset --hard origin/$Branch
+		if [ $Project == Lede ];then
+			sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
+		fi
 	fi
-fi
-Update_Logfile=$Home/Log/SourceUpdate_${Project}_$(date +%Y%m%d_%H:%M).log
-git pull 2>&1 | tee $Update_Logfile
-./scripts/feeds update -a 2>&1 | tee -a $Update_Logfile
-./scripts/feeds install -a 2>&1 | tee -a $Update_Logfile
-MSG_SUCC "[源代码和Feeds]更新结束!"
+	Update_Logfile=$Home/Log/SourceUpdate_${Project}_$(date +%Y%m%d_%H:%M).log
+	git pull 2>&1 | tee $Update_Logfile
+	./scripts/feeds update -a 2>&1 | tee -a $Update_Logfile
+	./scripts/feeds install -a 2>&1 | tee -a $Update_Logfile
+	MSG_SUCC "[源代码和Feeds]更新结束!"
 }
 
 Multi_Sources_Update() {
-if [ -e $Home/Projects/$1/Makefile ];then
-	Project=$1
-	Enforce_Update=0
-	Sources_Update_Core
-	sleep 2
-fi
+	if [ -f $Home/Projects/$1/Makefile ];then
+		Project=$1
+		Enforce_Update=0
+		Sources_Update_Core
+		sleep 2
+	fi
 }
 
 Project_Details() {
-if [ -e ./Projects/$1/Makefile ];then
-	echo -e "${White}$2.$1$DE${Yellow}[已检测到]${Blue}	$3"
-else
-	echo -e "${White}$2.$1$DE${Red}[未检测到]${Blue}	$3"
-fi
+	if [ -f ./Projects/$1/Makefile ];then
+		echo -e "${White}$2.$1$DE${Yellow}[已检测到]${Blue}	$3"
+	else
+		echo -e "${White}$2.$1$DE${Red}[未检测到]${Blue}	$3"
+	fi
 }
 
 Sources_Download() {
@@ -552,7 +552,7 @@ else
 		x=$(expr $i - 1)
 		echo "${x}.${Github_File_Branch}"
 	done
-	echo -e "q.返回\n"
+	echo -e "\nq.返回\n"
 	read -p '请从上方选择一个分支:' Choose_Branch
 	case $Choose_Branch in
 	q)
@@ -588,49 +588,48 @@ fi
 }
 
 Sources_Download_Check() {
-if [ -e $Home/Projects/$Project/Makefile ];then
-	cd $Home/Projects/$Project
-	[ $Project == Lede ] && sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
-	ln -s $Home/Backups/dl $Home/Projects/$Project/dl
-	MSG_SUCC "[$Project]源代码下载成功!"
-	Enter
-	Second_Menu
-else
-	MSG_ERR "[$Project]源代码下载失败!"
-	Enter
-fi
+	if [ -f $Home/Projects/$Project/Makefile ];then
+		cd $Home/Projects/$Project
+		[ $Project == Lede ] && sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
+		ln -s $Home/Backups/dl $Home/Projects/$Project/dl
+		MSG_SUCC "[$Project]源代码下载成功!"
+		Enter
+		Second_Menu
+	else
+		MSG_ERR "[$Project]源代码下载失败!"
+		Enter
+	fi
 }
 
 Dir_Check() {
-clear
-cd $Home
-for WD in $(cat ./Additional/Working_Directory)
-do
+	cd $Home
+	for WD in $(cat ./Additional/Working_Directory)
+	do
 	[ ! -d ./$WD ] && mkdir -p $WD
-done
-touch $Home/Log/AutoBuild.log
+	done
+	touch $Home/Log/AutoBuild.log
 }
 
-First_Startup_Check() {
-if [ ! -f $Home/Configs/Username ];then
-	read -p '首次启动,请创建一个用户名:' Username
-	echo "$Username" > $Home/Configs/Username
-else
-	Username=$(cat $Home/Configs/Username)
-fi
+Startup_Check() {
+	if [ ! -f $Home/Configs/Username ];then
+		read -p '首次启动,请创建一个用户名:' Username
+		echo "$Username" > $Home/Configs/Username
+	else
+		Username=$(cat $Home/Configs/Username)
+	fi
 }
 
 Second_Menu_Check() {
-Project=$1
-if [ -e ./Projects/$Project/Makefile ];then
-	Second_Menu
-else
-	if [ $DeveloperMode == 1 ];then
+	Project=$1
+	if [ -f ./Projects/$Project/Makefile ];then
 		Second_Menu
 	else
-		Sources_Download
+		if [ $DeveloperMode == 1 ];then
+			Second_Menu
+		else
+			Sources_Download
+		fi
 	fi
-fi
 }
 
 AutoBuild_Core() {
@@ -639,7 +638,7 @@ do
 	Settings_Props
 	ColorfulUI_Check
 	clear
-	MSG_TITLE "AutoBuild Core Script $Version"
+	MSG_TITLE "${AutoBuild_Title}"
 	MSG_COM G "1.Get Started!"
 	echo "2.网络测试"
 	echo "3.高级选项"
@@ -656,14 +655,15 @@ do
 	while :
 	do
 		clear
-		MSG_TITLE "AutoBuild Core Script $Version"
+		MSG_TITLE "${AutoBuild_Title}"
 		cd $Home
 		MSG_COM G "项目名称		[项目状态]	维护者\n"
 		DE="			"
 		Project_Details Lede 1 coolsnowwolf
 		DE="		"
-		Project_Details Openwrt 2 Openwrt_Team	
-		Project_Details Lienol 3 Li2nOnline
+		Project_Details Openwrt 2 Openwrt	
+		Project_Details Lienol 3 Lienol
+		Project_Details ImmortalWrt 4 "Project ImmortalWrt"
 		MSG_COM B "\nx.更新所有源代码和Feeds"
 		MSG_COM G "q.主菜单\n"
 		read -p '请从上方选择一个项目:' Choose
@@ -678,6 +678,7 @@ do
 				Multi_Sources_Update Lede
 				Multi_Sources_Update Openwrt
 				Multi_Sources_Update Lienol
+				Multi_Sources_Update ImmortalWrt
 			else
 				MSG_ERR "网络连接错误,更新失败!"
 				sleep 2	
@@ -691,6 +692,9 @@ do
 		;;
 		3)
 			Second_Menu_Check Lienol
+		;;
+		4)
+			Second_Menu_Check ImmortalWrt
 		;;
 		esac
 	done
@@ -709,20 +713,19 @@ done
 }
 
 Home=$(cd $(dirname $0); pwd)
-Dependency="$(cat $Home/Additional/Depends_Openwrt)"
-Extra_Dependency="ntpdate httping ssh lm-sensors net-tools expect"
 
-CPU_Model=$(awk -F ':[ ]' '/model name/{printf ($2);exit}' /proc/cpuinfo)
-CPU_Cores=$(cat /proc/cpuinfo | grep processor | wc -l)
-CPU_Threads=$(grep 'processor' /proc/cpuinfo | sort -u | wc -l)
-CPU_Freq=$(awk '/model name/{print ""$NF;exit}' /proc/cpuinfo)
-
+echo "Loading all AutoBuild modules ..."
 chmod +x -R $Home/Modules
 for Module in $Home/Modules/*.sh
 do
 	source $Module
 done
 
+GET_System_Info 1
+AutoBuild_Title="AutoBuild Core Script $Version [${Short_OS}]"
+Dependency="$(cat $Home/Additional/Depends_Openwrt)"
+Extra_Dependency="ntpdate httping ssh lm-sensors net-tools expect"
+
 Dir_Check
-First_Startup_Check
+Startup_Check
 AutoBuild_Core
