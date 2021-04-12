@@ -3,8 +3,8 @@
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
 # Supported System:Ubuntu 16.04-20.10 LTS、Deepin 20、CentOS[Test]
-Update=2021.3.25
-Version=V4.3.0
+Update=2021.4.12
+Version=V4.3.1
 
 Second_Menu() {
 while :
@@ -724,7 +724,7 @@ done
 GET_System_Info 1
 AutoBuild_Title="AutoBuild Core Script $Version [${Short_OS}]"
 Dependency="$(cat $Home/Additional/Depends_Openwrt)"
-Extra_Dependency="ntpdate httping ssh lm-sensors net-tools expect"
+Extra_Dependency="ntpdate httping ssh lm-sensors net-tools expect inetutils-ping"
 
 Dir_Check
 Startup_Check
