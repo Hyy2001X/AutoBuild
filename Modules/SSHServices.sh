@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SSHServices() {
-Update=2020.12.03
-Module_Version=V1.3.7
+Update=2021.04.12
+Module_Version=V1.4
 
 while :
 do
@@ -11,6 +11,7 @@ do
 	List_SSHProfile
 	MSG_COM G "\nn.创建新配置文件"
 	[ ! "`ls -A $Home/Configs/SSH`" = "" ] && MSG_COM R "d.删除所有配置文件"
+	echo "x.重置所有 [RSA Key Fingerprint]"
 	echo -e "q.返回\n"
 	read -p '请从上方选择一个操作:' Choose
 	case $Choose in
@@ -24,6 +25,11 @@ do
 	d)
 		rm -f $Home/Configs/SSH/*  > /dev/null 2>&1
 		MSG_SUCC "已删除所有 [SSH] 配置文件!"
+		sleep 2
+	;;
+	x)
+		rm -rf ~/.ssh
+		MSG_SUCC "[SSH] [RSA Key Fingerprint] 重置成功!"
 		sleep 2
 	;;
 	*)
@@ -48,11 +54,12 @@ do
 	clear
 	echo -e "${Blue}配置文件:${Yellow}[$SSHProfile_File]${White}"
 	echo -e "${Blue}连接参数:${Yellow}[ssh $SSH_User@$SSH_IP -p $SSH_Port]${White}\n"
-	MSG_COM "1.连接SSH"
+	MSG_COM "1.连接到 SSH"
 	echo "2.编辑"
-	echo "3.重命名"
-	MSG_COM R "4.删除配置文件[$SSHProfile_File]"
-	echo "5.重置[RSA Key Fingerprint]"
+	echo "3.重命名配置"
+	echo "4.修改密码"
+	MSG_COM R "5.删除此配置文件"
+	echo "6.重置[RSA Key Fingerprint]"
 	echo -e "\nq.返回"
 	GET_Choose
 	case $Choose in
@@ -69,7 +76,7 @@ do
 		Create_SSHProfile
 	;;
 	3)
-		echo " "
+		echo ""
 		read -p '[SSH] 请输入新的配置名称:' SSHProfile_RN
 		if [ ! -z "$SSHProfile_RN" ];then
 			cd $Home/Configs/SSH
@@ -82,15 +89,23 @@ do
 		sleep 2
 	;;
 	4)
+		echo ""
+		read -p '[SSH] 请输入新的密码:' SSH_Password
+		echo "SSH_Password=$SSH_Password" >> $Home/Configs/SSH/"$SSHProfile_File"
+		MSG_SUCC "[SSH] 配置文件已保存!"
+		sleep 2
+		
+	;;
+	5)
 		rm -f $Home/Configs/SSH/"$SSHProfile_File"
-		MSG_SUCC "[SSH] 配置文件[$SSHProfile_File]删除成功!"
+		MSG_SUCC "[SSH] 配置文件 [$SSHProfile_File] 删除成功!"
 		sleep 2
 		break
 	;;
-	5)
+	6)
 		
 		ssh-keygen -R $SSH_IP > /dev/null 2>&1
-		MSG_SUCC "[SSH] [RSA Key Fingerprint]重置成功!"
+		MSG_SUCC "[SSH] [RSA Key Fingerprint] 重置成功!"
 		sleep 2
 	;;
 	esac
@@ -144,7 +159,7 @@ if [ ! -z "`ls -A $Home/Configs/SSH`" ];then
 		echo -e "${i}.${Yellow}${SSHProfile}${White}"
 	done
 else
-	MSG_COM R "[未检测到配置文件]"
+	MSG_COM R "[未检测到任何配置文件]"
 fi
 }
 
@@ -160,4 +175,5 @@ expect -c "
 	}
 	interact
 "
+sleep 1
 }
