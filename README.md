@@ -8,7 +8,7 @@
 	`sudo apt-get update`
 
 2.安装 AutoBuild 的必要依赖
-	`sudo apt-get -y install git httping ntpdate subversion ssh lm-sensors expect`
+	`sudo apt-get -y install git httping ntpdate subversion ssh lm-sensors expect inetutils-ping bc`
 
 3.克隆 `AutoBuild 项目`到电脑
 	`git clone https://github.com/Hyy2001X/AutoBuild.git AutoBuild`
