@@ -1,17 +1,68 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2021.01.20
-Module_Version=V3.2.5
+Update=2021.04.24
+Module_Version=V3.2.6
 
 while :
 do
-	GET_TARGET_INFO
+	Build_Path=${Home}/Projects/${Project}
+	cd ${Build_Path}
+	Source_Repo="$(grep "https://github.com/[a-zA-Z0-9]" ${Build_Path}/.git/config | cut -c8-100)"
+	Source_Owner="$(echo "${Source_Repo}" | egrep -o "[a-z]+" | awk 'NR==4')"
+	Current_Branch="$(git branch | sed 's/* //g')"
+	[[ ! ${Current_Branch} == master ]] && {
+		Current_Branch="$(echo ${Current_Branch} | egrep -o "[0-9]+.[0-9]+")"
+		Openwrt_Version_="R${Current_Branch}-"
+	} || {
+		Openwrt_Version_="R18.06-"
+	}
+	case ${Source_Owner} in
+	coolsnowwolf)
+		Version_File=$Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings
+	;;
+	immortalwrt)
+		Version_File=$Home/Projects/$Project/package/base-files/files/etc/openwrt_release
+	;;
+	esac
+	while [[ -z "${x86_Test}" ]]
+	do
+		x86_Test="$(egrep -o "CONFIG_TARGET.*DEVICE.*=y" .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_(.*)=y/\1/')"
+		[[ -n "${x86_Test}" ]] && break
+		x86_Test="$(egrep -o "CONFIG_TARGET.*Generic=y" .config | sed -r 's/CONFIG_TARGET_(.*)_Generic=y/\1/')"
+		[[ -z "${x86_Test}" ]]  && exit
+	done
+	[[ "${x86_Test}" == "x86_64" ]] && {
+		TARGET_PROFILE="x86_64"
+	} || {
+		TARGET_PROFILE="$(egrep -o "CONFIG_TARGET.*DEVICE.*=y" .config | sed -r 's/.*DEVICE_(.*)=y/\1/')"
+	}
+	[[ "${TARGET_PROFILE}" == x86_64 ]] && {
+		[[ "$(cat ${Build_Path}/.config)" =~ "CONFIG_TARGET_IMAGES_GZIP=y" ]] && {
+			Firmware_Type=img.gz
+		} || {
+			Firmware_Type=img
+		}
+	}
+	TARGET_BOARD="$(awk -F '[="]+' '/TARGET_BOARD/{print $2}' .config)"
+	[[ ! "$(cat .config)" =~ "TARGET_BOARD" ]] && {
+		DEFCONFIG=1
+	} || DEFCONFIG=0
+	case ${TARGET_BOARD} in
+	ramips | reltek | ipq40xx | ath79)
+		Firmware_Type=bin
+	;;
+	rockchip)
+		Firmware_Type=img.gz
+	;;
+	esac
+	TARGET_SUBTARGET="$(awk -F '[="]+' '/TARGET_SUBTARGET/{print $2}' .config)"
+	TARGET_ARCH_PACKAGES=$(awk -F '[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config)
 	CPU_TEMP=$(sensors | grep 'Core 0' | cut -c17-24)
 	[[ -z "$CPU_TEMP" ]] && CPU_TEMP=0
 	clear
 	MSG_TITLE "AutoBuild Firmware Script ${Module_Version}"
-	MSG_COM G "电脑信息:${CPU_Model} ${CPU_Cores}核心${CPU_Threads}线程 ${CPU_TEMP}\n"
+	MSG_COM G "电脑信息:${CPU_Model} ${CPU_Cores} Cores ${CPU_Threads} Threads ${CPU_TEMP}\n"
 	if [ -f $Home/Projects/$Project/.config ];then
 		if [ -f $Home/Configs/${Project}_Recently_Config ];then
 			echo -e "${Yellow}最近配置文件:${Blue}[$(cat $Home/Configs/${Project}_Recently_Config)]${White}\n"
@@ -68,12 +119,15 @@ do
 		make defconfig
 	;;
 	7)
+		echo ""
 		read -p '请输入编译参数:' Compile_Threads
-		clear
-		MSG_WAIT "即将执行自定义参数 [$Compile_Threads]..."
-		echo "" && $Compile_Threads && echo ""
-		MSG_WAIT "自定义参数执行结束!"
-		Enter
+		[[ -z "$Compile_Threads" ]] && MSG_ERR "未输入任何参数,无法执行!" && sleep 2 || {
+			clear
+			MSG_WAIT "即将执行自定义参数 [$Compile_Threads]..."
+			echo "" && $Compile_Threads && echo ""
+			MSG_WAIT "自定义参数执行结束!"
+			Enter
+		}
 	;;
 	8)
 		BuildFirmware_Adv
@@ -87,105 +141,115 @@ done
 }
 
 BuildFirmware_Core() {
-Firmware_PATH="$Home/Projects/$Project/bin/targets/$TARGET_BOARD/$TARGET_SUBTARGET"
-rm -rf $Firmware_PATH > /dev/null 2>&1
-clear
-case $Firmware_Type in
-x86)
-	if [ $Project == Lede ];then
-		Firmware_INFO="AutoBuild-$TARGET_BOARD-$TARGET_SUBTARGET-$Project-$Lede_Version-$(date +%Y%m%d-%H:%M:%S)"
+	clear
+	Firmware_PATH="${Build_Path}/bin/targets/${TARGET_BOARD}/${TARGET_SUBTARGET}"
+	Compile_Date=$(date +%Y%m%d-%H:%M)
+	Display_Date=$(date +%Y/%m/%d)
+	case ${Source_Owner} in
+	immortalwrt)
+		_Firmware=immortalwrt
+		Openwrt_Version="${Openwrt_Version_}${Compile_Date}"
+	;;
+	coolsnowwolf)
+		_Firmware=openwrt
+		Old_Version="$(egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" ${Version_File})"
+		Openwrt_Version="${Old_Version}-${Compile_Date}"
+	;;
+	*)
+		_Firmware=openwrt
+		Openwrt_Version="${Openwrt_Version_}${Compile_Date}"
+	;;
+	esac
+	case "${TARGET_PROFILE}" in
+	x86_64)
+		Firmware_INFO="AutoBuild-$TARGET_BOARD-$TARGET_SUBTARGET-$Project-$Openwrt_Version"
+	;;
+	*)
+		Firmware_Name="${_Firmware}-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.${Firmware_Type}"
+		Firmware_INFO="AutoBuild-$TARGET_PROFILE-$Project-$Openwrt_Version"
+		AB_Firmware="${Firmware_INFO}.${Firmware_Type}"
+		Firmware_Detail="$Home/Firmware/Details/${Firmware_INFO}.detail"
+		echo -e "${Yellow}固件名称:${Blue}$AB_Firmware${White}\n"
+	;;
+	esac
+	cp -a $Home/Additional/Files/profile package/base-files/files/etc
+	case ${Source_Owner} in
+	coolsnowwolf)
+		if [ ! $(grep -o "Compiled by $Username" $Version_File | wc -l) == 1 ];then
+			sed -i "s?${Old_Version}?${Old_Version} Compiled by ${Username} [${Display_Date}]?g" ${Version_File}
+		fi
+		Old_Date=$(egrep -o "[0-9]+\/[0-9]+\/[0-9]+" ${Version_File})
+		if [ ! ${Display_Date} == ${Old_Date} ];then
+			sed -i "s?${Old_Date}?${Display_Date}?g" ${Version_File}
+		fi
+	;;
+	immortalwrt)
+		cp -a $Home/Additional/Files/banner package/lean/default-settings/files/openwrt_banner
+		cp -a $Home/Additional/Files/ImmortalWrt_release package/base-files/files/etc/openwrt_release
+		sed -i "s?By?By ${Username}?g" package/lean/default-settings/files/openwrt_banner
+		sed -i "s?Openwrt?ImmortalWrt ${Openwrt_Version}?g" package/lean/default-settings/files/openwrt_banner
+	;;
+	*)
+		cp -a $Home/Additional/Files/banner package/base-files/files/etc
+		sed -i "s?By?By ${Username}?g" package/base-files/files/etc/banner
+		sed -i "s?Openwrt?Openwrt ${Openwrt_Version} ?g" package/base-files/files/etc/banner
+	;;
+	esac
+	MSG_WAIT "开始编译$Project..."
+	Compile_Started=$(date +"%Y-%m-%d %H:%M:%S")
+	echo "$Compile_Started" > $Home/Configs/${Project}_Recently_Compiled
+	if [ $SaveCompileLog == 0 ];then
+		$Compile_Threads || Compiled_Failed=1
 	else
-		Firmware_INFO="AutoBuild-$TARGET_BOARD-$TARGET_SUBTARGET-$Project-$(date +%Y%m%d-%H:%M:%S)"
+		$Compile_Threads 2>&1 | tee $Home/Log/BuildOpenWrt_${Project}_${Compile_Date}.log || Compiled_Failed=1
 	fi
-;;
-Common)
-	Firmware_Name="openwrt-$TARGET_BOARD-$TARGET_SUBTARGET-$TARGET_PROFILE-squashfs-sysupgrade.${Firmware_sfx}"
-	if [ $Project == Lede ];then
-		Firmware_INFO="AutoBuild-$TARGET_PROFILE-$Project-$Lede_Version-$(date +%Y%m%d-%H:%M:%S)"
-	else
-		Firmware_INFO="AutoBuild-$TARGET_PROFILE-$Project-$(date +%Y%m%d-%H:%M:%S)"
-	fi
-	AB_Firmware="${Firmware_INFO}.${Firmware_sfx}"
-	Firmware_Detail="$Home/Firmware/Details/${Firmware_INFO}.detail"
-	echo -e "${Yellow}固件名称:${Blue}$AB_Firmware${White}\n"
-;;
-esac
-if [ $Project == Lede ];then
-	cd $Home/Projects/$Project/package/lean/default-settings/files
-	Date=$(date +%Y/%m/%d)
-	if [ ! $(grep -o "Compiled by $Username" ./zzz-default-settings | wc -l) = "1" ];then
-		sed -i "s?$Lede_Version?$Lede_Version Compiled by $Username [$Date]?g" ./zzz-default-settings
-	fi
-	Old_Date=$(egrep -o "[0-9]+\/[0-9]+\/[0-9]+" ./zzz-default-settings)
-	if [ ! $Date == $Old_Date ];then
-		sed -i "s?$Old_Date?$Date?g" ./zzz-default-settings
-	fi
-	cd $Home/Projects/$Project/package/base-files/files/etc
-	echo "$Lede_Version-$(date +%Y%m%d)" > openwrt_info
-fi
-MSG_WAIT "开始编译$Project..."
-cd $Home/Projects/$Project
-Compile_Started=$(date +"%Y-%m-%d %H:%M:%S")
-Compile_Date=$(date +"%Y%m%d_%H:%M")
-echo "$Compile_Started" > $Home/Configs/${Project}_Recently_Compiled
-if [ $SaveCompileLog == 0 ];then
-	$Compile_Threads
-else
-	$Compile_Threads 2>&1 | tee $Home/Log/BuildOpenWrt_${Project}_${Compile_Date}.log
-fi
-case $Firmware_Type in
-x86)
-	Compile_Stopped
-	cd $Firmware_PATH
-	find ./ -size +20480k -exec echo $@ > $Home/TEMP/Compiled_FI {} \;
-	IMAGES_MaxLine=$(sed -n '$=' $Home/TEMP/Compiled_FI)
-	echo ""
-	if [[ ! -z $IMAGES_MaxLine ]];then
-		Checkout_Package
-		cd $Firmware_PATH
-		mkdir -p $Home/Firmware/$Firmware_INFO
-		for Compiled_FI in $(cat $Home/TEMP/Compiled_FI)
-		do
-			Compiled_FI=${Compiled_FI##*/}
-			echo ""
-			MSG_COM "已检测到: $Compiled_FI"
-			mv $Compiled_FI $Home/Firmware/$Firmware_INFO
-			MD5=$(md5sum $Home/Firmware/$Firmware_INFO/$Compiled_FI | cut -d ' ' -f1)
-			SHA256=$(sha256sum $Home/Firmware/$Firmware_INFO/$Compiled_FI | cut -d ' ' -f1)
-			echo -e "MD5:$MD5\nSHA256:$SHA256" > $Home/Firmware/$Firmware_INFO/${Compiled_FI}.detail
-		done
-		MSG_SUCC "固件位置:Firmware/$Firmware_INFO"
-		MSG_SUCC "x86 设备编译结束!"
-	else
-		MSG_ERR "编译失败!"
-	fi
-	
-;;
-Common)
-	Compile_Stopped
-	if [ -f $Firmware_PATH/$Firmware_Name ];then
-		Checkout_Package
-		echo " 成功" >> $Home/Configs/${Project}_Recently_Compiled
-		cd $Home/Projects/$Project
-		mv $Firmware_PATH/$Firmware_Name $Home/Firmware/$AB_Firmware
-		cd $Home/Firmware
-		MSG_SUCC "固件位置:$Home/Firmware"
-		echo -e "${Yellow}固件名称:${Blue}$AB_Firmware"
-		Size=$(awk 'BEGIN{printf "%.2fMB\n",'$((`ls -l $AB_Firmware | awk '{print $5}'`))'/1000000}')
-		echo -e "${Yellow}固件大小:${Blue}$Size${White}"
-		MD5=$(md5sum $AB_Firmware | cut -d ' ' -f1)
-		SHA256=$(sha256sum $AB_Firmware | cut -d ' ' -f1)
-		MSG_COM B "\nMD5:$MD5"
-		MSG_COM B "SHA256:$SHA256"
-		echo -e "编译日期:$Compile_Started\n固件大小:$Size\n" > $Firmware_Detail
-		echo -e "MD5:$MD5\nSHA256:$SHA256" >> $Firmware_Detail
-	else
-		echo " 失败" >> $Home/Configs/${Project}_Recently_Compiled
-		MSG_ERR "编译失败!"
-	fi
-;;
-esac
-Enter
+	case "${TARGET_PROFILE}" in
+	x86_64)
+		Compile_Stopped
+		find $Firmware_PATH -size +20480k -exec echo $@ > $Home/TEMP/Compiled_FI {} \;
+		echo ""
+		if [[ -n $Compiled_Failed ]];then
+			Checkout_Package
+			mkdir -p $Home/Firmware/$Firmware_INFO
+			for Compiled_FI in $(cat $Home/TEMP/Compiled_FI)
+			do
+				Compiled_FI=${Compiled_FI##*/}
+				echo ""
+				MSG_COM "已检测到固件: $Compiled_FI"
+				mv $Firmware_PATH/$Compiled_FI $Home/Firmware/$Firmware_INFO
+				MD5=$(md5sum $Home/Firmware/$Firmware_INFO/$Compiled_FI | cut -d ' ' -f1)
+				SHA256=$(sha256sum $Home/Firmware/$Firmware_INFO/$Compiled_FI | cut -d ' ' -f1)
+				echo -e "MD5:$MD5\nSHA256:$SHA256" > $Home/Firmware/$Firmware_INFO/${Compiled_FI}.detail
+			done
+			MSG_SUCC "固件位置:Firmware/$Firmware_INFO"
+			MSG_SUCC "x86 设备编译结束!"
+		else
+			MSG_ERR "编译失败!"
+		fi
+	;;
+	*)
+		Compile_Stopped
+		if [ -f $Firmware_PATH/$Firmware_Name ];then
+			Checkout_Package
+			echo " 成功" >> $Home/Configs/${Project}_Recently_Compiled
+			mv $Firmware_PATH/$Firmware_Name $Home/Firmware/$AB_Firmware
+			MSG_SUCC "固件位置:$Home/Firmware"
+			echo -e "${Yellow}固件名称:${Blue}$AB_Firmware"
+			Size=$(awk 'BEGIN{printf "%.2fMB\n",'$((`ls -l $Home/Firmware/$AB_Firmware | awk '{print $5}'`))'/1000000}')
+			echo -e "${Yellow}固件大小:${Blue}${Size}${White}"
+			MD5=$(md5sum $Home/Firmware/$AB_Firmware | cut -d ' ' -f1)
+			SHA256=$(sha256sum $Home/Firmware/$AB_Firmware | cut -d ' ' -f1)
+			MSG_COM B "\nMD5:$MD5"
+			MSG_COM B "SHA256:$SHA256"
+			echo -e "编译日期:$Compile_Started\n固件大小:$Size\n" > $Firmware_Detail
+			echo -e "MD5:$MD5\nSHA256:$SHA256" >> $Firmware_Detail
+		else
+			echo " 失败" >> $Home/Configs/${Project}_Recently_Compiled
+			MSG_ERR "编译失败!"
+		fi
+	;;
+	esac
+	Enter
 }
 
 BuildFirmware_Adv() {
@@ -253,27 +317,6 @@ Checkout_Package() {
 	mv -f $(find ./ -type f -name "luci-app-*.ipk") ./luci-app-common > /dev/null 2>&1
 	mv -f $(find ./ -type f -name "luci-theme-*.ipk") ./luci-theme-common > /dev/null 2>&1
 	cp -a $(find $Packages_Dir/targets/$TARGET_BOARD/$TARGET_SUBTARGET/ -type f -name "*.ipk") ./$TARGET_ARCH_PACKAGES > /dev/null 2>&1
-}
-
-GET_TARGET_INFO() {
-	rm -rf $Home/TEMP/*
-	cd $Home/Projects/$Project
-	if [[ "$(cat .config)" =~ "CONFIG_TARGET_x86=y" ]];then
-		Firmware_Type=x86
-	else
-		Firmware_Type=Common
-		Firmware_sfx=bin
-	fi
-	TARGET_BOARD=$(awk -F '[="]+' '/TARGET_BOARD/{print $2}' .config | awk 'NR==1')
-	if [[ ! "$(cat .config)" =~ "TARGET_BOARD" ]];then
-		DEFCONFIG=1
-	else
-		DEFCONFIG=0
-	fi
-	TARGET_SUBTARGET=$(awk -F '[="]+' '/TARGET_SUBTARGET/{print $2}' .config)
-	TARGET_PROFILE=$(grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/')
-	TARGET_ARCH_PACKAGES=$(awk -F '[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config)
-	egrep -o "CONFIG_TARGET.*DEVICE.*=y" .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > $Home/TEMP/TARGET_PROFILE
 }
 
 BuildFirmware_Check() {

@@ -2,25 +2,25 @@
 # Project	AutoBuild
 # Author	Hyy2001、Nxiz
 # Github	https://github.com/Hyy2001X/AutoBuild
-# Supported System:Ubuntu 16.04-20.10 LTS、Deepin 20、CentOS[Test]
-Update=2021.4.12
-Version=V4.3.1
+# Supported System:Ubuntu 16.04-20.10 LTS、Deepin 20
+Update=2021.4.24
+Version=V4.3.2
 
 Second_Menu() {
 while :
 do
 	clear
-	if [ -e $Home/Projects/$Project/Makefile ];then
+	if [ -f $Home/Projects/$Project/Makefile ];then
 		MSG_COM "源码位置:$Home/Projects/$Project"
 		if [ $Project == Lede ];then
-			if [ -e $Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
+			if [ -f $Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
 				cd $Home/Projects/$Project/package/lean/default-settings/files
 				Lede_Version=$(egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" ./zzz-default-settings)
 				MSG_COM "源码版本:$Lede_Version"
 			fi
 		fi
 		cd $Home
-		if [ -e ./Configs/${Project}_Recently_Updated ];then
+		if [ -f ./Configs/${Project}_Recently_Updated ];then
 			Recently_Updated=$(cat ./Configs/${Project}_Recently_Updated)
 			MSG_COM "最近更新:$Recently_Updated"
 		fi
@@ -164,7 +164,7 @@ do
 			else
 				Backup_Config=$Project-$(date +%m%d_%H:%M)
 			fi	
-			if [ -e ./Projects/$Project/.config ];then
+			if [ -f ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
 				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
 			else
@@ -173,7 +173,7 @@ do
 		;;
 		2)
 			read -p '请输入自定义名称:' Backup_Config
-			if [ -e ./Projects/$Project/.config ];then
+			if [ -f ./Projects/$Project/.config ];then
 				cp ./Projects/$Project/.config ./Backups/Configs/"$Backup_Config"
 				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
 			else
@@ -209,7 +209,7 @@ do
 			if [ $Choose -le $Max_ConfigList_Line ] 2>/dev/null ;then
 				if [ ! $Choose == 0 ] 2>/dev/null ;then
 					ConfigFile=$(sed -n ${Choose}p $ConfigList_File)
-					if [ -e "$ConfigFile" ];then
+					if [ -f "$ConfigFile" ];then
 						ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
 						cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
 						echo "$ConfigFile" > $Home/Configs/${Project}_Recently_Config
@@ -249,7 +249,7 @@ do
 		Enter
 	;;
 	4)
-		if [ -e $Home/Backups/Projects/$Project/Makefile ];then
+		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
 			echo ""
 			MSG_WAIT "正在恢复[$Project]源代码..."
 			cp -a $Home/Backups/Projects/$Project $Home/Projects/ > /dev/null 2>&1
@@ -418,8 +418,8 @@ if [ $? -eq 0 ];then
 	fi
 	cd ./AutoBuild-Update
 	Update_Logfile=$Home/Log/Script_Update_$(date +%Y%m%d_%H:%M).log
-	git pull 2>&1 | tee $Update_Logfile
-	if [ $(grep -o "fatal: 无法访问" $Update_Logfile | wc -l) = "0" ];then
+	git pull 2>&1 | tee $Update_Logfile || Update_Failed=1
+	if [ -z ${Update_Failed} ];then
 		MSG_COM "\n合并到本地文件..."
 		Old_Version=$(awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}')
 		Old_Version_Dir=$Old_Version-$(date +%Y%m%d_%H:%M)
@@ -433,11 +433,11 @@ if [ $? -eq 0 ];then
 		mv $Home/Modules $Backups_Dir/Modules
 		cp -a * $Home
 		MSG_SUCC "[AutoBuild] 更新成功!"
-		read -p "" Key
+		Enter
 		$Home/AutoBuild.sh
 	else
 		MSG_ERR "[AutoBuild] 更新失败!"
-		read -p "" Key
+		Enter
 	fi
 else
 	MSG_ERR "网络连接错误,[AutoBuild] 更新失败!"
@@ -446,7 +446,7 @@ fi
 }
 
 Sources_Update_Check() {
-if [ -e $Home/Projects/$Project/Makefile ];then
+if [ -f $Home/Projects/$Project/Makefile ];then
 	timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
 	if [ $? -eq 0 ];then
 		Sources_Update_Core
@@ -535,7 +535,7 @@ Project_Details() {
 }
 
 Sources_Download() {
-if [ -e $Home/Projects/$Project/Makefile ];then
+if [ -f $Home/Projects/$Project/Makefile ];then
 	MSG_SUCC "已检测到[$Project]源代码,当前分支:[$Branch]"
 	sleep 3
 else
