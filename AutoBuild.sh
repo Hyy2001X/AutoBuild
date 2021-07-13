@@ -2,8 +2,8 @@
 # Project	AutoBuild
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
-Update=2021.7.9
-Version=V4.3.3
+Update=2021.7.13
+Version=V4.3.4
 
 Second_Menu() {
 while :
@@ -140,92 +140,91 @@ do
 		break
 	;;
 	1)
-	while :
-	do
-		cd $Home
-		clear
-		MSG_TITLE "备份[.config]"
-		if [[ $Project == Lede ]];then
-		echo -e "1.固定名称"
-		echo "2.自定义名称"
-		echo -e "\nq.返回"
-		GET_Choose
-		case $Choose in
-		q)
-			break
-		;;
-		1)
-			Backup_Config=$Project-$(date +%m%d_%H:%M)
-			if [[ -f ./Projects/$Project/.config ]];then
-				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
-				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
-			else
-				MSG_ERR "[.config] 备份失败!"
-			fi
-		;;
-		2)
-			read -p '请输入自定义名称:' Backup_Config
-			if [[ -f ./Projects/$Project/.config ]];then
-				cp ./Projects/$Project/.config ./Backups/Configs/"$Backup_Config"
-				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
-			else
-				MSG_ERR "[.config] 备份失败!"
-			fi
-		;;
-		esac
-		sleep 2
-	done
+		while :
+		do
+			cd $Home
+			clear
+			MSG_TITLE "备份[.config]"
+			echo -e "1.固定名称"
+			echo "2.自定义名称"
+			echo -e "\nq.返回"
+			GET_Choose
+			case $Choose in
+			q)
+				break
+			;;
+			1)
+				Backup_Config=$Project-$(date +%m%d_%H:%M)
+				if [[ -f ./Projects/$Project/.config ]];then
+					cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
+					MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
+				else
+					MSG_ERR "[.config] 备份失败!"
+				fi
+			;;
+			2)
+				read -p '请输入自定义名称:' Backup_Config
+				if [[ -f ./Projects/$Project/.config ]];then
+					cp ./Projects/$Project/.config ./Backups/Configs/"$Backup_Config"
+					MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
+				else
+					MSG_ERR "[.config] 备份失败!"
+				fi
+			;;
+			esac
+			sleep 2
+		done
 	;;
 	2)
-	if [[ -n "$(ls -A $Home/Backups/Configs)" ]];then
-	while :
-	do
-		clear
-		MSG_TITLE "恢复[.config]"
-		cd $Home/Backups/Configs
-		ls -A | cat > $Home/TEMP/Config.List
-		ConfigList_File=$Home/TEMP/Config.List
-		Max_ConfigList_Line=$(sed -n '$=' $ConfigList_File)
-		for ((i=1;i<=$Max_ConfigList_Line;i++));
-		do
-			ConfigFile_Name=$(sed -n ${i}p $ConfigList_File)
-			echo -e "${i}.${Yellow}${ConfigFile_Name}${White}"
-		done
-		echo -e "\nq.返回\n"
-		read -p '请从上方选择一个文件:' Choose
-		case $Choose in
-		q)
-			break
-		;;
-		*)
-			if [[ $Choose -le $Max_ConfigList_Line ]] 2>/dev/null ;then
-				if [[ ! $Choose == 0 ]] 2>/dev/null ;then
-					ConfigFile=$(sed -n ${Choose}p $ConfigList_File)
-					if [[ -f "$ConfigFile" ]];then
-						ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
-						cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
-						echo "$ConfigFile" > $Home/Configs/${Project}_Recently_Config
-						MSG_SUCC "配置文件 [$ConfigFile] 恢复成功!"
-						sleep 2
+		if [[ -n "$(ls -A $Home/Backups/Configs)" ]];then
+			while :
+			do
+				clear
+				MSG_TITLE "恢复[.config]"
+				cd $Home/Backups/Configs
+				ls -A | cat > $Home/TEMP/Config.List
+				ConfigList_File=$Home/TEMP/Config.List
+				Max_ConfigList_Line=$(sed -n '$=' $ConfigList_File)
+				for ((i=1;i<=$Max_ConfigList_Line;i++));
+				do
+					ConfigFile_Name=$(sed -n ${i}p $ConfigList_File)
+					echo -e "${i}.${Yellow}${ConfigFile_Name}${White}"
+				done
+				echo -e "\nq.返回\n"
+				read -p '请从上方选择一个文件:' Choose
+				case $Choose in
+				q)
+					break
+				;;
+				*)
+					if [[ $Choose -le $Max_ConfigList_Line ]] 2>/dev/null ;then
+						if [[ ! $Choose == 0 ]] 2>/dev/null ;then
+							ConfigFile=$(sed -n ${Choose}p $ConfigList_File)
+							if [[ -f "$ConfigFile" ]];then
+								ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
+								cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
+								echo "$ConfigFile" > $Home/Configs/${Project}_Recently_Config
+								MSG_SUCC "配置文件 [$ConfigFile] 恢复成功!"
+								sleep 2
+							else
+								MSG_ERR "未检测到对应的配置文件!"
+								sleep 2
+							fi
+						else
+							MSG_ERR "输入错误,请输入正确的数字!"
+							sleep 2
+						fi
 					else
-						MSG_ERR "未检测到对应的配置文件!"
+						MSG_ERR "输入错误,请输入正确的数字!"
 						sleep 2
 					fi
-				else
-					MSG_ERR "输入错误,请输入正确的数字!"
-					sleep 2
-				fi
-			else
-				MSG_ERR "输入错误,请输入正确的数字!"
-				sleep 2
-			fi
-		;;
-		esac
-	done
-	else
-		MSG_ERR "未找到备份文件,恢复失败!"
-		sleep 2
-	fi
+				;;
+				esac
+			done
+		else
+			MSG_ERR "未找到备份文件,恢复失败!"
+			sleep 2
+		fi
 	;;
 	3)
 		MSG_WAIT "正在备份[$Project]源代码..."
