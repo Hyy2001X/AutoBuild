@@ -1,7 +1,7 @@
 # AutoBuild Script Module by Hyy2001
 
 BuildFirmware_UI() {
-Update=2021.04.24
+Update=2021.07.09
 Module_Version=V3.2.6
 
 while :
@@ -30,7 +30,7 @@ do
 		x86_Test="$(egrep -o "CONFIG_TARGET.*DEVICE.*=y" .config | sed -r 's/CONFIG_TARGET_(.*)_DEVICE_(.*)=y/\1/')"
 		[[ -n "${x86_Test}" ]] && break
 		x86_Test="$(egrep -o "CONFIG_TARGET.*Generic=y" .config | sed -r 's/CONFIG_TARGET_(.*)_Generic=y/\1/')"
-		[[ -z "${x86_Test}" ]]  && exit
+		[[ -z "${x86_Test}" ]] && break
 	done
 	[[ "${x86_Test}" == "x86_64" ]] && {
 		TARGET_PROFILE="x86_64"

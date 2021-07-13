@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 SSHServices() {
-Update=2021.05.03
-Module_Version=V1.5
+Update=2021.07.9
+Module_Version=V1.5.1
 
 while :
 do
@@ -10,7 +10,7 @@ do
 	MSG_TITLE "SSH Services Script $Module_Version"
 	List_SSHProfile
 	MSG_COM G "\nn.创建新配置文件"
-	[ ! "$(ls -A $Home/Configs/SSH)" = "" ] && MSG_COM R "d.删除所有配置文件"
+	[[ -n $(ls -A $Home/Configs/SSH) ]] && MSG_COM R "d.删除所有配置文件"
 	echo "x.重置 [RSA Key Fingerprint]"
 	echo -e "q.返回\n"
 	read -p '请从上方选择一个操作:' Choose
@@ -32,8 +32,8 @@ do
 		sleep 2
 	;;
 	*)
-		if [ $Choose -gt 0 ] > /dev/null 2>&1 ;then
-			if [ $Choose -le $SSHProfileList_MaxLine ] > /dev/null 2>&1 ;then
+		if [[ $Choose -gt 0 ]] > /dev/null 2>&1 ;then
+			if [[ $Choose -le $SSHProfileList_MaxLine ]] > /dev/null 2>&1 ;then
 				SSHProfile_File="$Home/Configs/SSH/$(sed -n ${Choose}p ${SSHProfileList})"
 				SSHServices_Menu
 			else
@@ -72,23 +72,23 @@ do
 	2)
 		SSH_Profile="$SSHProfile_File"
 		read -p '[SSH] 请输入新的 IP 地址[回车即跳过修改]:' SSH_IP_New
-		[ -n "$SSH_IP_New" ] && {
+		[[ -n $SSH_IP_New ]] && {
 			sed -i "s?SSH_IP=${SSH_IP}?SSH_IP=${SSH_IP_New}?g" "$SSH_Profile"
 			SSH_IP=$SSH_IP_New 
 		}
 		read -p '[SSH] 请输入新的端口号:' SSH_Port_New
-		[ -n "$SSH_Port_New" ] && {
+		[[ -n $SSH_Port_New ]] && {
 			sed -i "s?SSH_Port=${SSH_Port}?SSH_Port=${SSH_Port_New}?g" "$SSH_Profile"
 			SSH_Port=$SSH_Port_New
 		}
 		read -p '[SSH] 请输入新的用户名:' SSH_User_New
-		[ -n "$SSH_User_New" ] && {
+		[[ -n $SSH_User_New ]] && {
 			sed -i "s?SSH_User=${SSH_User}?SSH_User=${SSH_User_New}?g" "$SSH_Profile"
 			SSH_User=$SSH_User_New
 		}
 		read -p '[SSH] 请输入新密码:' SSH_Password_New
-		[ -n $SSH_Password_New ] && {
-			if [ -z $SSH_Password ];then
+		[[ -n $SSH_Password_New ]] && {
+			if [[ -z $SSH_Password ]];then
 				sed -i '/SSH_Password/d' "$SSHProfile"
 				echo "SSH_Password=$SSH_Password_New" >> "$SSHProfile"
 			else
@@ -100,7 +100,7 @@ do
 	3)
 		echo ""
 		read -p '[SSH] 请输入新的配置名称:' SSHProfile_RN
-		if [ ! -z "$SSHProfile_RN" ];then
+		if [[ ! -z "$SSHProfile_RN" ]];then
 			cd $Home/Configs/SSH
 			mv "$SSHProfile_File" "$SSHProfile_RN" > /dev/null 2>&1
 			MSG_SUCC "重命名 [$SSHProfile_File] > [$SSHProfile_RN] 成功!"
@@ -137,18 +137,18 @@ Create_SSHProfile() {
 	cd $Home
 	echo " "
 	read -p '请输入新配置名称:' SSH_Profile
-	[ -z "$SSH_Profile" ] && SSH_Profile="$Home/Configs/SSH/ssh-$(openssl rand -base64 4 | tr -d =)" || SSH_Profile=$Home/Configs/SSH/"$SSH_Profile"
-	[ -f $SSH_Profile ] && {
+	[[ -z $SSH_Profile ]] && SSH_Profile="$Home/Configs/SSH/ssh-$(openssl rand -base64 4 | tr -d =)" || SSH_Profile=$Home/Configs/SSH/"$SSH_Profile"
+	[[ -f $SSH_Profile ]] && {
 		MSG_ERR "[SSH] 已存在相同名称的配置文件!"
 		sleep 2
 		return
 	}
 	read -p '[SSH] 请输入IP地址:' SSH_IP
-	[ -z "$SSH_IP" ] && SSH_IP="192.168.1.1"
+	[[ -z $SSH_IP ]] && SSH_IP="192.168.1.1"
 	read -p '[SSH] 请输入端口号:' SSH_Port
-	[ -z "$SSH_Port" ] && SSH_Port=22
+	[[ -z $SSH_Port ]] && SSH_Port=22
 	read -p '[SSH] 请输入用户名:' SSH_User
-	while [ -z "$SSH_User" ]
+	while [[ -z $SSH_User ]]
 	do
 		MSG_ERR "[SSH] 用户名不能为空!"
 		echo ""
@@ -165,9 +165,9 @@ Create_SSHProfile() {
 }
 
 List_SSHProfile() {
-if [ ! -z "$(ls -A $Home/Configs/SSH)" ];then
+if [[ -n $(ls -A $Home/Configs/SSH) ]];then
 	cd $Home/Configs/SSH
-	ls -A | cat > $Home/TEMP/SSHProfileList
+	echo "$(ls -A)" > $Home/TEMP/SSHProfileList
 	SSHProfileList=$Home/TEMP/SSHProfileList
 	SSHProfileList_MaxLine=$(sed -n '$=' $SSHProfileList)
 	MSG_COM G "配置文件列表"

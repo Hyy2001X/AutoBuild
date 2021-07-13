@@ -1,25 +1,25 @@
 # AutoBuild Script Module by Hyy2001
 
 ReplaceSourcesList() {
-	Update=2021.02.15
-	Module_Version=V2.0-BETA
+	Update=2021.07.09
+	Module_Version=V2.1
 
 	SERVER_LIST=${Home}/Additional/ReplaceSourcesList/Server_List
 	CODENAME_LIST=${Home}/Additional/ReplaceSourcesList/Codename_List
 	TEMPLATE=${Home}/Additional/ReplaceSourcesList/ServerUrl_Template
 	BAK_FILE=${Home}/Backups/sources.list.bak
 
-	if [ ! -f /etc/lsb-release ];then
+	if [[ ! -f /etc/lsb-release ]];then
 		MSG_ERR "暂不支持此操作系统,当前支持的操作系统: [Ubuntu]"
 		sleep 2 && return
 	else
 		OS_ID=$(awk -F '[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release)
 		OS_Version=$(awk -F '[="]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
-		if [[ ! "${OS_ID}" == Ubuntu ]];then
+		if [[ ! ${OS_ID} == Ubuntu ]];then
 			MSG_ERR "暂不支持此操作系统,当前支持的操作系统: [Ubuntu]"
 			sleep 2 && return
 		fi
-		if [[ ! "$(cat ${CODENAME_LIST} | awk '{print $1}')" =~ "${OS_Version}" ]];then
+		if [[ ! $(cat ${CODENAME_LIST} | awk '{print $1}') =~ ${OS_Version} ]];then
 			MSG_ERR "暂不支持当前 [Ubuntu] 版本: [${OS_Version}]"
 			echo -ne "${Red}当前支持的 [Ubuntu] 版本:"
 			for CN in $(cat ${CODENAME_LIST} | awk '{print $1}')
@@ -36,7 +36,7 @@ ReplaceSourcesList() {
 		echo -e "${Skyb}操作系统${Yellow}: [${OS_ID} ${OS_Version}]${White}"
 		Current_Server=$(egrep -o "[a-z]+[.][a-z]+[.][a-z]+" /etc/apt/sources.list | awk 'NR==1')
 		echo -e "${Skyb}当前系统源${Yellow}: [${Current_Server}]${White}\n"
-		if [ -f "${SERVER_LIST}" ];then
+		if [[ -f ${SERVER_LIST} ]];then
 			Server_Count=$(sed -n '$=' ${SERVER_LIST})
 			for ((i=1;i<=${Server_Count};i++));
 			do   
@@ -55,7 +55,7 @@ ReplaceSourcesList() {
 			break
 		;;
 		x)
-			if [ -f ${BAK_FILE} ];then
+			if [[ -f ${BAK_FILE} ]];then
 				sudo mv ${BAK_FILE} /etc/apt/sources.list
 				MSG_SUCC "[默认源] 恢复成功!"
 			else
@@ -76,13 +76,13 @@ ReplaceSourcesList() {
 }
 
 Choose_Server() {
-	if [ ${Choose} -gt 0 ] > /dev/null 2>&1 ;then
-		if [ ${Choose} -le ${Server_Count} ] > /dev/null 2>&1 ;then
+	if [[ ${Choose} -gt 0 ]] > /dev/null 2>&1 ;then
+		if [[ ${Choose} -le ${Server_Count} ]] > /dev/null 2>&1 ;then
 			ServerUrl=$(sed -n ${Choose}p ${SERVER_LIST} | awk '{print $2}')
 			ServerName=$(sed -n ${Choose}p ${SERVER_LIST} | awk '{print $1}')
 			Codename=$(cat ${CODENAME_LIST} | grep "${OS_Version}" | awk '{print $2}')
-			if [[ -z ${Codename} ]] || [[ -z ${ServerUrl} ]] || [[ -z ${ServerName} ]];then
-				MSG_ERR "重要参数获取失败,请尝试更新 [AutoBuild] 后重试!"
+			if [[ -z ${Codename} || -z ${ServerUrl} || -z ${ServerName} ]];then
+				MSG_ERR "参数获取失败,请尝试更新 [AutoBuild] 后重试!"
 			fi
 			Replace_Server
 		else
@@ -93,8 +93,8 @@ Choose_Server() {
 }
 
 Replace_Server() {
-	if [ -f /etc/apt/sources.list ];then
-		if [ ! -f ${BAK_FILE} ];then
+	if [[ -f /etc/apt/sources.list ]];then
+		if [[ ! -f ${BAK_FILE} ]];then
 			sudo cp /etc/apt/sources.list ${BAK_FILE}
 			sudo chmod 777 ${BAK_FILE}
 			MSG_SUCC "未检测到备份,当前系统源已自动备份至 [${BAK_FILE}] !"
@@ -105,6 +105,6 @@ Replace_Server() {
 	sudo cp ${TEMPLATE} /etc/apt/sources.list
 	sudo sed -i "s?ServerUrl?${ServerUrl}?g" /etc/apt/sources.list
 	sudo sed -i "s?Codename?${Codename}?g" /etc/apt/sources.list
-	MSG_SUCC "当前已切换到: [${ServerName}]"
+	MSG_SUCC "系统源已切换到: [${ServerName}]"
 	sleep 2
 }

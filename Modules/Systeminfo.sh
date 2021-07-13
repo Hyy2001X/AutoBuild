@@ -1,8 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
 Systeminfo() {
-	Update=2021.03.25
-	Module_Version=V1.8
+	Update=2021.07.09
+	Module_Version=V1.8.1
 
 	GET_System_Info 2
 
@@ -36,15 +36,15 @@ GET_System_Info() {
 		CPU_Threads=$(grep 'processor' /proc/cpuinfo | sort -u | wc -l)
 		CPU_Freq=$(awk '/model name/{print ""$NF;exit}' /proc/cpuinfo)
 		Get_OS() {
-			[ -e /etc/redhat-release ] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
-			[ -e /etc/os-release ] && awk -F '[= "]' '/PRETTY_NAME/{print $3,$4,$5}' /etc/os-release && return
-			[ -e /etc/lsb-release ] && awk -F '[="]+' '/DESCRIPTION/{print $2}' /etc/lsb-release && return
+			[[ -f /etc/redhat-release ]] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
+			[[ -f /etc/os-release ]] && awk -F '[= "]' '/PRETTY_NAME/{print $3,$4,$5}' /etc/os-release && return
+			[[ -f /etc/lsb-release ]] && awk -F '[="]+' '/DESCRIPTION/{print $2}' /etc/lsb-release && return
 		}
 		OS_INFO=$(Get_OS)
 		Short_OS=$(echo ${OS_INFO} | awk '{print $1}')
 		System_Bit=$(getconf LONG_BIT)
 		CPU_Base=$(uname -m)
-		[[ -z "${CPU_Base}" ]] && CPU_Info="${System_Bit}" || CPU_Info="${System_Bit} (${CPU_Base} Bit)"
+		[[ -z ${CPU_Base} ]] && CPU_Info="${System_Bit}" || CPU_Info="${System_Bit} (${CPU_Base} Bit)"
 		Computer_Name=$(hostname)
 		MemTotal_MB=$(free -m | awk '{print $2}' | awk 'NR==2')
 		MemTotal_GB=$(echo "scale=1; $MemTotal_MB / 1000" | bc)

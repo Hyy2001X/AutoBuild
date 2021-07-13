@@ -1,32 +1,32 @@
 # AutoBuild Script Module by Hyy2001
 
 Network_Test() {
-Update=2021.02.09
-Module_Version=V3.0.2
+	Update=2021.07.09
+	Module_Version=V3.0.3
 
 	clear
-	[[ -z "${PingMode}" ]] && PingMode=httping
-	[[ -z "${Home}" ]] && Home=/tmp
+	[[ -z ${PingMode} ]] && PingMode=httping
+	[[ -z ${Home} ]] && Home=/tmp
 	TMP_PATH=${Home}/TEMP
 	TMP_FILE=${TMP_PATH}/NetworkTest.log
 	PING_MODE=${PingMode}
 	MSG_TITLE "Network Test Script $Module_Version [${PING_MODE}]"
 	MSG_COM G "网址			次数	延迟/Min	延迟/Avg	延迟/Max	状态\n"
 
-	TestCore www.baidu.com 2
-	TestCore git.openwrt.com 3
-	TestCore www.google.com 3
-	TestCore www.github.com 3
+	Run_Test www.baidu.com 2
+	Run_Test git.openwrt.com 3
+	Run_Test www.google.com 3
+	Run_Test www.github.com 3
 
 	Enter
 }
 
-TestCore() {
+Run_Test() {
 	_URL=$1
 	_COUNT=$2
 	_TIMEOUT=$((${_COUNT}*2+1))
-	[[ -z $1 ]] || [[ -z $2 ]] && return
-	[ ! ${_COUNT} -gt 0 ] 2>/dev/null && return
+	[[ -z $1 || -z $2 ]] && return
+	[[ ! ${_COUNT} -gt 0 ]] 2>/dev/null && return
 	timeout 3 ${PING_MODE} ${_URL} -c 1 > /dev/null 2>&1
 	if [ $? -eq 0 ];then
 		echo -ne "\r${Skyb}测试中...${White}\r"
@@ -46,7 +46,7 @@ TestCore() {
 		elif [[ ${_PING_PROC} -le 250 ]];then
 			_TYPE="${Red}较差"
 		else
-			_TYPE="${Red}很差"
+			_TYPE="${Red}差"
 		fi
 		echo -e "${_URL}		${_COUNT}	${_PING_MIN}		${_PING_AVG}		${_PING_MAX}		${_TYPE}${White}"
 	else

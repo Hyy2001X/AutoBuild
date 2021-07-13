@@ -1,26 +1,25 @@
 #!/bin/bash
 # Project	AutoBuild
-# Author	Hyy2001、Nxiz
+# Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
-# Supported System:Ubuntu 16.04-20.10 LTS、Deepin 20
-Update=2021.4.24
-Version=V4.3.2
+Update=2021.7.9
+Version=V4.3.3
 
 Second_Menu() {
 while :
 do
 	clear
-	if [ -f $Home/Projects/$Project/Makefile ];then
+	if [[ -f $Home/Projects/$Project/Makefile ]];then
 		MSG_COM "源码位置:$Home/Projects/$Project"
-		if [ $Project == Lede ];then
-			if [ -f $Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings ];then
+		if [[ $Project == Lede ]];then
+			if [[ -f $Home/Projects/$Project/package/lean/default-settings/files/zzz-default-settings ]];then
 				cd $Home/Projects/$Project/package/lean/default-settings/files
 				Lede_Version=$(egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" ./zzz-default-settings)
 				MSG_COM "源码版本:$Lede_Version"
 			fi
 		fi
 		cd $Home
-		if [ -f ./Configs/${Project}_Recently_Updated ];then
+		if [[ -f ./Configs/${Project}_Recently_Updated ]];then
 			Recently_Updated=$(cat ./Configs/${Project}_Recently_Updated)
 			MSG_COM "最近更新:$Recently_Updated"
 		fi
@@ -114,7 +113,7 @@ do
 	;;
 	8)
 		clear
-		if [ -d $Home/Projects/$Project/.git ];then
+		if [[ -d $Home/Projects/$Project/.git ]];then
 			cd $Home/Projects/$Project
 			git log -10 --graph --all --branches --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%cr)%C(reset) %C(bold green)(%ai)%C(reset) %C(white)%s'
 			Enter
@@ -146,11 +145,8 @@ do
 		cd $Home
 		clear
 		MSG_TITLE "备份[.config]"
-		if [ $Project == Lede ];then
-			echo -e "1.标准名称/${Yellow}文件格式:[$Project-版本号-日期_时间]${White}"
-		else
-			echo -e "1.标准名称/${Yellow}文件格式:[$Project-日期_时间]${White}"
-		fi
+		if [[ $Project == Lede ]];then
+		echo -e "1.固定名称"
 		echo "2.自定义名称"
 		echo -e "\nq.返回"
 		GET_Choose
@@ -159,12 +155,8 @@ do
 			break
 		;;
 		1)
-			if [ $Project == Lede ];then
-				Backup_Config=$Project-$Lede_Version-$(date +%m%d_%H:%M)
-			else
-				Backup_Config=$Project-$(date +%m%d_%H:%M)
-			fi	
-			if [ -f ./Projects/$Project/.config ];then
+			Backup_Config=$Project-$(date +%m%d_%H:%M)
+			if [[ -f ./Projects/$Project/.config ]];then
 				cp ./Projects/$Project/.config ./Backups/Configs/$Backup_Config
 				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
 			else
@@ -173,7 +165,7 @@ do
 		;;
 		2)
 			read -p '请输入自定义名称:' Backup_Config
-			if [ -f ./Projects/$Project/.config ];then
+			if [[ -f ./Projects/$Project/.config ]];then
 				cp ./Projects/$Project/.config ./Backups/Configs/"$Backup_Config"
 				MSG_SUCC "备份成功![.config] 已备份到:'/Backups/Configs/$Backup_Config'"
 			else
@@ -185,7 +177,7 @@ do
 	done
 	;;
 	2)
-	if [ ! -z "$(ls -A $Home/Backups/Configs)" ];then
+	if [[ -n "$(ls -A $Home/Backups/Configs)" ]];then
 	while :
 	do
 		clear
@@ -206,10 +198,10 @@ do
 			break
 		;;
 		*)
-			if [ $Choose -le $Max_ConfigList_Line ] 2>/dev/null ;then
-				if [ ! $Choose == 0 ] 2>/dev/null ;then
+			if [[ $Choose -le $Max_ConfigList_Line ]] 2>/dev/null ;then
+				if [[ ! $Choose == 0 ]] 2>/dev/null ;then
 					ConfigFile=$(sed -n ${Choose}p $ConfigList_File)
-					if [ -f "$ConfigFile" ];then
+					if [[ -f "$ConfigFile" ]];then
 						ConfigFile_Dir="$Home/Backups/Configs/$ConfigFile"
 						cp "$ConfigFile_Dir" $Home/Projects/$Project/.config
 						echo "$ConfigFile" > $Home/Configs/${Project}_Recently_Config
@@ -249,7 +241,7 @@ do
 		Enter
 	;;
 	4)
-		if [ -f $Home/Backups/Projects/$Project/Makefile ];then
+		if [[ -f $Home/Backups/Projects/$Project/Makefile ]];then
 			echo ""
 			MSG_WAIT "正在恢复[$Project]源代码..."
 			cp -a $Home/Backups/Projects/$Project $Home/Projects/ > /dev/null 2>&1
@@ -262,7 +254,7 @@ do
 	;;
 	5)
 		cd $Home/Projects
-		if [ ! -h ./$Project/dl ];then
+		if [[ ! -h ./$Project/dl ]];then
 			[ -d ./$Project/dl ] && mv -f ./$Project/dl/* $Home/Backups/dl
 			rm -rf ./$Project/dl
 			ln -s $Home/Backups/dl $Home/Projects/$Project/dl
@@ -301,7 +293,6 @@ do
 		clear
 		sudo apt-get update
 		sudo apt-get upgrade
-		sudo apt-get clean
 		Enter
 	;;
 	2)
@@ -315,6 +306,7 @@ do
 			sleep 2
 			sudo apt-get -y install $Dependency $Extra_Dependency
 			Update_Times=$(($Update_Times + 1))
+			sleep 1
 		done
 		sudo apt-get clean
 		Enter
@@ -409,17 +401,17 @@ done
 
 AutoBuild_Updater() {
 timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
-if [ $? -eq 0 ];then
+if [[ $? -eq 0 ]];then
 	clear
 	MSG_WAIT "正在更新[AutoBuild],请耐心等待..."
 	cd $Home/Backups
-	if [ -z "$(ls -A ./AutoBuild-Update)" ];then
+	if [[ -z $(ls -A ./AutoBuild-Update) ]];then
 		git clone https://github.com/Hyy2001X/AutoBuild AutoBuild-Update
 	fi
 	cd ./AutoBuild-Update
 	Update_Logfile=$Home/Log/Script_Update_$(date +%Y%m%d_%H:%M).log
 	git pull 2>&1 | tee $Update_Logfile || Update_Failed=1
-	if [ -z ${Update_Failed} ];then
+	if [[ -z ${Update_Failed} ]];then
 		MSG_COM "\n合并到本地文件..."
 		Old_Version=$(awk 'NR==7' $Home/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}')
 		Old_Version_Dir=$Old_Version-$(date +%Y%m%d_%H:%M)
@@ -446,31 +438,31 @@ fi
 }
 
 Sources_Update_Check() {
-if [ -f $Home/Projects/$Project/Makefile ];then
+if [[ -f $Home/Projects/$Project/Makefile ]];then
 	timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
-	if [ $? -eq 0 ];then
+	if [[ $? -eq 0 ]];then
 		Sources_Update_Core
 		read -p "" Key
 	else
-		MSG_ERR "网络连接错误,[$Project]源代码更新失败!"
+		MSG_ERR "网络连接错误,[$Project]源码更新失败!"
 		sleep 2
 	fi
 else
-	MSG_ERR "未检测到[$Project]源代码,更新失败!"
+	MSG_ERR "未检测到[$Project]源码,更新失败!"
 	sleep 2
 fi
 }
 
 Make_Download() {
-if [ -f $Home/Projects/$Project/.config ];then
+if [[ -f $Home/Projects/$Project/.config ]];then
 	timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
-	if [ $? -eq 0 ];then
+	if [[ $? -eq 0 ]];then
 		cd $Home/Projects/$Project
 		clear
 		MSG_WAIT "开始执行 [make download]..."
 		echo ""
 		dl_Logfile=$Home/Log/dl_${Project}_$(date +%Y%m%d_%H:%M).log
-		if [ -d dl ];then
+		if [[ -d dl ]];then
 			mv dl/* $Home/Backups/dl > /dev/null 2>&1
 			rm -rf dl
 		fi
@@ -503,12 +495,9 @@ Sources_Update_Core() {
 	echo ""
 	echo "$(date +%Y-%m-%d_%H:%M)" > $Home/Configs/${Project}_Recently_Updated
 	cd $Home/Projects/$Project
-	if [ $Enforce_Update == 1 ];then
+	if [[ $Enforce_Update == 1 ]];then
 		git fetch --all
 		git reset --hard origin/$Branch
-		if [ $Project == Lede ];then
-			sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
-		fi
 	fi
 	Update_Logfile=$Home/Log/SourceUpdate_${Project}_$(date +%Y%m%d_%H:%M).log
 	git pull 2>&1 | tee $Update_Logfile
@@ -518,7 +507,7 @@ Sources_Update_Core() {
 }
 
 Multi_Sources_Update() {
-	if [ -f $Home/Projects/$1/Makefile ];then
+	if [[ -f $Home/Projects/$1/Makefile ]];then
 		Project=$1
 		Enforce_Update=0
 		Sources_Update_Core
@@ -527,7 +516,7 @@ Multi_Sources_Update() {
 }
 
 Project_Details() {
-	if [ -f ./Projects/$1/Makefile ];then
+	if [[ -f ./Projects/$1/Makefile ]];then
 		echo -e "${White}$2.$1$DE${Yellow}[已检测到]${Blue}	$3"
 	else
 		echo -e "${White}$2.$1$DE${Red}[未检测到]${Blue}	$3"
@@ -535,7 +524,7 @@ Project_Details() {
 }
 
 Sources_Download() {
-if [ -f $Home/Projects/$Project/Makefile ];then
+if [[ -f $Home/Projects/$Project/Makefile ]];then
 	MSG_SUCC "已检测到[$Project]源代码,当前分支:[$Branch]"
 	sleep 3
 else
@@ -559,8 +548,8 @@ else
 		break
 	;;
 	*)
-		if [ $Choose_Branch -le $Max_Branch_Line ] 2>/dev/null ;then
-			if [ ! $Choose_Branch == 0 ];then
+		if [[ $Choose_Branch -le $Max_Branch_Line ]] 2>/dev/null ;then
+			if [[ ! $Choose_Branch == 0 ]];then
 				clear
 				Branch_Line=$(expr $Choose_Branch + 1)
 				Github_Source_Branch=$(sed -n ${Branch_Line}p $Github_File)
@@ -588,7 +577,7 @@ fi
 }
 
 Sources_Download_Check() {
-	if [ -f $Home/Projects/$Project/Makefile ];then
+	if [[ -f $Home/Projects/$Project/Makefile ]];then
 		cd $Home/Projects/$Project
 		[ $Project == Lede ] && sed -i "s/#src-git helloworld/src-git helloworld/g" ./feeds.conf.default
 		ln -s $Home/Backups/dl $Home/Projects/$Project/dl
@@ -605,13 +594,13 @@ Dir_Check() {
 	cd $Home
 	for WD in $(cat ./Additional/Working_Directory)
 	do
-	[ ! -d ./$WD ] && mkdir -p $WD
+		[ ! -d ./$WD ] && mkdir -p $WD
 	done
-	touch $Home/Log/AutoBuild.log
+	[[ ! -f $Home/Log/AutoBuild.log ]] && touch $Home/Log/AutoBuild.log
 }
 
 Startup_Check() {
-	if [ ! -f $Home/Configs/Username ];then
+	if [[ ! -s $Home/Configs/Username ]];then
 		read -p '首次启动,请创建一个用户名:' Username
 		echo "$Username" > $Home/Configs/Username
 	else
@@ -621,10 +610,10 @@ Startup_Check() {
 
 Second_Menu_Check() {
 	Project=$1
-	if [ -f ./Projects/$Project/Makefile ];then
+	if [[ -f ./Projects/$Project/Makefile ]];then
 		Second_Menu
 	else
-		if [ $DeveloperMode == 1 ];then
+		if [[ $DeveloperMode == 1 ]];then
 			Second_Menu
 		else
 			Sources_Download
@@ -639,7 +628,7 @@ do
 	ColorfulUI_Check
 	clear
 	MSG_TITLE "${AutoBuild_Title}"
-	MSG_COM G "1.Get Started!"
+	MSG_COM G "1.项目菜单"
 	echo "2.网络测试"
 	echo "3.高级选项"
 	echo "4.脚本设置"
@@ -663,7 +652,7 @@ do
 		DE="		"
 		Project_Details Openwrt 2 Openwrt	
 		Project_Details Lienol 3 Lienol
-		Project_Details ImmortalWrt 4 "Project ImmortalWrt"
+		Project_Details ImmortalWrt 4 ImmortalWrt
 		MSG_COM B "\nx.更新所有源代码和Feeds"
 		MSG_COM G "q.主菜单\n"
 		read -p '请从上方选择一个项目:' Choose
@@ -673,7 +662,7 @@ do
 		;;
 		x)
 			timeout 3 ping -c 1 www.baidu.com > /dev/null 2>&1
-			if [ $? -eq 0 ];then
+			if [[ $? -eq 0 ]];then
 				cd $Home/Projects
 				Multi_Sources_Update Lede
 				Multi_Sources_Update Openwrt
