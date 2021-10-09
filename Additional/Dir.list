@@ -4,6 +4,8 @@ Projects/Openwrt
 Projects/Lienol
 TEMP
 Packages
+Packages/luci-app-common
+Packages/luci-theme-common
 Firmware
 Firmware/Details
 Backups

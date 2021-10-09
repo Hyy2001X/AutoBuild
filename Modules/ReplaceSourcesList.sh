@@ -1,12 +1,11 @@
 # AutoBuild Script Module by Hyy2001
 
+Update=2021.10.07
+	
 ReplaceSourcesList() {
-	Update=2021.07.09
-	Module_Version=V2.1
-
-	SERVER_LIST=${Home}/Additional/ReplaceSourcesList/Server_List
-	CODENAME_LIST=${Home}/Additional/ReplaceSourcesList/Codename_List
-	TEMPLATE=${Home}/Additional/ReplaceSourcesList/ServerUrl_Template
+	MIRROR_LIST=${Home}/Additional/SourcesList/Mirror
+	CODENAME_LIST=${Home}/Additional/SourcesList/Codename
+	TEMPLATE=${Home}/Additional/SourcesList/ServerUrl_Template
 	BAK_FILE=${Home}/Backups/sources.list.bak
 
 	if [[ ! -f /etc/lsb-release ]];then
@@ -32,19 +31,19 @@ ReplaceSourcesList() {
 	while :
 	do
 		clear
-		MSG_TITLE "Replace SourcesList Script ${Module_Version}"
+		MSG_TITLE "Replace SourcesList"
 		echo -e "${Skyb}操作系统${Yellow}: [${OS_ID} ${OS_Version}]${White}"
 		Current_Server=$(egrep -o "[a-z]+[.][a-z]+[.][a-z]+" /etc/apt/sources.list | awk 'NR==1')
 		echo -e "${Skyb}当前系统源${Yellow}: [${Current_Server}]${White}\n"
-		if [[ -f ${SERVER_LIST} ]];then
-			Server_Count=$(sed -n '$=' ${SERVER_LIST})
+		if [[ -f ${MIRROR_LIST} ]];then
+			Server_Count=$(sed -n '$=' ${MIRROR_LIST})
 			for ((i=1;i<=${Server_Count};i++));
 			do   
-				ServerName=$(sed -n ${i}p ${SERVER_LIST} | awk '{print $1}')
+				ServerName=$(sed -n ${i}p ${MIRROR_LIST} | awk '{print $1}')
 				echo -e "${i}.${Yellow}${ServerName}${White}"
 			done
 		else
-			MSG_COM R "[未检测到 ${SERVER_LIST}]"
+			MSG_COM R "[未检测到 ${MIRROR_LIST}]"
 		fi
 		MSG_COM G "\nx.恢复默认源"
 		MSG_COM B "u.更新软件源"
@@ -78,8 +77,8 @@ ReplaceSourcesList() {
 Choose_Server() {
 	if [[ ${Choose} -gt 0 ]] > /dev/null 2>&1 ;then
 		if [[ ${Choose} -le ${Server_Count} ]] > /dev/null 2>&1 ;then
-			ServerUrl=$(sed -n ${Choose}p ${SERVER_LIST} | awk '{print $2}')
-			ServerName=$(sed -n ${Choose}p ${SERVER_LIST} | awk '{print $1}')
+			ServerUrl=$(sed -n ${Choose}p ${MIRROR_LIST} | awk '{print $2}')
+			ServerName=$(sed -n ${Choose}p ${MIRROR_LIST} | awk '{print $1}')
 			Codename=$(cat ${CODENAME_LIST} | grep "${OS_Version}" | awk '{print $2}')
 			if [[ -z ${Codename} || -z ${ServerUrl} || -z ${ServerName} ]];then
 				MSG_ERR "参数获取失败,请尝试更新 [AutoBuild] 后重试!"

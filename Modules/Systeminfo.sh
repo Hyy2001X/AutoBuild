@@ -1,13 +1,11 @@
 # AutoBuild Script Module by Hyy2001
 
+Update=2021.10.07
+
 Systeminfo() {
-	Update=2021.07.09
-	Module_Version=V1.8.1
-
 	GET_System_Info 2
-
 	clear
-	MSG_TITLE "System info Script $Module_Version"
+	MSG_TITLE "System info"
 	Decoration
 	echo -e "${Skyb}操作系统${Yellow}		${Short_OS}"
 	echo -e "${Skyb}系统版本${Yellow}		${OS_INFO}"

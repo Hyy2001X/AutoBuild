@@ -1,16 +1,15 @@
 # AutoBuild Script Module by Hyy2001
 
-Network_Test() {
-	Update=2021.07.09
-	Module_Version=V3.0.3
+Update=2021.10.07
 
+Network_Test() {
 	clear
 	[[ -z ${PingMode} ]] && PingMode=httping
 	[[ -z ${Home} ]] && Home=/tmp
 	TMP_PATH=${Home}/TEMP
 	TMP_FILE=${TMP_PATH}/NetworkTest.log
 	PING_MODE=${PingMode}
-	MSG_TITLE "Network Test Script $Module_Version [${PING_MODE}]"
+	MSG_TITLE "Network Test [${PING_MODE}]"
 	MSG_COM G "网址			次数	延迟/Min	延迟/Avg	延迟/Max	状态\n"
 
 	Run_Test www.baidu.com 2

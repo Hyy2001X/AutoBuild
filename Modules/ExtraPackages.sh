@@ -1,30 +1,30 @@
 # AutoBuild Script Module by Hyy2001
 
-ExtraPackages() {
-	Update=2021.07.09
-	Module_Version=V4.9.8
+Update=2021.10.07
 
+ExtraPackages() {
 	ExtraPackages_mkdir
 	while :
 	do
 		cd $PKG_Dir
 		clear
-		MSG_TITLE "Extra Packages Script $Module_Version"
-		echo "1.SmartDNS"
-		echo "2.[AdGuardHome] luci-app-adguardhome"
-		echo "3.OpenClash"
-		echo "4.Clash"
-		echo "5.OpenAppFilter"
-		echo "6.Passwall"
-		echo "7.MentoHust"
-		echo "8.[微信推送] ServerChan "
-		echo "9.[端口转发] Socat"
-		echo "10.[Hello World] luci-app-vssr"
-		echo "11.[Argon 配置] luci-app-argon-config"
-		echo "12.[关机/重启] luci-app-shutdown"
+		MSG_TITLE "Extra Packages"
+		echo "1. SmartDNS"
+		echo "2. AdGuard Home"
+		echo "3. OpenClash"
+		echo "4. Clash"
+		echo "5. OpenAppFilter"
+		echo "6. Passwall"
+		echo "7. MentoHust"
+		echo "8. [微信推送] ServerChan "
+		echo "9. [端口转发] Socat"
+		echo "10. [Hello World] luci-app-vssr"
+		echo "11. [Argon 配置] luci-app-argon-config"
+		echo "12. iPerf3 服务器"
+		echo "13. NPS 客户端"
 		echo -e "\nq.返回\n"
 		read -p '请从上方选择一个软件包:' Choose
-		case $Choose in
+		case ${Choose} in
 		q)
 			break
 		;;
@@ -33,23 +33,23 @@ ExtraPackages() {
 			PKG_URL=https://github.com/kenzok8/openwrt-packages/trunk/smartdns
 			ExtraPackages_svn
 			PKG_NAME=luci-app-smartdns
-			if [[ $Project == Lede ]];then
+			if [[ ${Project} == Lede ]];then
 				PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
 			else
 				PKG_URL="https://github.com/pymumu/luci-app-smartdns"
 			fi
 			ExtraPackages_git
-			rm -rf $Home/Projects/$Project/tmp
+			rm -rf ${Home}/Projects/${Project}/tmp
 		;;
 		2)
 			PKG_NAME=luci-app-adguardhome
-			PKG_URL=https://github.com/Hyy2001X/luci-app-adguardhome
-			ExtraPackages_git
+			PKG_URL=https://github.com/Hyy2001X/AutoBuild-Packages/trunk/luci-app-adguardhome
+			ExtraPackages_svn
 		;;
 		3)
 			SRC_NAME=OpenClash
-			SRC_URL="https://github.com/vernesong/OpenClash"
-			ExtraPackages_git
+			SRC_URL=https://github.com/vernesong/OpenClash/trunk/luci-app-openclash
+			ExtraPackages_svn
 		;;
 		4)
 			PKG_NAME=luci-app-clash
@@ -68,10 +68,10 @@ ExtraPackages() {
 		;;
 		7)
 			PKG_NAME=luci-app-mentohust
-			PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/luci-app-mentohust
+			PKG_URL=https://github.com/immortalwrt/luci/branches/openwrt-18.06/applications/luci-app-mentohust
 			ExtraPackages_svn
 			PKG_NAME=mentohust
-			PKG_URL=https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/mentohust
+			PKG_URL=https://github.com/immortalwrt/packages/branches/openwrt-18.06/net/mentohust
 			ExtraPackages_svn
 		;;
 		8)
@@ -95,9 +95,14 @@ ExtraPackages() {
 			ExtraPackages_git
 		;;
 		12)
-			PKG_NAME=luci-app-shutdown
-			PKG_URL=https://github.com/Hyy2001X/luci-app-shutdown
-			ExtraPackages_git
+			PKG_NAME=luci-app-iperf3-server
+			PKG_URL=https://github.com/Hyy2001X/AutoBuild-Packages/trunk/luci-app-iperf3-server
+			ExtraPackages_svn
+		;;
+		13)
+			PKG_NAME=luci-app-npc
+			PKG_URL=https://github.com/Hyy2001X/AutoBuild-Packages/trunk/luci-app-npc
+			ExtraPackages_svn
 		;;
 		esac
 	done
@@ -117,9 +122,9 @@ ExtraThemes() {
 			echo "1.luci-theme-argon"
 		fi
 		cd $PKG_Dir
-		ExtraThemesList_File=$Home/Additional/ExtraThemes_List
+		ExtraThemesList_File=${Home}/Additional/Themes.list
 		List_MaxLine=$(sed -n '$=' $ExtraThemesList_File)
-		rm -f $Home/TEMP/Checked_Themes > /dev/null 2>&1
+		rm -f ${Home}/TEMP/Checked_Themes > /dev/null 2>&1
 		for ((i=1;i<=$List_MaxLine;i++));
 			do
 				Theme=$(sed -n ${i}p $ExtraThemesList_File | awk '{print $2}')
@@ -135,7 +140,7 @@ ExtraThemes() {
 					else
 						echo -e "$(($i + 1)).${Yellow}${Theme}${White}"
 					fi
-					echo "$Theme" >> $Home/TEMP/Checked_Themes
+					echo "$Theme" >> ${Home}/TEMP/Checked_Themes
 				else
 					echo "$(($i + 1)).${Theme}"
 				fi
@@ -144,7 +149,7 @@ ExtraThemes() {
 		MSG_COM "u.更新已安装的主题包"
 		echo -e "q.返回\n"
 		read -p '请从上方选择一个主题包:' Choose
-		case $Choose in
+		case ${Choose} in
 		a)
 			clear
 			for ((i=1;i<=$List_MaxLine;i++));
@@ -163,9 +168,9 @@ ExtraThemes() {
 			Enter
 		;;
 		u)
-			if [[ -f $Home/TEMP/Checked_Themes ]];then
+			if [[ -f ${Home}/TEMP/Checked_Themes ]];then
 				clear
-				cat $Home/TEMP/Checked_Themes | while read Theme
+				cat ${Home}/TEMP/Checked_Themes | while read Theme
 				do
 					MSG_WAIT "正在更新 $Theme ..."
 					cd ./$Theme
@@ -184,7 +189,7 @@ ExtraThemes() {
 		;;
 		1)
 			PKG_NAME=luci-theme-argon
-			if [[ $Project == Lede ]];then
+			if [[ ${Project} == Lede ]];then
 				if [ -d $PKG_Home/lean/luci-theme-argon ];then
 					rm -rf $PKG_Home/lean/luci-theme-argon
 				fi
@@ -197,9 +202,9 @@ ExtraThemes() {
 			fi
 		;;
 		*)
-			if [[ $Choose -gt 0 ]] > /dev/null 2>&1 ;then
-				if [[ $(($Choose - 1)) -le $List_MaxLine ]] > /dev/null 2>&1 ;then
-					Choose=$(($Choose - 1))
+			if [[ ${Choose} -gt 0 ]] > /dev/null 2>&1 ;then
+				if [[ $((${Choose} - 1)) -le $List_MaxLine ]] > /dev/null 2>&1 ;then
+					Choose=$((${Choose} - 1))
 					URL_TYPE=$(sed -n ${Choose}p $ExtraThemesList_File | awk '{print $1}')
 					PKG_NAME=$(sed -n ${Choose}p $ExtraThemesList_File | awk '{print $2}')
 					PKG_URL=$(sed -n ${Choose}p $ExtraThemesList_File | awk '{print $3}')
@@ -211,7 +216,7 @@ ExtraThemes() {
 						ExtraPackages_svn
 					;;
 					*)
-						MSG_ERR "[第 $Choose 行：$URL_TYPE] 格式错误!请检查'/Additional/ExtraThemes_List'是否填写正确."
+						MSG_ERR "[第 ${Choose} 行：$URL_TYPE] 格式错误!请检查'/Additional/ExtraThemes_List'是否填写正确."
 						sleep 3
 					esac
 				else
@@ -248,22 +253,8 @@ ExtraPackages_svn() {
 	sleep 2
 }
 
-ExtraPackages_src-git() {
-	if [[ ! $(cat $Home/Projects/$Project/feeds.conf.default) =~ "src-git $SRC_NAME" ]];then
-		cd $Home/Projects/$Project
-		clear
-		echo "src-git $SRC_NAME $SRC_URL" >> feeds.conf.default
-		./scripts/feeds update $SRC_NAME
-		./scripts/feeds install -a
-		Enter
-	else
-		MSG_ERR "添加失败,[$SRC_NAME] 无法重复添加!"
-		sleep 2
-	fi
-}
-
 ExtraPackages_mkdir() {
-	PKG_Home=$Home/Projects/$Project/package
+	PKG_Home=${Home}/Projects/${Project}/package
 	[[ ! -d $PKG_Home/ExtraPackages ]] && mkdir -p $PKG_Home/ExtraPackages
 	PKG_Dir=$PKG_Home/ExtraPackages
 }

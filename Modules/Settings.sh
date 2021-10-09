@@ -1,9 +1,8 @@
 # AutoBuild Script Module by Hyy2001
 
-Settings() {
-	Update=2021.07.09
-	Module_Version=V2.3.3
+Update=2021.07.09
 
+Settings() {
 	while :
 	do
 		Settings_Props
@@ -33,7 +32,7 @@ Settings() {
 		MSG_COM G "\nx.恢复所有默认设置"
 		echo "q.返回"
 		GET_Choose
-		case $Choose in
+		case ${Choose} in
 		q)
 			break
 		;;
@@ -89,18 +88,18 @@ Default_Settings() {
 
 Set_Default_Settings() {
 	Default_Settings
-	echo "DeveloperMode=$DeveloperMode" > $Home/Configs/Settings
-	echo "ColorfulUI=$ColorfulUI" >> $Home/Configs/Settings
-	echo "SaveCompileLog=$SaveCompileLog" >> $Home/Configs/Settings
-	echo "PingMode=$PingMode" >> $Home/Configs/Settings
+	echo "DeveloperMode=$DeveloperMode" > ${Home}/Configs/Settings
+	echo "ColorfulUI=$ColorfulUI" >> ${Home}/Configs/Settings
+	echo "SaveCompileLog=$SaveCompileLog" >> ${Home}/Configs/Settings
+	echo "PingMode=$PingMode" >> ${Home}/Configs/Settings
 }
 
 Settings_Props() {
-	cd $Home/Configs
-	if [[ ! -f $Home/Configs/Settings ]];then
+	cd ${Home}/Configs
+	if [[ ! -f ${Home}/Configs/Settings ]];then
 		Set_Default_Settings
 	else
-		source $Home/Configs/Settings
+		source ${Home}/Configs/Settings
 	fi
 }
 
@@ -144,17 +143,17 @@ MSG_COM() {
 
 MSG_WAIT() {
 	echo -e "${Blue}${*}${White}"
-	echo "[$(date +%Y/%m/%d-%H:%M:%S)] [WAIT] ${*}" >> $Home/Log/AutoBuild.log
+	echo "[$(date +%Y/%m/%d-%H:%M:%S)] [WAIT] ${*}" >> ${Home}/Log/AutoBuild.log
 }
 
 MSG_ERR() {
 	echo -e "\n${Red}${*}${White}"
-	echo "[$(date +%Y/%m/%d-%H:%M:%S)] [ERR] ${*}" >> $Home/Log/AutoBuild.log
+	echo "[$(date +%Y/%m/%d-%H:%M:%S)] [ERR] ${*}" >> ${Home}/Log/AutoBuild.log
 }
 
 MSG_SUCC() {
 	echo -e "\n${Yellow}${*}${White}"
-	echo "[$(date +%Y/%m/%d-%H:%M:%S)] [SUCC] ${*}" >> $Home/Log/AutoBuild.log
+	echo "[$(date +%Y/%m/%d-%H:%M:%S)] [SUCC] ${*}" >> ${Home}/Log/AutoBuild.log
 }
 
 MSG_TITLE() {
