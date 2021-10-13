@@ -3,7 +3,7 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 
-Update=2021.10.9
+Update=2021.10.13
 Version=V4.4
 
 Second_Menu() {
@@ -13,21 +13,20 @@ Second_Menu() {
 
 	while :
 	do
-		cd ${Build_Path}
 		clear
-		if [[ -s Makefile ]]
+		if [[ -s ${Build_Path}/Makefile ]]
 		then
-			ECHO "源码位置:${Build_Path}"
-			ECHO "源码分支:$(GET_Branch ${Build_Path})"
+			cd ${Build_Path}
+			ECHO G "源码位置: ${Build_Path}:$(GET_Branch ${Build_Path})"
 			Version=$(egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" package/lean/default-settings/files/zzz-default-settings 2> /dev/null)
-			[[ -n ${Version} ]] && ECHO "源码版本:${Version}"
+			[[ -n ${Version} ]] && ECHO "源码版本: ${Version}"
 			unset Version
 			if [[ -s ${Home}/Configs/${Project}_Recently_Updated ]]
 			then
-				ECHO "最近更新:$(cat ${Home}/Configs/${Project}_Recently_Updated)"
+				ECHO "最近更新: $(cat ${Home}/Configs/${Project}_Recently_Updated)"
 			fi
 		else
-			ECHO R "警告:未检测到[${Project}]源码,请前往[高级选项]下载!"
+			return
 		fi
 		echo
 		echo "1. 更新源代码"
@@ -35,7 +34,7 @@ Second_Menu() {
 		echo "3. 备份与恢复"
 		echo "4. 编译选项"
 		echo "5. 高级选项"
-		ECHO G "\nm. 主菜单"
+		ECHO X "\nm. 主菜单"
 		echo "q. 返回"
 		GET_Choose Choose
 		case ${Choose} in
@@ -49,7 +48,7 @@ Second_Menu() {
 			Sources_Update common ${Project}
 		;;
 		2)
-			Make_Menuconfig
+			Menuconfig $(pwd)
 		;;
 		3)
 			BackupServices
@@ -77,7 +76,7 @@ Project_Options() {
 		echo "6. 删除配置文件"
 		echo "7. 下载 [dl]库"
 		echo "8. 源代码更新日志"
-		ECHO G "\nm. 主菜单"
+		ECHO X "\nm. 主菜单"
 		echo "q. 返回"
 		GET_Choose Choose
 		case ${Choose} in
@@ -126,12 +125,12 @@ BackupServices() {
 	while :
 	do
 		clear
-		ECHO G "备份与恢复"
+		ECHO X "备份与恢复\n"
 		echo "1. 备份 [.config]"
 		echo "2. 恢复 [.config]"
-		echo "3. 备份 [${Project}]源代码"
-		echo "4. 恢复 [${Project}]源代码"
-		ECHO G "5. 链接 [dl]库"
+		echo "3. 备份 [${Project}] 源码文件"
+		echo "4. 恢复 [${Project}] 源码文件"
+		ECHO X "5. 链接 [dl]库"
 		echo -e "\nq. 返回"
 		GET_Choose Choose
 		case ${Choose} in
@@ -142,7 +141,7 @@ BackupServices() {
 			while :;do
 				cd ${Home}
 				clear
-				ECHO G "备份[.config]"
+				ECHO X "备份 [.config]\n"
 				echo -e "1. 固定名称"
 				echo "2. 自定义名称"
 				echo -e "\nq. 返回"
@@ -178,7 +177,7 @@ BackupServices() {
 				while :
 				do
 					clear
-					ECHO G "恢复[.config]"
+					ECHO X "恢复 [.config]\n"
 					cd ${Home}/Backups/Configs
 					ls -A | cat > ${Cache_Path}/Config.List
 					ConfigList_File=${Cache_Path}/Config.List
@@ -188,8 +187,8 @@ BackupServices() {
 						ConfigFile_Name=$(sed -n ${i}p $ConfigList_File)
 						echo -e "${i}. ${Yellow}${ConfigFile_Name}${White}"
 					done
-					echo -e "\nq.返回\n"
-					read -p '请从上方选择一个文件:' Choose
+					echo -e "\nq.返回"
+					GET_Choose Choose
 					case ${Choose} in
 					q)
 						break
@@ -225,7 +224,7 @@ BackupServices() {
 			fi
 		;;
 		3)
-			ECHO G "\n正在备份[${Project}]源码文件,请稍后 ..."
+			ECHO X "\n正在备份[${Project}]源码文件,请稍后 ..."
 			[[ ! -d ${Home}/Backups/Projects/${Project} ]] && mkdir -p ${Home}/Backups/Projects/${Project}
 			rm -rf ${Home}/Backups/Projects/${Project}/*
 			for X in $(echo ${Backup_List[@]})
@@ -240,7 +239,7 @@ BackupServices() {
 		4)
 			if [[ -f ${Home}/Backups/Projects/${Project}/Makefile ]]
 			then
-				ECHO G "\n正在恢复[${Project}]源码文件,请稍后 ..."
+				ECHO X "\n正在恢复[${Project}]源码文件,请稍后 ..."
 				for X in $(echo ${Backup_List[@]})
 				do
 					rm -rf ${Home}/Projects/${X}
@@ -280,7 +279,7 @@ Advanced_Options() {
 		echo "6. 系统信息"
 		echo "7. 系统下载源"
 		ECHO "\nx. 更新脚本"
-		ECHO G "q. 主菜单"
+		ECHO X "q. 主菜单"
 		GET_Choose Choose
 		case ${Choose} in
 		q)
@@ -300,7 +299,7 @@ Advanced_Options() {
 			sudo apt-get update
 			i=1;while [[ $i -le 3 ]];do
 				clear
-				ECHO G "开始第 $i 次安装..."
+				ECHO X "开始第 $i 次安装..."
 				sleep 2
 				sudo apt-get -y install ${Dependency} 
 				sudo apt-get -y install ${Extra_Dependency}
@@ -347,7 +346,7 @@ Space_Cleaner() {
 		echo "1. 执行 [make clean]"
 		echo "2. 执行 [make dirclean]"
 		echo "3. 执行 [make distclean]"
-		ECHO R "4. 删除 [${Project}] 项目"
+		ECHO G "4. 删除 [${Project}] 项目"
 		echo "5. 清理 [临时文件/编译缓存]"
 		echo "6. 清理 [更新日志]"
 		echo "7. 清理 [编译日志]"
@@ -359,23 +358,19 @@ Space_Cleaner() {
 			break
 		;;
 		1)
-			echo
-			ECHO G "正在执行 [make clean],请稍后 ..."
+			ECHO X "\n正在执行 [make clean],请稍后 ..."
 			make clean > /dev/null 2>&1
 		;;
 		2)
-			echo
-			ECHO G "正在执行 [make dirclean],请稍后 ..."
+			ECHO X "\n正在执行 [make dirclean],请稍后 ..."
 			make dirclean > /dev/null 2>&1
 		;;
 		3)
-			echo
-			ECHO G "正在执行 [make distclean],请稍后 ..."
+			ECHO X "\n正在执行 [make distclean],请稍后 ..."
 			make distclean > /dev/null 2>&1
 		;;
 		4)
-			echo
-			ECHO G "正在删除 [${Project}],请稍后 ..."
+			ECHO X "\n正在删除 [${Project}],请稍后 ..."
 			rm -rf ${Build_Path}/*
 			rm -f ${Home}/Configs/${Project}_Recently_*
 			rm -f ${Home}/Log/*_${Project}_*
@@ -393,7 +388,7 @@ Space_Cleaner() {
 			ECHO Y "\n[编译日志] 删除成功!"
 		;;
 		esac
-		sleep 2
+		sleep 3
 	done
 }
 
@@ -401,31 +396,31 @@ Module_Updater() {
 	if [[ $(NETWORK_CHECK 223.5.5.5) == 0 ]]
 	then
 		clear
-		ECHO G "正在更新 [AutoBuild],请稍后 ..."
-		cd ${Home}/Backups
-		if [[ -z $(ls -A ./AutoBuild-Update) ]];then
-			git clone https://github.com/Hyy2001X/AutoBuild AutoBuild-Update
+		ECHO X "正在更新 [AutoBuild] 程序,请稍后 ...\n"
+		if [[ -z $(ls -A ${Home}/Backups/AutoBuild-Update) ]]
+		then
+			git clone https://github.com/Hyy2001X/AutoBuild ${Home}/Backups/AutoBuild-Update
 		fi
-		cd ./AutoBuild-Update
-		Update_Logfile=${Home}/Log/Script_Update_$(date +%Y%m%d_%H:%M).log
-		git pull 2>&1 | tee $Update_Logfile || Update_Failed=1
-		if [[ -z ${Update_Failed} ]];then
-			ECHO "\n合并到本地文件..."
+		cd ${Home}/Backups/AutoBuild-Update
+		Update_Logfile=${Home}/Log/AutoBuild_Update_$(date +%Y%m%d_%H:%M).log
+		git fetch --all | tee -a ${Update_Logfile}
+		git reset --hard origin/master | tee -a ${Update_Logfile} || Update_Failed=1
+		git pull 2>&1 | tee ${Update_Logfile} || Update_Failed=1
+		if [[ -z ${Update_Failed} ]]
+		then
 			Old_Version=$(awk 'NR==7' ${Home}/AutoBuild.sh | awk -F'[="]+' '/Version/{print $2}')
-			Old_Version_Dir=${Old_Version}-$(date +%Y%m%d_%H:%M)
-			Backups_Dir=${Home}/Backups/OldVersion/AutoBuild-Core-${Old_Version}
-			[ -d ${Backups_Dir} ] && rm -rf ${Backups_Dir}
+			Backups_Dir=${Home}/Backups/OldVersion/AutoBuild-${Old_Version}-$(date +%Y%m%d-%H%M)
 			mkdir -p ${Backups_Dir}
 			mv ${Home}/AutoBuild.sh ${Backups_Dir}/AutoBuild.sh
 			mv ${Home}/README.md ${Backups_Dir}/README.md
 			mv ${Home}/LICENSE ${Backups_Dir}/LICENSE
 			mv ${Home}/Depends ${Backups_Dir}/Depends 2>/dev/null 
 			cp -a * ${Home}
-			ECHO Y "\n[AutoBuild] 更新成功!"
+			ECHO Y "\n[AutoBuild] 程序更新成功!"
 			Enter
-			${Home}/AutoBuild.sh
+			chmod 777 ${Home}/AutoBuild.sh && exec ${Home}/AutoBuild.sh
 		else
-			ECHO R "\n[AutoBuild] 更新失败!"
+			ECHO R "\n[AutoBuild] 程序更新失败!"
 			Enter
 		fi
 	else
@@ -461,10 +456,17 @@ Make_Download() {
 	Enter
 }
 
-Make_Menuconfig() {
+Menuconfig() {
+	cd $1
+	echo
+	read -p "是否删除旧配置文件?[Y/n]:" Choose
 	clear
-	cd ${Build_Path}
 	ECHO B "Loading ${Project} Configuration..."
+	case ${Choose} in
+	[Yy])
+		rm -rf .config*
+	;;
+	esac
 	make menuconfig
 	Enter
 }
@@ -477,20 +479,21 @@ Sources_Download() {
 		return
 	fi
 	clear
-	ECHO G "[${Project}] 源码下载: 分支选择\n"
+	ECHO X "[${Project}] 源码下载: 分支选择\n"
 	Github_File=${Home}/Depends/Projects/${Project}
-	Github_Source_Link=$(sed -n 1p $Github_File)
-	ECHO "仓库地址:$Github_Source_Link\n"
-	Max_All_Line=$(sed -n '$=' $Github_File)
-	Max_Branch_Line=$(expr $Max_All_Line - 1)
+	Github_Source_Link=$(sed -n 1p ${Github_File})
+	ECHO G "仓库地址: ${Github_Source_Link}\n"
+	ECHO "请从下方选择一个分支:\n"
+	Max_All_Line=$(sed -n '$=' ${Github_File})
+	Max_Branch_Line=$(expr ${Max_All_Line} - 1)
 	for ((i=2;i<=${Max_All_Line};i++));do
-		Github_File_Branch=$(sed -n ${i}p $Github_File)
-		X=$(expr $i - 1)
-		echo "${X}.${Github_File_Branch}"
+		Github_File_Branch=$(sed -n ${i}p ${Github_File})
+		X=$(expr ${i} - 1)
+		echo "${X}. ${Github_File_Branch}"
 	done
 	unset X i
-	echo -e "\nq.返回\n"
-	read -p '请从上方选择一个分支:' Choose_Branch
+	echo -e "\nq.返回"
+	GET_Choose Choose_Branch
 	case ${Choose_Branch} in
 	q)
 		break
@@ -579,8 +582,8 @@ Module_Builder() {
 		TARGET_ARCH_PACKAGES=$(awk -F '[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config)
 		CPU_TEMP=$(echo "$(sensors 2> /dev/null | grep Core | awk '{Sum += $3};END {print Sum}') / $(sensors 2>/dev/null | grep Core | wc -l)" | bc 2>/dev/null)
 		clear
-		ECHO G "AutoBuild 固件编译"
-		ECHO G "设备信息:${CPU_Model} ${CPU_Cores} Cores ${CPU_Threads} Threads ${CPU_TEMP}\n"
+		ECHO X "AutoBuild 固件编译\n"
+		ECHO X "设备信息:${CPU_Model} ${CPU_Cores} Cores ${CPU_Threads} Threads ${CPU_TEMP}\n"
 		if [ -f .config ];then
 			if [ -f ${Home}/Configs/${Project}_Recently_Config ];then
 				echo -e "${Yellow}最近配置文件:${Blue}[$(cat ${Home}/Configs/${Project}_Recently_Config)]${White}\n"
@@ -603,14 +606,13 @@ Module_Builder() {
 		echo -e "4. make -j${CPU_Threads} V=s${White}"
 		echo "5. make menuconfig"
 		echo "6. make defconfig"
-		echo "7. 手动输入参数"
-		ECHO G "8. 高级选项"
+		ECHO X "7. 高级选项"
 		echo "q. 返回"
 		if [[ -f ${Home}/Configs/${Project}_Recently_Compiled ]]
 		then
 			Recently_Compiled=$(awk 'NR==1' ${Home}/Configs/${Project}_Recently_Compiled)
 			Recently_Compiled_Stat=$(awk 'NR==2' ${Home}/Configs/${Project}_Recently_Compiled)
-			echo -e "\n${Yellow}最近编译时间:${Blue}[${Recently_Compiled}${Recently_Compiled_Stat}]${White}"
+			echo -e "\n${Yellow}最近编译时间: ${Blue}[${Recently_Compiled}${Recently_Compiled_Stat}]${White}"
 		fi
 		GET_Choose Choose_1
 		case ${Choose_1} in
@@ -630,40 +632,29 @@ Module_Builder() {
 			Compile_Threads="make -j${CPU_Threads} V=s"
 		;;
 		5)
-			Make_Menuconfig
+			Menuconfig $(pwd)
 		;;
 		6)
 			echo
-			ECHO G "\n正在执行 [make defconfig],请稍后 ..."
+			ECHO X "正在执行 [make defconfig],请稍后 ..."
 			make defconfig
 		;;
 		7)
-			echo
-			read -p '请输入编译参数:' Compile_Threads
-			[[ -z "$Compile_Threads" ]] && ECHO R "\n未输入任何参数,无法执行!" && sleep 2 || {
-				clear
-				ECHO G "即将执行自定义参数 [${Compile_Threads}]..."
-				echo && ${Compile_Threads} && echo
-				ECHO G "自定义参数执行结束!"
-				Enter
-			}
-		;;
-		8)
 			while :;do
 				clear
-				ECHO G "AutoBuild Firmware 高级选项"
+				ECHO X "AutoBuild Firmware 高级选项\n"
 				echo "1. 执行 [make kernel_menuconfig]"
 				echo "2. 执行 [make download]"
 				echo "3. 分离 [.config] > defconfig"
 				echo "4. 删除 [.config]"
 				echo "5. 更多空间清理"
 				echo -e "\nq. 返回"
-				ECHO G "m. 主菜单"
+				ECHO X "m. 主菜单"
 				GET_Choose Choose
 				case ${Choose} in
 				1)
 					clear
-					ECHO G "正在执行 [make kernel_menuconfig],请稍后 ..."
+					ECHO X "正在执行 [make kernel_menuconfig],请稍后 ..."
 					make kernel_menuconfig
 				;;
 				2)
@@ -710,7 +701,7 @@ Module_Builder() {
 			Firmware_Path="${Build_Path}/bin/targets/${TARGET_BOARD}/${TARGET_SUBTARGET}"
 			Packages_Path=${Home}/Packages
 			ECHO Y "固件信息: ${CURRENT_Version}\n"
-			ECHO G "开始编译 ${TARGET_PROFILE} ..."
+			ECHO X "开始编译 ${TARGET_PROFILE} ..."
 			Compile_Date=$(date +%Y%m%d-%H:%M)
 			Compile_Started=$(date +"%Y-%m-%d %H:%M:%S")
 			echo "${Compile_Started}" > ${Home}/Configs/${Project}_Recently_Compiled
@@ -718,9 +709,9 @@ Module_Builder() {
 			mkdir -p ${Home}/Packages/${TARGET_ARCH_PACKAGES}
 			mkdir -p "${Packages_Path}/${TARGET_ARCH_PACKAGES}/Kernel Modules"
 			echo
-			ECHO G "备份当前 dl 库到 '${Home}/Backups/dl' ..."
+			ECHO X "备份当前 dl 库到 '${Home}/Backups/dl' ..."
 			awk "BEGIN { cmd=\"cp -a ${Build_Path}/dl/* ${Home}/Backups/dl\"; print "n" | cmd; }" > /dev/null 2>&1
-			ECHO G "备份软件包到 '${Home}/Packages' ..."
+			ECHO X "备份软件包到 '${Home}/Packages' ..."
 			rm -rf ${Cache_Path}/Packages && mkdir -p ${Cache_Path}/Packages
 			mv -f $(find ${Build_Path}/bin -type f -name "*.ipk") ${Cache_Path}/Packages > /dev/null 2>&1
 			mv -f $(find ${Cache_Path}/Packages -type f -name "kmod-*.ipk") "${Packages_Path}/${TARGET_ARCH_PACKAGES}/Kernel Modules" > /dev/null 2>&1
@@ -824,7 +815,7 @@ ExtraPackages() {
 	do
 		cd ${ExtraPackages_Path}
 		clear
-		ECHO G "Extra Packages"
+		ECHO X "Extra Packages"
 		echo "1. SmartDNS"
 		echo "2. AdGuard Home"
 		echo "3. OpenClash"
@@ -929,7 +920,7 @@ ExtraThemes() {
 	while :
 	do
 		clear
-		ECHO G "添加第三方主题包\n"
+		ECHO X "添加第三方主题包\n"
 		if [[ -f ${PKG_Path}/lean/luci-theme-argon/Makefile ]];then
 			Theme_Version="$(cat ${PKG_Path}/lean/luci-theme-argon/Makefile | grep 'PKG_VERSION' | cut -c14-20)"
 			echo -e "1. ${Yellow}luci-theme-argon [${Theme_Version}]${White}"
@@ -960,7 +951,7 @@ ExtraThemes() {
 					echo "$(($i + 1)). ${Theme}"
 				fi
 		done
-		ECHO G "\na. 添加所有主题包"
+		ECHO X "\na. 添加所有主题包"
 		ECHO "u. 更新已安装的主题包"
 		echo -e "q. 返回\n"
 		read -p '请从上方选择一个主题包:' Choose
@@ -987,7 +978,7 @@ ExtraThemes() {
 				clear
 				cat ${Cache_Path}/Checked_Themes | while read Theme
 				do
-					ECHO G "正在更新 ${Theme} ..."
+					ECHO X "正在更新 ${Theme} ..."
 					cd ./${Theme}
 					svn update > /dev/null 2>&1
 					git pull > /dev/null 2>&1
@@ -1078,8 +1069,8 @@ Module_Network_Test() {
 	clear
 	TMP_FILE=${Cache_Path}/NetworkTest.log
 	PING_MODE=httping
-	ECHO G "Network Test [${PING_MODE}]"
-	ECHO G "网址			次数	延迟/Min	延迟/Avg	延迟/Max	状态\n"
+	ECHO X "Network Test [${PING_MODE}]"
+	ECHO X "网址			次数	延迟/Min	延迟/Avg	延迟/Max	状态\n"
 
 	Run_Test www.baidu.com 2
 	Run_Test git.openwrt.com 3
@@ -1151,7 +1142,7 @@ Module_SourcesList() {
 	while :
 	do
 		clear
-		ECHO G "Replace SourcesList"
+		ECHO X "Replace SourcesList"
 		echo -e "${Grey}操作系统${Yellow}: [${OS_ID} ${OS_Version}]${White}"
 		Current_Server=$(egrep -o "[a-z]+[.][a-z]+[.][a-z]+" /etc/apt/sources.list | awk 'NR==1')
 		echo -e "${Grey}当前系统源${Yellow}: [${Current_Server}]${White}\n"
@@ -1165,7 +1156,7 @@ Module_SourcesList() {
 		else
 			ECHO R "[未检测到 ${MIRROR_LIST}]"
 		fi
-		ECHO G "\nx.恢复默认源"
+		ECHO X "\nx.恢复默认源"
 		ECHO B "u.更新软件源"
 		echo "q.返回"
 		GET_Choose Choose
@@ -1229,15 +1220,24 @@ Replace_Server() {
 }
 
 ECHO() {
-	case $1 in
+	local Color
+	case $# in
+	1)
+		echo -e "${White}${*}${White}"
+	;;
+	2)
+		case $1 in
 		R) Color="${Red}";;
 		G) Color="${Green}";;
 		B) Color="${Blue}";;
 		Y) Color="${Yellow}";;
 		X) Color="${Grey}";;
+		*) Color="${White}";;
+		esac
+		shift
+		echo -e "${Color}${*}${White}"
+	;;
 	esac
-	[[ $# -gt 1 ]] && shift
-	echo -e "${White}${Color}${*}${White}"
 }
 
 GET_Choose() {
@@ -1257,9 +1257,9 @@ Decoration() {
 Module_SSHServices() {
 	while :;do
 		clear
-		ECHO G "SSH Services"
+		ECHO X "SSH Services"
 		List_SSHProfile
-		ECHO G "\nn. 创建新配置文件"
+		ECHO X "\nn. 创建新配置文件"
 		[[ -n $(ls -A ${Home}/Configs/SSH) ]] && ECHO R "d. 删除所有配置文件"
 		echo "x. 重置 [RSA Key Fingerprint]"
 		echo -e "q. 返回\n"
@@ -1421,7 +1421,7 @@ List_SSHProfile() {
 		echo "$(ls -A)" > ${Cache_Path}/SSHProfileList
 		SSHProfileList=${Cache_Path}/SSHProfileList
 		SSHProfileList_MaxLine=$(sed -n '$=' $SSHProfileList)
-		ECHO G "配置文件列表"
+		ECHO X "配置文件列表"
 		echo
 		for ((i=1;i<=$SSHProfileList_MaxLine;i++));
 		do   
@@ -1450,7 +1450,7 @@ SSH_Login() {
 Module_Systeminfo() {
 	GET_System_Info 2
 	clear
-	ECHO G "System info"
+	ECHO X "System info"
 	Decoration 70
 	echo -e "${Grey}操作系统${Yellow}		${Short_OS}"
 	echo -e "${Grey}系统版本${Yellow}		${OS_INFO}"
@@ -1529,7 +1529,7 @@ AutoBuild_Core() {
 			while :;do
 				clear
 				ECHO X "${AutoBuild_Title}\n"
-				ECHO G "项目名称		[项目状态]	Maintainer\n"
+				ECHO X "项目名称		[项目状态]	Maintainer\n"
 				
 				Project_Details 1 Lede coolsnowwolf
 				Project_Details 2 Openwrt Openwrt	
@@ -1537,7 +1537,7 @@ AutoBuild_Core() {
 				Project_Details 4 ImmortalWrt ImmortalWrt
 				
 				ECHO B "\nx.更新所有源代码和Feeds"
-				ECHO G "q.主菜单\n"
+				ECHO X "q.主菜单\n"
 				read -p '请从上方选择一个项目:' Choose
 				case ${Choose} in
 				q)
