@@ -63,8 +63,7 @@ Second_Menu() {
 }
 
 Project_Options() {
-	while :
-	do
+	while :;do
 		cd ${Build_Path}
 		clear
 		ECHO X "源码高级选项\n"
@@ -105,8 +104,8 @@ Project_Options() {
 		;;
 		7)
 			clear
-			if [[ -d ${Build_Path}/.git ]];then
-				cd ${Build_Path}
+			if [[ -d .git ]]
+			then
 				git log -20 --graph --all --branches --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%cr)%C(reset) %C(bold green)(%ai)%C(reset) %C(white)%s'
 				Enter
 			fi
@@ -146,7 +145,8 @@ BackupServices() {
 				;;
 				1)
 					Backup_Config=${Project}-$(date +%m%d_%H:%M)
-					if [[ -f ./Projects/${Project}/.config ]];then
+					if [[ -f ./Projects/${Project}/.config ]]
+					then
 						cp ./Projects/${Project}/.config ./Backups/Configs/${Backup_Config}
 						ECHO Y "\n备份成功![.config] 已备份到:'/Backups/Configs/${Backup_Config}'"
 					else
@@ -155,7 +155,8 @@ BackupServices() {
 				;;
 				2)
 					read -p '请输入自定义名称:' Backup_Config
-					if [[ -f ./Projects/${Project}/.config ]];then
+					if [[ -f ./Projects/${Project}/.config ]]
+					then
 						cp ./Projects/${Project}/.config ./Backups/Configs/"${Backup_Config}"
 						ECHO Y "\n备份成功![.config] 已备份到:'/Backups/Configs/${Backup_Config}'"
 					else
@@ -167,7 +168,8 @@ BackupServices() {
 			done
 		;;
 		2)
-			if [[ -n "$(ls -A ${Home}/Backups/Configs)" ]];then
+			if [[ -n "$(ls -A ${Home}/Backups/Configs)" ]]
+			then
 				while :
 				do
 					clear
@@ -188,10 +190,13 @@ BackupServices() {
 						break
 					;;
 					*)
-						if [[ ${Choose} -le ${Max_ConfigList_Line} ]] 2>/dev/null ;then
-							if [[ ! ${Choose} == 0 ]] 2>/dev/null ;then
+						if [[ ${Choose} -le ${Max_ConfigList_Line} ]] 2> /dev/null
+						then
+							if [[ ! ${Choose} == 0 ]] 2> /dev/null
+							then
 								ConfigFile=$(sed -n ${Choose}p $ConfigList_File)
-								if [[ -f "${ConfigFile}" ]];then
+								if [[ -f "${ConfigFile}" ]]
+								then
 									ConfigFile_Dir="${Home}/Backups/Configs/$ConfigFile"
 									cp "$ConfigFile_Dir" ${Build_Path}/.config
 									echo "${ConfigFile}" > ${Home}/Configs/${Project}_Recently_Config
@@ -291,7 +296,7 @@ Advanced_Options() {
 		2)
 			clear
 			$(which sudo) apt-get -y update
-			i=1;while [[ $i -le 3 ]];do
+			local i=1;while [[ $i -le 3 ]];do
 				clear
 				ECHO X "开始第 $i 次安装..."
 				sleep 2
@@ -408,7 +413,7 @@ Module_Updater() {
 			mv ${Home}/AutoBuild.sh ${Backups_Dir}/AutoBuild.sh
 			mv ${Home}/README.md ${Backups_Dir}/README.md
 			mv ${Home}/LICENSE ${Backups_Dir}/LICENSE
-			mv ${Home}/Depends ${Backups_Dir}/Depends 2>/dev/null 
+			mv ${Home}/Depends ${Backups_Dir}/Depends 2> /dev/null 
 			cp -a * ${Home}
 			ECHO Y "\n[AutoBuild] 程序更新成功!"
 			Enter
@@ -836,7 +841,8 @@ ExtraPackages() {
 			PKG_URL=https://github.com/kenzok8/openwrt-packages/trunk/smartdns
 			ExtraPackages_svn
 			PKG_NAME=luci-app-smartdns
-			if [[ ${Project} == Lede ]];then
+			if [[ ${Project} == Lede ]]
+			then
 				PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
 			else
 				PKG_URL="https://github.com/pymumu/luci-app-smartdns"
@@ -917,7 +923,8 @@ ExtraThemes() {
 	do
 		clear
 		ECHO X "添加第三方主题包\n"
-		if [[ -f ${PKG_Path}/lean/luci-theme-argon/Makefile ]];then
+		if [[ -f ${PKG_Path}/lean/luci-theme-argon/Makefile ]]
+		then
 			Theme_Version="$(cat ${PKG_Path}/lean/luci-theme-argon/Makefile | grep 'PKG_VERSION' | cut -c14-20)"
 			echo -e "1. ${Yellow}luci-theme-argon [${Theme_Version}]${White}"
 		else
@@ -930,11 +937,14 @@ ExtraThemes() {
 		for ((i=1;i<=${List_MaxLine};i++));
 			do
 				Theme=$(sed -n ${i}p $ExtraThemesList_File | awk '{print $2}')
-				if [[ -f ${ExtraPackages_Path}/${Theme}/Makefile ]];then
-					if [[ $(cat ${ExtraPackages_Path}/${Theme}/Makefile) =~ PKG_VERSION ]];then
+				if [[ -f ${ExtraPackages_Path}/${Theme}/Makefile ]]
+				then
+					if [[ $(cat ${ExtraPackages_Path}/${Theme}/Makefile) =~ PKG_VERSION ]]
+					then
 						GET_Version="$(cat ${ExtraPackages_Path}/${Theme}/Makefile | grep 'PKG_VERSION' | cut -c14-20)"
 						Theme_Version=" [${GET_Version}]"
-						if [[ $(cat ${ExtraPackages_Path}/${Theme}/Makefile) =~ PKG_RELEASE ]];then
+						if [[ $(cat ${ExtraPackages_Path}/${Theme}/Makefile) =~ PKG_RELEASE ]]
+						then
 							GET_Release="$(cat ${ExtraPackages_Path}/${Theme}/Makefile | grep 'PKG_RELEASE' | cut -c14-20)"
 							Theme_Version=" [${GET_Version}-${GET_Release}]"
 						fi
@@ -970,7 +980,8 @@ ExtraThemes() {
 			Enter
 		;;
 		u)
-			if [[ -f ${Cache_Path}/Checked_Themes ]];then
+			if [[ -f ${Cache_Path}/Checked_Themes ]]
+			then
 				clear
 				cat ${Cache_Path}/Checked_Themes | while read Theme
 				do
@@ -991,8 +1002,10 @@ ExtraThemes() {
 		;;
 		1)
 			PKG_NAME=luci-theme-argon
-			if [[ ${Project} == Lede ]];then
-				if [ -d ${PKG_Path}/lean/luci-theme-argon ];then
+			if [[ ${Project} == Lede ]]
+			then
+				if [[ -d ${PKG_Path}/lean/luci-theme-argon ]]
+				then
 					rm -rf ${PKG_Path}/lean/luci-theme-argon
 				fi
 				PKG_URL=" -b 18.06 https://github.com/jerrykuku/luci-theme-argon"
@@ -1004,8 +1017,10 @@ ExtraThemes() {
 			fi
 		;;
 		*)
-			if [[ ${Choose} -gt 0 ]] > /dev/null 2>&1 ;then
-				if [[ $((${Choose} - 1)) -le ${List_MaxLine} ]] > /dev/null 2>&1 ;then
+			if [[ ${Choose} -gt 0 ]] > /dev/null 2>&1
+			then
+				if [[ $((${Choose} - 1)) -le ${List_MaxLine} ]] > /dev/null 2>&1
+				then
 					Choose=$((${Choose} - 1))
 					URL_TYPE=$(sed -n ${Choose}p $ExtraThemesList_File | awk '{print $1}')
 					PKG_NAME=$(sed -n ${Choose}p $ExtraThemesList_File | awk '{print $2}')
@@ -1036,7 +1051,8 @@ ExtraThemes() {
 ExtraPackages_git() {
 	[[ -d ${ExtraPackages_Path}/${PKG_NAME} ]] && rm -rf ${ExtraPackages_Path}/${PKG_NAME}
 	git clone ${PKG_URL} ${PKG_NAME} > /dev/null 2>&1
-	if [[ -f ${ExtraPackages_Path}/${PKG_NAME}/Makefile || -f ${ExtraPackages_Path}/${PKG_NAME}/README.md || -n $(ls -A ${ExtraPackages_Path}/${PKG_NAME}) ]];then
+	if [[ -f ${ExtraPackages_Path}/${PKG_NAME}/Makefile || -f ${ExtraPackages_Path}/${PKG_NAME}/README.md || -n $(ls -A ${ExtraPackages_Path}/${PKG_NAME}) ]]
+	then
 		ECHO Y "\n已添加 ${PKG_NAME}"
 	else
 		ECHO R "\n未添加 ${PKG_NAME}"
@@ -1047,7 +1063,8 @@ ExtraPackages_git() {
 ExtraPackages_svn() {
 	[[ -d ${ExtraPackages_Path}/${PKG_NAME} ]] && rm -rf ${ExtraPackages_Path}/${PKG_NAME}
 	svn checkout ${PKG_URL} ${PKG_NAME} > /dev/null 2>&1
-	if [[ -f ${ExtraPackages_Path}/${PKG_NAME}/Makefile || -f ${ExtraPackages_Path}/${PKG_NAME}/README.md || -n $(ls -A ${ExtraPackages_Path}/${PKG_NAME}) ]];then
+	if [[ -f ${ExtraPackages_Path}/${PKG_NAME}/Makefile || -f ${ExtraPackages_Path}/${PKG_NAME}/README.md || -n $(ls -A ${ExtraPackages_Path}/${PKG_NAME}) ]]
+	then
 		ECHO Y "\n已添加 ${PKG_NAME}"
 	else
 		ECHO R "\n未添加 ${PKG_NAME}"
@@ -1065,14 +1082,13 @@ Module_Network_Test() {
 	clear
 	TMP_FILE=${Cache_Path}/NetworkTest.log
 	PING_MODE=httping
-	ECHO X "Network Test [${PING_MODE}]"
-	ECHO X "网址			次数	延迟/Min	延迟/Avg	延迟/Max	状态\n"
-
+	[[ -z $(which ${PING_MODE}) ]] && PING_MODE=ping
+	ECHO X "网络测试 [${PING_MODE}]\n"
+	ECHO G "网址			次数	延迟/Min	延迟/Avg	延迟/Max	状态\n"
 	Run_Test www.baidu.com 2
 	Run_Test git.openwrt.com 3
 	Run_Test www.google.com 3
 	Run_Test www.github.com 3
-
 	Enter
 }
 
@@ -1083,7 +1099,8 @@ Run_Test() {
 	[[ -z $1 || -z $2 ]] && return
 	[[ ! ${_COUNT} -gt 0 ]] 2> /dev/null && return
 	timeout 3 ${PING_MODE} ${_URL} -c 1 > /dev/null 2>&1
-	if [ $? == 0 ];then
+	if [[ $? == 0 ]]
+	then
 		echo -ne "\r${Grey}测试中...${White}\r"
 		timeout ${_TIMEOUT} ${PING_MODE} ${_URL} -c ${_COUNT} > ${TMP_FILE}
 		_IP=$(egrep -o "[0-9]+.[0-9]+.[0-9]+.[0-9]" ${TMP_FILE} | awk 'NR==1')
@@ -1092,13 +1109,17 @@ Run_Test() {
 		_PING_AVG=$(echo ${_PING} | egrep -o "[0-9]+.[0-9]+" | awk 'NR==2')
 		_PING_MAX=$(echo ${_PING} | egrep -o "[0-9]+.[0-9]+" | awk 'NR==3')
 		_PING_PROC=$(echo ${_PING_AVG} | egrep -o "[0-9]+" | awk 'NR==1')
-		if [[ ${_PING_PROC} -le 50 ]];then
+		if [[ ${_PING_PROC} -le 50 ]]
+		then
 			_TYPE="${Yellow}优秀"
-		elif [[ ${_PING_PROC} -le 100 ]];then
+		elif [[ ${_PING_PROC} -le 100 ]]
+		then
 			_TYPE="${Blue}良好"
-		elif [[ ${_PING_PROC} -le 200 ]];then
+		elif [[ ${_PING_PROC} -le 200 ]]
+		then
 			_TYPE="${Grey}一般"
-		elif [[ ${_PING_PROC} -le 250 ]];then
+		elif [[ ${_PING_PROC} -le 250 ]]
+		then
 			_TYPE="${Red}较差"
 		else
 			_TYPE="${Red}差"
@@ -1115,32 +1136,29 @@ Module_SourcesList() {
 	TEMPLATE=${Home}/Depends/Sources_List/ServerUrl_Template
 	BAK_FILE=${Home}/Backups/sources.list.bak
 
-	if [[ ${Short_OS} != Ubuntu ]];then
+	if [[ ${Short_OS} != Ubuntu ]]
+	then
 		ECHO R "\n暂不支持此操作系统,当前支持的操作系统: [Ubuntu]"
 		sleep 2 && return 1
 	else
 		OS_ID=$(awk -F '[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release)
 		OS_Version=$(awk -F '[="]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
-		if [[ ${Short_OS} != Ubuntu ]];then
+		if [[ ${Short_OS} != Ubuntu ]]
+		then
 			ECHO R "\n暂不支持此操作系统,当前支持的操作系统: [Ubuntu]"
 			sleep 2 && return 1
 		fi
-		if [[ ! $(cat ${CODENAME_LIST} | awk '{print $1}') =~ ${OS_Version} ]];then
-			ECHO R "\n暂不支持当前 [Ubuntu] 版本: [${OS_Version}]"
-			echo -ne "${Red}当前支持的 [Ubuntu] 版本:"
-			for CN in $(cat ${CODENAME_LIST} | awk '{print $1}')
-			do
-				echo -n "${CN} "
-			done
+		if [[ ! $(cat ${CODENAME_LIST} | awk '{print $1}') =~ ${OS_Version} ]]
+		then
+			ECHO R "\n暂不支持此 Ubuntu 系统版本: [${OS_Version}]"
 			sleep 3 && return
 		fi	
 	fi
-	while :
-	do
+	while :;do
 		clear
 		ECHO X "替换系统下载源\n"
 		echo -e "${Green}操作系统${Yellow}: [${OS_ID} ${OS_Version}]${White}"
-		Current_Server=$(egrep -o "[a-z]+[.][a-z]+[.][a-z]+" /etc/apt/sources.list | awk 'NR==1')
+		Current_Server=$(awk '{print $2}' /etc/apt/sources.list | sed -r 's/htt[ps]+:\/\/(.*)\/ubuntu\//\1/' | awk 'NR==1')
 		echo -e "${Green}当前系统源${Yellow}: [${Current_Server}]${White}\n"
 		if [[ -f ${MIRROR_LIST} ]]
 		then
@@ -1162,7 +1180,8 @@ Module_SourcesList() {
 			break
 		;;
 		x)
-			if [[ -f ${BAK_FILE} ]];then
+			if [[ -f ${BAK_FILE} ]]
+			then
 				$(which sudo) mv ${BAK_FILE} /etc/apt/sources.list
 				ECHO Y "\n[默认源] 恢复成功!"
 			else
@@ -1183,12 +1202,15 @@ Module_SourcesList() {
 }
 
 Choose_Server() {
-	if [[ ${Choose} -gt 0 ]] > /dev/null 2>&1 ;then
-		if [[ ${Choose} -le ${Server_Count} ]] > /dev/null 2>&1 ;then
+	if [[ ${Choose} -gt 0 ]] > /dev/null 2>&1
+	then
+		if [[ ${Choose} -le ${Server_Count} ]] > /dev/null 2>&1
+		then
 			ServerUrl=$(sed -n ${Choose}p ${MIRROR_LIST} | awk '{print $2}')
 			ServerName=$(sed -n ${Choose}p ${MIRROR_LIST} | awk '{print $1}')
 			Codename=$(cat ${CODENAME_LIST} | grep "${OS_Version}" | awk '{print $2}')
-			if [[ -z ${Codename} || -z ${ServerUrl} || -z ${ServerName} ]];then
+			if [[ -z ${Codename} || -z ${ServerUrl} || -z ${ServerName} ]]
+			then
 				ECHO R "\n参数获取失败,请尝试更新 [AutoBuild] 后重试!"
 			fi
 			Replace_Server
@@ -1200,8 +1222,10 @@ Choose_Server() {
 }
 
 Replace_Server() {
-	if [[ -f /etc/apt/sources.list ]];then
-		if [[ ! -f ${BAK_FILE} ]];then
+	if [[ -f /etc/apt/sources.list ]]
+	then
+		if [[ ! -f ${BAK_FILE} ]]
+		then
 			$(which sudo) cp /etc/apt/sources.list ${BAK_FILE}
 			$(which sudo) chmod 777 ${BAK_FILE}
 			ECHO Y "\n未检测到备份,当前系统源已自动备份至 [${BAK_FILE}] !"
@@ -1336,7 +1360,8 @@ Module_SSHServices_Menu() {
 			}
 			read -p '[SSH] 请输入新密码:' SSH_Password_New
 			[[ -n $SSH_Password_New ]] && {
-				if [[ -z $SSH_Password ]];then
+				if [[ -z $SSH_Password ]]
+				then
 					sed -i '/SSH_Password/d' "$SSHProfile"
 					echo "SSH_Password=$SSH_Password_New" >> "$SSHProfile"
 				else
@@ -1348,7 +1373,8 @@ Module_SSHServices_Menu() {
 		3)
 			echo
 			read -p '[SSH] 请输入新的配置名称:' SSHProfile_RN
-			if [[ ! -z "$SSHProfile_RN" ]];then
+			if [[ ! -z "$SSHProfile_RN" ]]
+			then
 				cd ${Home}/Configs/SSH
 				mv "$SSHProfile_File" "$SSHProfile_RN" > /dev/null 2>&1
 				ECHO Y "\n重命名 [$SSHProfile_File] > [$SSHProfile_RN] 成功!"
@@ -1413,7 +1439,8 @@ Create_SSHProfile() {
 }
 
 List_SSHProfile() {
-	if [[ -n $(ls -A ${Home}/Configs/SSH) ]];then
+	if [[ -n $(ls -A ${Home}/Configs/SSH) ]]
+	then
 		cd ${Home}/Configs/SSH
 		echo "$(ls -A)" > ${Cache_Path}/SSHProfileList
 		SSHProfileList=${Cache_Path}/SSHProfileList
@@ -1526,36 +1553,31 @@ AutoBuild_Core() {
 			while :;do
 				clear
 				ECHO X "${AutoBuild_Title}\n"
-				ECHO X "项目名称		[项目状态]	Maintainer\n"
-				
-				Project_Details 1 Lede coolsnowwolf
-				Project_Details 2 Openwrt Openwrt	
-				Project_Details 3 Lienol Lienol
-				Project_Details 4 ImmortalWrt ImmortalWrt
-				
-				ECHO B "\nx.更新所有源代码和Feeds"
-				ECHO X "q.主菜单\n"
+				ECHO X "项目名称		[项目状态]\n"
+				for ((i=0;i<=${#Project_List[@]};i++));do
+					e=$(($i + 1))
+					[[ -n ${Project_List[i]} ]] && Project_Details ${e} ${Project_List[i]}
+				done
+				unset e i
+				ECHO G "\nx. 更新所有源代码和Feeds"
+				ECHO X "m. 主菜单\n"
 				read -p '请从上方选择一个项目:' Choose
+				[[ ${Choose} =~ [0-9] ]] && Choose=$((${Choose} - 1))
 				case ${Choose} in
-				q)
+				m)
 					break
 				;;
 				x)
-					for X in $(echo Lede Openwrt Lienol ImmortalWrt);do
+					for X in $(echo ${Project_List[@]});do
 						Sources_Update common ${X}
 					done
 				;;
-				1)
-					Second_Menu Lede
-				;;
-				2)
-					Second_Menu Openwrt
-				;;
-				3)
-					Second_Menu Lienol
-				;;
-				4)
-					Second_Menu ImmortalWrt
+				[0-9])
+					[[ -n ${Project_List[${Choose}]} ]] && \
+						Second_Menu ${Project_List[${Choose}]} || {
+						ECHO R "\n输入错误,请输入正确的选项!"
+						sleep 2
+					}
 				;;
 				esac
 			done
@@ -1573,9 +1595,9 @@ AutoBuild_Core() {
 Project_Details() {
 	if [[ -f ${Home}/Projects/$2/Makefile ]]
 	then
-		printf "%s. %-20s ${Yellow}%-19s${Grey} %-s\n${White}" $1 $2 [已检测到] $3
+		printf "%s. %-20s ${Yellow}%-19s${Grey}\n${White}" $1 $2 [已检测到]
 	else
-		printf "%s. %-20s ${Red}%-19s${Grey} %-s\n${White}" $1 $2 [未检测到] $3
+		printf "%s. %-20s ${Red}%-19s${Grey}\n${White}" $1 $2 [未检测到]
 	fi
 }
 
@@ -1588,7 +1610,7 @@ Sources_Update() {
 	fi
 	if [[ $(NETWORK_CHECK 223.5.5.5) == 1 ]]
 	then
-		ECHO R "\n网络连接错误,[${Project}]源码更新失败!"
+		ECHO R "\n网络连接错误,更新失败!"
 		sleep 2
 		return
 	fi
@@ -1657,6 +1679,8 @@ Backup_List=(
 	feeds.conf.default
 	rules.mk
 )
+
+Project_List=(Lede Openwrt Lienol ImmortalWrt)
 
 Dependency="build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync"
 Extra_Dependency="ntpdate httping ssh lm-sensors net-tools expect inetutils-ping"
