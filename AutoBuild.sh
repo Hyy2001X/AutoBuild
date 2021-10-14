@@ -3,7 +3,7 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 
-Update=2021.10.13
+Update=2021.10.14
 Version=V4.4
 
 Second_Menu() {
@@ -73,9 +73,8 @@ Project_Options() {
 		ECHO Y "3. 添加主题包"
 		ECHO X "4. 添加软件包"
 		echo "5. 空间清理"
-		echo "6. 删除配置文件"
-		echo "7. 下载 [dl]库"
-		echo "8. 源代码更新日志"
+		echo "6. 下载 [dl]库"
+		echo "7. 源代码更新日志"
 		ECHO X "\nm. 主菜单"
 		echo "q. 返回"
 		GET_Choose Choose
@@ -102,14 +101,9 @@ Project_Options() {
 			Space_Cleaner
 		;;
 		6)
-			rm -f ${Build_Path}/.config*
-			ECHO Y "\n[配置文件] 删除成功!"
-			sleep 2
-		;;
-		7)
 			Make_Download
 		;;
-		8)
+		7)
 			clear
 			if [[ -d ${Build_Path}/.git ]];then
 				cd ${Build_Path}
@@ -290,24 +284,24 @@ Advanced_Options() {
 		;;
 		1)
 			clear
-			sudo apt-get update
-			sudo apt-get upgrade
+			$(which sudo) apt-get -y update
+			$(which sudo) apt-get -y upgrade
 			Enter
 		;;
 		2)
 			clear
-			sudo apt-get update
+			$(which sudo) apt-get -y update
 			i=1;while [[ $i -le 3 ]];do
 				clear
 				ECHO X "开始第 $i 次安装..."
 				sleep 2
-				sudo apt-get -y install ${Dependency} 
-				sudo apt-get -y install ${Extra_Dependency}
+				$(which sudo) apt-get -y install ${Dependency} 
+				$(which sudo) apt-get -y install ${Extra_Dependency}
 				i=$(($i + 1))
 				sleep 1
 			done
 			unset i
-			sudo apt-get clean
+			$(which sudo) apt-get clean
 			Enter
 		;;
 		3)
@@ -315,15 +309,15 @@ Advanced_Options() {
 		;;
 		4)
 			echo
-			sudo ntpdate ntp1.aliyun.com
-			sudo hwclock --systohc
+			$(which sudo) ntpdate ntp1.aliyun.com
+			$(which sudo) hwclock --systohc
 			sleep 2
 		;;
 		5)
 			echo
 			read -p '请输入快速启动的指令:' FastOpen	
 			[ -f ~/.bashrc ] && echo "alias ${FastOpen}='${Home}/AutoBuild.sh'" >> ~/.bashrc || {
-				sudo echo "alias ${FastOpen}='${Home}/AutoBuild.sh'" >> /etc/profile
+				$(which sudo) echo "alias ${FastOpen}='${Home}/AutoBuild.sh'" >> /etc/profile
 			}
 			ECHO Y "\n创建成功!下次登录在终端输入 ${FastOpen} 即可启动 AutoBuild."
 			sleep 3
@@ -346,10 +340,10 @@ Space_Cleaner() {
 		echo "1. 执行 [make clean]"
 		echo "2. 执行 [make dirclean]"
 		echo "3. 执行 [make distclean]"
-		ECHO G "4. 删除 [${Project}] 项目"
-		echo "5. 清理 [临时文件/编译缓存]"
-		echo "6. 清理 [更新日志]"
-		echo "7. 清理 [编译日志]"
+		echo "4. 清理 [临时文件/编译缓存]"
+		echo "5. 清理 [更新日志]"
+		echo "6. 清理 [编译日志]"
+		ECHO G "7. 删除 [${Project}] 源码文件"
 		echo "q. 返回"
 		GET_Choose Choose
 		cd ${Build_Path}
@@ -370,22 +364,22 @@ Space_Cleaner() {
 			make distclean > /dev/null 2>&1
 		;;
 		4)
-			ECHO X "\n正在删除 [${Project}],请稍后 ..."
-			rm -rf ${Build_Path}/*
-			rm -f ${Home}/Configs/${Project}_Recently_*
-			rm -f ${Home}/Log/*_${Project}_*
-		;;
-		5)
 			rm -rf ${Build_Path}/tmp
 			ECHO Y "\n[临时文件/编译缓存] 删除成功!"
 		;;
-		6)
+		5)
 			rm -f ${Home}/Log/SourceUpdate_${Project}_*
 			ECHO Y "\n[更新日志] 删除成功!"
 		;;
-		7)
+		6)
 			rm -f ${Home}/Log/BuildOpenWrt_${Project}_*
 			ECHO Y "\n[编译日志] 删除成功!"
+		;;
+		7)
+			ECHO X "\n正在删除 [${Project}] 源码文件,请稍后 ..."
+			rm -rf ${Build_Path}/*
+			rm -f ${Home}/Configs/${Project}_Recently_*
+			rm -f ${Home}/Log/*_${Project}_*
 		;;
 		esac
 		sleep 3
@@ -580,15 +574,17 @@ Module_Builder() {
 		esac
 		TARGET_SUBTARGET=$(awk -F '[="]+' '/TARGET_SUBTARGET/{print $2}' .config)
 		TARGET_ARCH_PACKAGES=$(awk -F '[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config)
-		CPU_TEMP=$(echo "$(sensors 2> /dev/null | grep Core | awk '{Sum += $3};END {print Sum}') / $(sensors 2>/dev/null | grep Core | wc -l)" | bc 2>/dev/null)
 		clear
 		ECHO X "AutoBuild 固件编译\n"
-		ECHO X "设备信息:${CPU_Model} ${CPU_Cores} Cores ${CPU_Threads} Threads ${CPU_TEMP}\n"
-		if [ -f .config ];then
-			if [ -f ${Home}/Configs/${Project}_Recently_Config ];then
+		ECHO X "设备信息:${CPU_Model} ${CPU_Cores} Cores ${CPU_Threads} Threads\n"
+		if [ -f .config ]
+		then
+			if [[ -f ${Home}/Configs/${Project}_Recently_Config ]]
+			then
 				echo -e "${Yellow}最近配置文件:${Blue}[$(cat ${Home}/Configs/${Project}_Recently_Config)]${White}\n"
 			fi
-			if [ ${DIFF_CONFIG} == 0 ];then
+			if [[ ${DIFF_CONFIG} == 0 ]]
+			then
 				echo -e "源码信息:${Yellow} ${Openwrt_Author}/${Openwrt_Reponame}:${Openwrt_Branch}${White}"
 				echo -e "设备名称:${Yellow} ${TARGET_PROFILE}${White}"
 				echo -e "CPU 架构:${Yellow} ${TARGET_BOARD}${White}"
@@ -661,11 +657,12 @@ Module_Builder() {
 					Make_Download
 				;;
 				3)
-					if [ -f .config ];then
-						./scripts/diffconfig.sh > ${Home}/Backups/Configs/defconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)
-						ECHO Y "\n新配置文件已保存到:'Backups/Configs/defconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)'"
+					if [ -f .config ]
+					then
+						./scripts/diffconfig.sh > ${Home}/Backups/Configs/diffconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)
+						ECHO Y "\n新配置文件已保存到: 'Backups/Configs/diffconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)'"
 					else
-						ECHO R "\n未检测到[.config]文件!"
+						ECHO R "\n未检测到 [.config]文件!"
 					fi
 					sleep 2
 				;;
@@ -700,8 +697,7 @@ Module_Builder() {
 			esac
 			Firmware_Path="${Build_Path}/bin/targets/${TARGET_BOARD}/${TARGET_SUBTARGET}"
 			Packages_Path=${Home}/Packages
-			ECHO Y "固件信息: ${CURRENT_Version}\n"
-			ECHO X "开始编译 ${TARGET_PROFILE} ..."
+			ECHO X "开始编译 [${TARGET_PROFILE}] ..."
 			Compile_Date=$(date +%Y%m%d-%H:%M)
 			Compile_Started=$(date +"%Y-%m-%d %H:%M:%S")
 			echo "${Compile_Started}" > ${Home}/Configs/${Project}_Recently_Compiled
@@ -1142,23 +1138,24 @@ Module_SourcesList() {
 	while :
 	do
 		clear
-		ECHO X "Replace SourcesList"
-		echo -e "${Grey}操作系统${Yellow}: [${OS_ID} ${OS_Version}]${White}"
+		ECHO X "替换系统下载源\n"
+		echo -e "${Green}操作系统${Yellow}: [${OS_ID} ${OS_Version}]${White}"
 		Current_Server=$(egrep -o "[a-z]+[.][a-z]+[.][a-z]+" /etc/apt/sources.list | awk 'NR==1')
-		echo -e "${Grey}当前系统源${Yellow}: [${Current_Server}]${White}\n"
-		if [[ -f ${MIRROR_LIST} ]];then
+		echo -e "${Green}当前系统源${Yellow}: [${Current_Server}]${White}\n"
+		if [[ -f ${MIRROR_LIST} ]]
+		then
 			Server_Count=$(sed -n '$=' ${MIRROR_LIST})
 			for ((i=1;i<=${Server_Count};i++));
 			do   
 				ServerName=$(sed -n ${i}p ${MIRROR_LIST} | awk '{print $1}')
-				echo -e "${i}.${Yellow}${ServerName}${White}"
+				echo -e "${i}. ${Yellow}${ServerName}${White}"
 			done
 		else
 			ECHO R "[未检测到 ${MIRROR_LIST}]"
 		fi
-		ECHO X "\nx.恢复默认源"
-		ECHO B "u.更新软件源"
-		echo "q.返回"
+		ECHO X "\nx. 恢复默认源"
+		ECHO B "u. 更新软件源"
+		echo "q. 返回"
 		GET_Choose Choose
 		case ${Choose} in
 		q)
@@ -1166,7 +1163,7 @@ Module_SourcesList() {
 		;;
 		x)
 			if [[ -f ${BAK_FILE} ]];then
-				sudo mv ${BAK_FILE} /etc/apt/sources.list
+				$(which sudo) mv ${BAK_FILE} /etc/apt/sources.list
 				ECHO Y "\n[默认源] 恢复成功!"
 			else
 				ECHO R "\n未找到备份: [${BAK_FILE}],恢复失败!"
@@ -1175,7 +1172,7 @@ Module_SourcesList() {
 		;;
 		u)
 			clear
-			sudo apt update
+			$(which sudo) apt-get -y update
 			Enter
 		;;
 		*)
@@ -1205,16 +1202,16 @@ Choose_Server() {
 Replace_Server() {
 	if [[ -f /etc/apt/sources.list ]];then
 		if [[ ! -f ${BAK_FILE} ]];then
-			sudo cp /etc/apt/sources.list ${BAK_FILE}
-			sudo chmod 777 ${BAK_FILE}
+			$(which sudo) cp /etc/apt/sources.list ${BAK_FILE}
+			$(which sudo) chmod 777 ${BAK_FILE}
 			ECHO Y "\n未检测到备份,当前系统源已自动备份至 [${BAK_FILE}] !"
 		fi
 	else
 		ECHO R "\n未检测到: [/etc/apt/sources.list],备份失败!"
 	fi
-	sudo cp ${TEMPLATE} /etc/apt/sources.list
-	sudo sed -i "s?ServerUrl?${ServerUrl}?g" /etc/apt/sources.list
-	sudo sed -i "s?Codename?${Codename}?g" /etc/apt/sources.list
+	$(which sudo) cp ${TEMPLATE} /etc/apt/sources.list
+	$(which sudo) sed -i "s?ServerUrl?${ServerUrl}?g" /etc/apt/sources.list
+	$(which sudo) sed -i "s?Codename?${Codename}?g" /etc/apt/sources.list
 	ECHO Y "\n系统源已切换到: [${ServerName}]"
 	sleep 2
 }
@@ -1670,5 +1667,5 @@ done
 unset X Path_Depends
 
 GET_System_Info 1
-AutoBuild_Title="AutoBuild Core Script $Version [${Short_OS}] [${LOGNAME}]"
+AutoBuild_Title="AutoBuild Core ${Version}-${Update} [${Short_OS}] [${LOGNAME}]"
 AutoBuild_Core
