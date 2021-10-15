@@ -131,8 +131,8 @@ BackupServices() {
 			break
 		;;
 		1)
+			cd ${Build_Path}
 			while :;do
-				cd ${Home}
 				clear
 				ECHO X "备份 [.config]\n"
 				echo -e "1. 固定名称"
@@ -144,21 +144,20 @@ BackupServices() {
 					break
 				;;
 				1)
-					Backup_Config=${Project}-$(date +%m%d_%H:%M)
-					if [[ -f ./Projects/${Project}/.config ]]
+					if [ -f .config ]
 					then
-						cp ./Projects/${Project}/.config ./Backups/Configs/${Backup_Config}
-						ECHO Y "\n备份成功![.config] 已备份到:'/Backups/Configs/${Backup_Config}'"
+						cp .config ${Home}/Backups/Configs/Config_${Project}_$(date +%Y%m%d-%H%M%S)
+						ECHO Y "\n[.config] 备份成功!"
 					else
 						ECHO R "\n[.config] 备份失败!"
 					fi
 				;;
 				2)
 					read -p '请输入自定义名称:' Backup_Config
-					if [[ -f ./Projects/${Project}/.config ]]
+					if [ -f .config ]
 					then
-						cp ./Projects/${Project}/.config ./Backups/Configs/"${Backup_Config}"
-						ECHO Y "\n备份成功![.config] 已备份到:'/Backups/Configs/${Backup_Config}'"
+						cp .config ${Home}/Backups/Configs/"${Backup_Config}"
+						ECHO Y "\n[.config] 备份成功"
 					else
 						ECHO R "\n[.config] 备份失败!"
 					fi
@@ -170,8 +169,7 @@ BackupServices() {
 		2)
 			if [[ -n "$(ls -A ${Home}/Backups/Configs)" ]]
 			then
-				while :
-				do
+				while :;do
 					clear
 					ECHO X "恢复 [.config]\n"
 					cd ${Home}/Backups/Configs
@@ -321,9 +319,14 @@ Advanced_Options() {
 		5)
 			echo
 			read -p '请输入快速启动的指令:' FastOpen	
-			[ -f ~/.bashrc ] && echo "alias ${FastOpen}='${Home}/AutoBuild.sh'" >> ~/.bashrc || {
+			if [ -f ~/.bashrc ]
+			then
+				sed -i "/AutoBuild.sh/d" ~/.bashrc 2> /dev/null
+				echo "alias ${FastOpen}='${Home}/AutoBuild.sh'" >> ~/.bashrc
+			else
+				$(which sudo) sed -i "/AutoBuild.sh/d" /etc/profile 2> /dev/null
 				$(which sudo) echo "alias ${FastOpen}='${Home}/AutoBuild.sh'" >> /etc/profile
-			}
+			fi
 			ECHO Y "\n创建成功!下次登录在终端输入 ${FastOpen} 即可启动 AutoBuild."
 			sleep 3
 		;;
@@ -664,7 +667,7 @@ Module_Builder() {
 				3)
 					if [ -f .config ]
 					then
-						./scripts/diffconfig.sh > ${Home}/Backups/Configs/diffconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)
+						./scripts/diffconfig.sh > ${Home}/Backups/Configs/diffconfig_${Project}_$(date +%Y%m%d-%H%M%S)
 						ECHO Y "\n新配置文件已保存到: 'Backups/Configs/diffconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)'"
 					else
 						ECHO R "\n未检测到 [.config]文件!"
@@ -702,17 +705,24 @@ Module_Builder() {
 			esac
 			Firmware_Path="${Build_Path}/bin/targets/${TARGET_BOARD}/${TARGET_SUBTARGET}"
 			Packages_Path=${Home}/Packages
+			rm -rf ${Firmware_Path}
 			ECHO X "开始编译 [${TARGET_PROFILE}] ..."
 			Compile_Date=$(date +%Y%m%d-%H:%M)
 			Compile_Started=$(date +"%Y-%m-%d %H:%M:%S")
 			echo "${Compile_Started}" > ${Home}/Configs/${Project}_Recently_Compiled
 			${Compile_Threads} 2>&1 | tee ${Home}/Log/BuildOpenWrt_${Project}_${Compile_Date}.log || Compile_Failed=1
+			if [[ ${Compile_Failed} == 1 ]]
+			then
+				ECHO R "\n固件编译失败!"
+				Enter
+				continue
+			fi
 			mkdir -p ${Home}/Packages/${TARGET_ARCH_PACKAGES}
 			mkdir -p "${Packages_Path}/${TARGET_ARCH_PACKAGES}/Kernel Modules"
 			echo
 			ECHO X "备份当前 dl 库到 '${Home}/Backups/dl' ..."
 			awk "BEGIN { cmd=\"cp -a ${Build_Path}/dl/* ${Home}/Backups/dl\"; print "n" | cmd; }" > /dev/null 2>&1
-			ECHO X "备份软件包到 '${Home}/Packages' ..."
+			ECHO X "备份软件包到 '${Home}/Packages' ...\n"
 			rm -rf ${Cache_Path}/Packages && mkdir -p ${Cache_Path}/Packages
 			mv -f $(find ${Build_Path}/bin -type f -name "*.ipk") ${Cache_Path}/Packages > /dev/null 2>&1
 			mv -f $(find ${Cache_Path}/Packages -type f -name "kmod-*.ipk") "${Packages_Path}/${TARGET_ARCH_PACKAGES}/Kernel Modules" > /dev/null 2>&1
@@ -734,7 +744,7 @@ Module_Builder() {
 			;;
 			esac
 			mkdir -p ${Home}/Firmware/${TARGET_PROFILE}
-			[[ $(ls) =~ 'AutoBuild-' ]] && cp -a AutoBuild-* ${Home}/Firmware/${TARGET_PROFILE}
+			[[ $(ls) =~ 'AutoBuild-' ]] && mv -f AutoBuild-* ${Home}/Firmware/${TARGET_PROFILE}
 			Enter
 		;;
 		esac
@@ -767,6 +777,7 @@ Rename_Firmware() {
 		esac
 		eval AutoBuild_Firmware=${AutoBuild_Firmware}
 		[[ -f $1 ]] && {
+			echo -e "${Yellow}固件名称: ${AutoBuild_Firmware}"
 			cp -a $1 ${AutoBuild_Firmware}
 		}
 		shift
@@ -1131,10 +1142,10 @@ Run_Test() {
 }
 
 Module_SourcesList() {
-	MIRROR_LIST=${Home}/Depends/Sources_List/Mirror
-	CODENAME_LIST=${Home}/Depends/Sources_List/Codename
-	TEMPLATE=${Home}/Depends/Sources_List/ServerUrl_Template
-	BAK_FILE=${Home}/Backups/sources.list.bak
+	local Mirror=${Home}/Depends/Sources_List/Mirror
+	local Codename=${Home}/Depends/Sources_List/Codename
+	local Source_Template=${Home}/Depends/Sources_List/Template
+	local BAK_FILE=${Home}/Backups/sources.list.bak
 
 	if [[ ${Short_OS} != Ubuntu ]]
 	then
@@ -1148,31 +1159,27 @@ Module_SourcesList() {
 			ECHO R "\n暂不支持此操作系统,当前支持的操作系统: [Ubuntu]"
 			sleep 2 && return 1
 		fi
-		if [[ ! $(cat ${CODENAME_LIST} | awk '{print $1}') =~ ${OS_Version} ]]
+		if [[ ! $(cat ${Codename} | awk '{print $1}') =~ ${OS_Version} ]]
 		then
 			ECHO R "\n暂不支持此 Ubuntu 系统版本: [${OS_Version}]"
-			sleep 3 && return
+			sleep 2 && return 1
 		fi	
 	fi
 	while :;do
 		clear
 		ECHO X "替换系统下载源\n"
-		echo -e "${Green}操作系统${Yellow}: [${OS_ID} ${OS_Version}]${White}"
-		Current_Server=$(awk '{print $2}' /etc/apt/sources.list | sed -r 's/htt[ps]+:\/\/(.*)\/ubuntu\//\1/' | awk 'NR==1')
-		echo -e "${Green}当前系统源${Yellow}: [${Current_Server}]${White}\n"
-		if [[ -f ${MIRROR_LIST} ]]
+		ECHO "操作系统${Yellow}: [${OS_ID}:${OS_Version}]"
+		ECHO "当前系统源${Yellow}: [$(awk '{print $2}' /etc/apt/sources.list | sed -r 's/htt[ps]+:\/\/(.*)\/ubuntu\//\1/' | awk 'NR==1')]\n"
+		if [[ -f ${Mirror} ]]
 		then
-			Server_Count=$(sed -n '$=' ${MIRROR_LIST})
-			for ((i=1;i<=${Server_Count};i++));
-			do   
-				ServerName=$(sed -n ${i}p ${MIRROR_LIST} | awk '{print $1}')
-				echo -e "${i}. ${Yellow}${ServerName}${White}"
+			local i=1;for Mirror_Name in $(cat ${Mirror} | awk '{print $1}');do
+				echo -e "${i}. ${Yellow}${Mirror_Name}${White}"
+				i=$(($i + 1))
 			done
 		else
-			ECHO R "[未检测到 ${MIRROR_LIST}]"
+			ECHO R "[未检测到镜像列表 ${Mirror}]"
 		fi
 		ECHO X "\nx. 恢复默认源"
-		ECHO B "u. 更新软件源"
 		echo "q. 返回"
 		GET_Choose Choose
 		case ${Choose} in
@@ -1189,55 +1196,33 @@ Module_SourcesList() {
 			fi
 			sleep 2
 		;;
-		u)
-			clear
-			$(which sudo) apt-get -y update
-			Enter
-		;;
-		*)
-			Choose_Server
+		[0-9])
+			if [[ ${Choose} -gt 0 && ! ${Choose} -gt $(($i - 1)) ]] > /dev/null 2>&1
+			then
+				Server_Url=$(sed -n ${Choose}p ${Mirror} | awk '{print $2}')
+				Server_Name=$(sed -n ${Choose}p ${Mirror} | awk '{print $1}')
+				Code_Name=$(grep "${OS_Version}" ${Codename} | awk '{print $2}')
+				if [[ -z ${Server_Url} || -z ${Server_Name} || -z ${Code_Name} ]]
+				then
+					ECHO R "\n参数获取失败,请尝试更新 [AutoBuild] 后重试!"
+					sleep 2
+					continue
+				fi
+				if [[ -f /etc/apt/sources.list && ! -f ${BAK_FILE} ]]
+				then
+					$(which sudo) cp -a /etc/apt/sources.list ${BAK_FILE}
+					$(which sudo) chmod 777 ${BAK_FILE}
+					ECHO Y "\n当前系统源已自动备份到 '${BAK_FILE}'"
+				fi
+				$(which sudo) cp ${Source_Template} /etc/apt/sources.list
+				$(which sudo) sed -i "s?ServerUrl?${Server_Url}?g" /etc/apt/sources.list
+				$(which sudo) sed -i "s?Codename?${Code_Name}?g" /etc/apt/sources.list
+				ECHO Y "\n系统源已切换到: [${Server_Name}]"
+				sleep 2
+			fi
 		;;
 		esac
 	done
-}
-
-Choose_Server() {
-	if [[ ${Choose} -gt 0 ]] > /dev/null 2>&1
-	then
-		if [[ ${Choose} -le ${Server_Count} ]] > /dev/null 2>&1
-		then
-			ServerUrl=$(sed -n ${Choose}p ${MIRROR_LIST} | awk '{print $2}')
-			ServerName=$(sed -n ${Choose}p ${MIRROR_LIST} | awk '{print $1}')
-			Codename=$(cat ${CODENAME_LIST} | grep "${OS_Version}" | awk '{print $2}')
-			if [[ -z ${Codename} || -z ${ServerUrl} || -z ${ServerName} ]]
-			then
-				ECHO R "\n参数获取失败,请尝试更新 [AutoBuild] 后重试!"
-			fi
-			Replace_Server
-		else
-			ECHO R "\n输入错误,请输入正确的选项!"
-			sleep 1
-		fi
-	fi
-}
-
-Replace_Server() {
-	if [[ -f /etc/apt/sources.list ]]
-	then
-		if [[ ! -f ${BAK_FILE} ]]
-		then
-			$(which sudo) cp /etc/apt/sources.list ${BAK_FILE}
-			$(which sudo) chmod 777 ${BAK_FILE}
-			ECHO Y "\n未检测到备份,当前系统源已自动备份至 [${BAK_FILE}] !"
-		fi
-	else
-		ECHO R "\n未检测到: [/etc/apt/sources.list],备份失败!"
-	fi
-	$(which sudo) cp ${TEMPLATE} /etc/apt/sources.list
-	$(which sudo) sed -i "s?ServerUrl?${ServerUrl}?g" /etc/apt/sources.list
-	$(which sudo) sed -i "s?Codename?${Codename}?g" /etc/apt/sources.list
-	ECHO Y "\n系统源已切换到: [${ServerName}]"
-	sleep 2
 }
 
 ECHO() {
@@ -1272,14 +1257,29 @@ Enter() {
 }
 
 Decoration() {
-	printf "${Grey}%-${1}s${White}\n" "-" | sed 's/\s/-/g'
+	printf "${Grey}%-${1}s${White}\n" "$2" | sed "s/\s/$2/g"
 }
 
 Module_SSHServices() {
 	while :;do
 		clear
 		ECHO X "SSH Services"
-		List_SSHProfile
+		if [[ -n $(ls -A ${Home}/Configs/SSH) ]]
+		then
+			cd ${Home}/Configs/SSH
+			echo "$(ls -A)" > ${Cache_Path}/SSHProfileList
+			SSHProfileList=${Cache_Path}/SSHProfileList
+			SSHProfileList_MaxLine=$(sed -n '$=' $SSHProfileList)
+			ECHO X "配置文件列表"
+			echo
+			for ((i=1;i<=${SSHProfileList_MaxLine};i++));
+			do   
+				SSHProfile=$(sed -n ${i}p $SSHProfileList)
+				echo -e "${i}. ${Yellow}${SSHProfile}${White}"
+			done
+		else
+			ECHO R "\n[未检测到任何配置文件]"
+		fi
 		ECHO X "\nn. 创建新配置文件"
 		[[ -n $(ls -A ${Home}/Configs/SSH) ]] && ECHO R "d. 删除所有配置文件"
 		echo "x. 重置 [RSA Key Fingerprint]"
@@ -1438,30 +1438,11 @@ Create_SSHProfile() {
 	SSH_Login
 }
 
-List_SSHProfile() {
-	if [[ -n $(ls -A ${Home}/Configs/SSH) ]]
-	then
-		cd ${Home}/Configs/SSH
-		echo "$(ls -A)" > ${Cache_Path}/SSHProfileList
-		SSHProfileList=${Cache_Path}/SSHProfileList
-		SSHProfileList_MaxLine=$(sed -n '$=' $SSHProfileList)
-		ECHO X "配置文件列表"
-		echo
-		for ((i=1;i<=$SSHProfileList_MaxLine;i++));
-		do   
-			SSHProfile=$(sed -n ${i}p $SSHProfileList)
-			echo -e "${i}. ${Yellow}${SSHProfile}${White}"
-		done
-	else
-		ECHO R "[未检测到任何配置文件]"
-	fi
-}
-
 SSH_Login() {
 	clear
 	echo -e "${Blue}连接参数:${Yellow}[ssh ${SSH_User}@${SSH_IP} -p ${SSH_Port}]${White}\n"
 	expect -c "
-	set timeout 1
+	set timeout 3
 	spawn ssh ${SSH_User}@${SSH_IP} -p ${SSH_Port}
 	expect {
 		*yes/no* { send \"yes\r\"; exp_continue }
@@ -1474,24 +1455,24 @@ SSH_Login() {
 Module_Systeminfo() {
 	GET_System_Info 2
 	clear
-	ECHO X "System info"
-	Decoration 70
-	echo -e "${Grey}操作系统${Yellow}		${Short_OS}"
-	echo -e "${Grey}系统版本${Yellow}		${OS_INFO}"
-	echo -e "${Grey}计算机名称${Yellow}		${Computer_Name}"
-	echo -e "${Grey}登陆用户名${Yellow}		${USER}"
-	echo -e "${Grey}内核版本${Yellow}		${Kernel_Version}"
-	echo -e "${Grey}物理内存${Yellow}		${MemTotal_GB}GB/${MemTotal_MB}MB"
-	echo -e "${Grey}可用内存${Yellow}		${MemFree_GB}GB/${MemFree}MB"
-	echo -e "${Grey}CPU 型号${Yellow}		${CPU_Model}"
-	echo -e "${Grey}CPU 频率${Yellow}		${CPU_Freq}"
-	echo -e "${Grey}CPU 架构${Yellow}		${CPU_Info}"
-	echo -e "${Grey}CPU 核心数量${Yellow}		${CPU_Cores}"
-	echo -e "${Grey}CPU 当前频率${Yellow}		${Current_Freq}MHz"
-	echo -e "${Grey}CPU 当前温度${Yellow}		${Current_Temp}"
-	echo -e "${Grey}IP地址${Yellow}			${IP_Address}"
-	echo -e "${Grey}开机时长${Yellow}		${Computer_Startup}"
-	Decoration 70
+	ECHO X "系统信息\n"
+	Decoration 70 =
+	ECHO X "操作系统${Yellow}		${Short_OS}"
+	ECHO X "系统版本${Yellow}		${OS_INFO}"
+	ECHO X "计算机名称${Yellow}		${Computer_Name}"
+	ECHO X "登陆用户名${Yellow}		${USER}"
+	ECHO X "内核版本${Yellow}		${Kernel_Version}"
+	ECHO X "物理内存${Yellow}		${MemTotal_GB}GB/${MemTotal_MB}MB"
+	ECHO X "可用内存${Yellow}		${MemFree_GB}GB/${MemFree}MB"
+	ECHO X "CPU 型号${Yellow}		${CPU_Model}"
+	ECHO X "CPU 频率${Yellow}		${CPU_Freq}"
+	ECHO X "CPU 架构${Yellow}		${CPU_Info}"
+	ECHO X "CPU 核心数量${Yellow}		${CPU_Cores}"
+	ECHO X "CPU 当前频率${Yellow}		${Current_Freq}MHz"
+	ECHO X "CPU 当前温度${Yellow}		${Current_Temp}"
+	ECHO X "IP 地址${Yellow}			${IP_Address}"
+	ECHO X "开机时长${Yellow}		${Computer_Startup}"
+	Decoration 70 =
 	Enter
 }
 
