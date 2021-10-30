@@ -3,7 +3,7 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 
-Update=2021.10.14
+Update=2021.10.30
 Version=V4.4
 
 Second_Menu() {
@@ -39,7 +39,7 @@ Second_Menu() {
 		GET_Choose Choose
 		case ${Choose} in
 		q)
-			break
+			AutoBuild_Second
 		;;
 		m)
 			AutoBuild_Core
@@ -72,7 +72,7 @@ Project_Options() {
 		ECHO Y "3. 添加主题包"
 		ECHO X "4. 添加软件包"
 		echo "5. 空间清理"
-		echo "6. 下载 [dl]库"
+		echo "6. 下载公共源码库"
 		echo "7. 源代码更新日志"
 		ECHO X "\nm. 主菜单"
 		echo "q. 返回"
@@ -121,8 +121,8 @@ BackupServices() {
 		ECHO X "备份与恢复\n"
 		echo "1. 备份 [.config]"
 		echo "2. 恢复 [.config]"
-		echo "3. 备份 [${Project}] 源码文件"
-		echo "4. 恢复 [${Project}] 源码文件"
+		echo "3. 备份 [${Project}] 源码"
+		echo "4. 恢复 [${Project}] 源码"
 		ECHO X "5. 链接 [dl]库"
 		echo -e "\nq. 返回"
 		GET_Choose Choose
@@ -167,7 +167,7 @@ BackupServices() {
 			done
 		;;
 		2)
-			if [[ -n "$(ls -A ${Home}/Backups/Configs)" ]]
+			if [[ -n $(ls -A ${Home}/Backups/Configs) ]]
 			then
 				while :;do
 					clear
@@ -193,10 +193,10 @@ BackupServices() {
 							if [[ ! ${Choose} == 0 ]] 2> /dev/null
 							then
 								ConfigFile=$(sed -n ${Choose}p $ConfigList_File)
-								if [[ -f "${ConfigFile}" ]]
+								if [[ -f ${ConfigFile} ]]
 								then
 									ConfigFile_Dir="${Home}/Backups/Configs/$ConfigFile"
-									cp "$ConfigFile_Dir" ${Build_Path}/.config
+									cp "${ConfigFile_Dir}" ${Build_Path}/.config
 									echo "${ConfigFile}" > ${Home}/Configs/${Project}_Recently_Config
 									ECHO Y "\n配置文件 [$ConfigFile] 恢复成功!"
 									sleep 2
@@ -221,7 +221,7 @@ BackupServices() {
 			fi
 		;;
 		3)
-			ECHO X "\n正在备份[${Project}]源码文件,请稍后 ..."
+			ECHO X "\n正在备份 [${Project}] 源码,请稍后 ..."
 			[[ ! -d ${Home}/Backups/Projects/${Project} ]] && mkdir -p ${Home}/Backups/Projects/${Project}
 			rm -rf ${Home}/Backups/Projects/${Project}/*
 			for X in $(echo ${Backup_List[@]})
@@ -229,14 +229,14 @@ BackupServices() {
 				cp -a ${Build_Path}/${X} ${Home}/Backups/Projects/${Project}
 			done
 			unset X
-			ECHO Y "\n备份成功!源码文件已备份到 'Backups/Projects/${Project}'"
+			ECHO Y "\n备份成功!源码已备份到 'Backups/Projects/${Project}'"
 			ECHO Y "\n存储占用:$(du -sh ${Home}/Backups/Projects/${Project} | awk '{print $1}')B"
 			sleep 3
 		;;
 		4)
 			if [[ -f ${Home}/Backups/Projects/${Project}/Makefile ]]
 			then
-				ECHO X "\n正在恢复[${Project}]源码文件,请稍后 ..."
+				ECHO X "\n正在恢复 [${Project}] 源码,请稍后 ..."
 				for X in $(echo ${Backup_List[@]})
 				do
 					rm -rf ${Home}/Projects/${X}
@@ -351,7 +351,7 @@ Space_Cleaner() {
 		echo "4. 清理 [临时文件/编译缓存]"
 		echo "5. 清理 [更新日志]"
 		echo "6. 清理 [编译日志]"
-		ECHO G "7. 删除 [${Project}] 源码文件"
+		ECHO G "7. 删除 [${Project}] 源码"
 		echo "q. 返回"
 		GET_Choose Choose
 		cd ${Build_Path}
@@ -384,10 +384,11 @@ Space_Cleaner() {
 			ECHO Y "\n[编译日志] 删除成功!"
 		;;
 		7)
-			ECHO X "\n正在删除 [${Project}] 源码文件,请稍后 ..."
+			ECHO X "\n正在删除 [${Project}] 源码,请稍后 ..."
 			rm -rf ${Build_Path}/*
 			rm -f ${Home}/Configs/${Project}_Recently_*
 			rm -f ${Home}/Log/*_${Project}_*
+			AutoBuild_Second
 		;;
 		esac
 		sleep 3
@@ -474,57 +475,65 @@ Menuconfig() {
 }
 
 Sources_Download() {
-	if [[ -s ${Build_Path}/Makefile ]]
-	then
-		ECHO Y "\n已检测到 [${Project}]源代码,当前分支:[$(GET_Branch ${Build_Path})]"
-		sleep 3
-		return
-	fi
-	clear
-	ECHO X "[${Project}] 源码下载: 分支选择\n"
-	Github_File=${Home}/Depends/Projects/${Project}
-	Github_Source_Link=$(sed -n 1p ${Github_File})
-	ECHO G "仓库地址: ${Github_Source_Link}\n"
-	ECHO "请从下方选择一个分支:\n"
-	Max_All_Line=$(sed -n '$=' ${Github_File})
-	Max_Branch_Line=$(expr ${Max_All_Line} - 1)
-	for ((i=2;i<=${Max_All_Line};i++));do
-		Github_File_Branch=$(sed -n ${i}p ${Github_File})
-		X=$(expr ${i} - 1)
-		echo "${X}. ${Github_File_Branch}"
-	done
-	unset X i
-	echo -e "\nq.返回"
-	GET_Choose Choose_Branch
-	case ${Choose_Branch} in
-	q)
-		break
-	;;
-	*)
-		if [[ ${Choose_Branch} -gt ${Max_Branch_Line} || ${Choose_Branch} == 0 ]] 2> /dev/null
+	while :;do
+		if [[ -s ${Build_Path}/Makefile ]]
 		then
-			Sources_Download
+			ECHO Y "\n已检测到 [${Project}]源代码,当前分支:[$(GET_Branch ${Build_Path})]"
+			sleep 3
+			return
 		fi
 		clear
-		Branch_Line=$(expr ${Choose_Branch} + 1)
-		Github_Source_Branch=$(sed -n ${Branch_Line}p $Github_File)
-		echo -e "${Blue}下载地址: ${Yellow}$Github_Source_Link"
-		echo -e "${Blue}远程分支: ${Yellow}$Github_Source_Branch\n"
-		rm -rf ${Build_Path}
-		ECHO X "开始克隆 [${Project}]源代码 ...\n"
-		git clone -b ${Github_Source_Branch} ${Github_Source_Link} ${Build_Path}
-		if [[ $? == 0 ]]
-		then
-			ln -s ${Home}/Backups/dl ${Build_Path}/dl
-			ECHO Y "\n[${Project}]源代码下载成功!"
-			sleep 3
-			Second_Menu
-		else
-			ECHO R "\n[${Project}]源代码下载失败!"
-			Enter
-		fi
-	;;
-	esac
+		Github_File=${Home}/Depends/Projects/${Project}
+		Github_URL=$(egrep "http|https|git@" ${Github_File} | awk 'NR==1')
+		ECHO X "[${Project}] 源码下载: 分支选择\n"
+		ECHO G "仓库地址: ${Github_URL}\n"
+		ECHO "请从下方选择一个分支:\n"
+		Github_Branch_Array=($(egrep -v "http|https|git@" ${Github_File}))
+		local i=0;while :;do
+			echo "$(($i + 1)). ${Github_Branch_Array[$i]}"
+			i=$(($i + 1))
+			[[ $i == ${#Github_Branch_Array[@]} ]] && break
+		done
+		echo -e "\nq.返回"
+		GET_Choose Choose_Branch
+		case ${Choose_Branch} in
+		q)
+			break
+		;;
+		[0-9])
+			if [[ ${Choose_Branch} -le ${#Github_Branch_Array[@]} && ${Choose_Branch} != 0 ]] 2> /dev/null
+			then
+				if [[ ${Github_URL} =~ github.com ]]
+				then
+					echo
+					read -p "是否启用 [Ghproxy] 镜像加速?[Y/n]:" if_Ghproxy
+					case ${if_Ghproxy} in
+					[Yy])
+						Github_URL="https://ghproxy.com/${Github_URL}"
+					;;
+					esac
+				fi
+				clear
+				Github_Branch=${Github_Branch_Array[$((${Choose_Branch} - 1))]}
+				ECHO B "下载地址: ${Yellow}${Github_URL}"
+				ECHO B "远程分支: ${Yellow}${Github_Branch}\n"
+				rm -rf ${Build_Path}
+				ECHO X "开始克隆 [${Project}] ...\n"
+				git clone -b ${Github_Branch} ${Github_URL} ${Build_Path}
+				if [[ $? == 0 ]]
+				then
+					ln -s ${Home}/Backups/dl ${Build_Path}/dl
+					ECHO Y "\n[${Project}] 源码下载成功!"
+					Enter
+					Second_Menu ${Project}
+				else
+					ECHO R "\n[${Project}] 源码下载失败!"
+					Enter
+				fi
+			fi
+		;;
+		esac
+	done
 }
 
 Module_Builder() {
@@ -536,16 +545,16 @@ Module_Builder() {
 	fi
 	if [[ ! -f ${Build_Path}/.config ]]
 	then
-		ECHO R "\n未检测到[.config]文件!"
+		ECHO R "\n未检测到设备配置文件,请先执行 [make menuconfig]"
 		sleep 3
 		return 1
 	fi
 	while :;do
 		cd ${Build_Path}
-		Openwrt_Repository=$(grep "https://github.com/[a-zA-Z0-9]" ${Build_Path}/.git/config | cut -c8-100 | sed 's/^[ \t]*//g')
+		Openwrt_Repository=$(egrep -o "git.*" ${Build_Path}/.git/config)
 		Openwrt_Branch=$(GET_Branch $(pwd))
-		Openwrt_Author=$(echo ${Openwrt_Repository} | cut -d "/" -f4)
-		Openwrt_Reponame=$(echo ${Openwrt_Repository} | cut -d "/" -f5)
+		Openwrt_Author=$(echo ${Openwrt_Repository} | cut -d "/" -f2)
+		Openwrt_Reponame=$(echo ${Openwrt_Repository} | cut -d "/" -f3)
 		case "${Openwrt_Author}/${Openwrt_Reponame}" in
 		coolsnowwolf/[Ll]ede)
 			Version_File=package/lean/default-settings/files/zzz-default-settings
@@ -583,7 +592,7 @@ Module_Builder() {
 		TARGET_SUBTARGET=$(awk -F '[="]+' '/TARGET_SUBTARGET/{print $2}' .config)
 		TARGET_ARCH_PACKAGES=$(awk -F '[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config)
 		clear
-		ECHO X "AutoBuild 固件编译\n"
+		ECHO X "AutoBuild 固件编译 [${Openwrt_Repository}]\n"
 		ECHO X "设备信息:${CPU_Model} ${CPU_Cores} Cores ${CPU_Threads} Threads\n"
 		if [ -f .config ]
 		then
@@ -706,14 +715,15 @@ Module_Builder() {
 			Firmware_Path="${Build_Path}/bin/targets/${TARGET_BOARD}/${TARGET_SUBTARGET}"
 			Packages_Path=${Home}/Packages
 			rm -rf ${Firmware_Path}
-			ECHO X "开始编译 [${TARGET_PROFILE}] ..."
+			ECHO Y "执行指令: [${Compile_Threads}]\n"
+			ECHO X "开始编译: [${TARGET_PROFILE}] ..."
 			Compile_Date=$(date +%Y%m%d-%H:%M)
 			Compile_Started=$(date +"%Y-%m-%d %H:%M:%S")
 			echo "${Compile_Started}" > ${Home}/Configs/${Project}_Recently_Compiled
-			${Compile_Threads} 2>&1 | tee ${Home}/Log/BuildOpenWrt_${Project}_${Compile_Date}.log || Compile_Failed=1
-			if [[ ${Compile_Failed} == 1 ]]
+			${Compile_Threads} 2>&1 | tee ${Home}/Log/BuildOpenWrt_${Project}_${Compile_Date}.log
+			if [[ $? != 0 ]]
 			then
-				ECHO R "\n固件编译失败!"
+				ECHO R "\n编译失败!"
 				Enter
 				continue
 			fi
@@ -1526,48 +1536,50 @@ AutoBuild_Core() {
 		echo "q. 退出脚本"
 		GET_Choose Choose
 		case ${Choose} in
-		q)
+		q | exit)
 			rm -rf ${Cache_Path}/* 2> /dev/null
 			exit
 		;;
 		1)
-			while :;do
-				clear
-				ECHO X "${AutoBuild_Title}\n"
-				ECHO X "项目名称		[项目状态]\n"
-				for ((i=0;i<=${#Project_List[@]};i++));do
-					e=$(($i + 1))
-					[[ -n ${Project_List[i]} ]] && Project_Details ${e} ${Project_List[i]}
-				done
-				unset e i
-				ECHO G "\nx. 更新所有源代码和Feeds"
-				ECHO X "m. 主菜单\n"
-				read -p '请从上方选择一个项目:' Choose
-				[[ ${Choose} =~ [0-9] ]] && Choose=$((${Choose} - 1))
-				case ${Choose} in
-				m)
-					break
-				;;
-				x)
-					for X in $(echo ${Project_List[@]});do
-						Sources_Update common ${X}
-					done
-				;;
-				[0-9])
-					[[ -n ${Project_List[${Choose}]} ]] && \
-						Second_Menu ${Project_List[${Choose}]} || {
-						ECHO R "\n输入错误,请输入正确的选项!"
-						sleep 2
-					}
-				;;
-				esac
-			done
+			AutoBuild_Second
 		;;
 		2)
 			Module_Network_Test
 		;;
 		3)
 			Advanced_Options
+		;;
+		esac
+	done
+}
+
+
+AutoBuild_Second() {
+	while :;do
+	clear
+		ECHO X "${AutoBuild_Title}\n"
+		ECHO X "项目名称		[项目状态]\n"
+		for ((i=0;i<=${#Project_List[@]};i++));do
+			e=$(($i + 1))
+			[[ -n ${Project_List[i]} ]] && Project_Details ${e} ${Project_List[i]}
+		done
+		unset e i
+		ECHO G "\nx. 更新所有源代码"
+		ECHO X "m. 主菜单\n"
+		read -p '请从上方选择一个项目:' Choose
+		[[ ${Choose} =~ [0-9] ]] && Choose=$((${Choose} - 1))
+		case ${Choose} in
+		q | m | exit)
+			AutoBuild_Core
+		;;
+		x)
+			for X in $(echo ${Project_List[@]});do
+				Sources_Update common ${X}
+			done
+		;;
+		[0-9])
+			[[ -n ${Project_List[${Choose}]} ]] && \
+				Second_Menu ${Project_List[${Choose}]}
 		;;
 		esac
 	done
