@@ -1557,6 +1557,7 @@ AutoBuild_Core() {
 AutoBuild_Second() {
 	while :;do
 	clear
+		cd ${Home}
 		ECHO X "${AutoBuild_Title}\n"
 		ECHO X "项目名称		[项目状态]\n"
 		for ((i=0;i<=${#Project_List[@]};i++));do
