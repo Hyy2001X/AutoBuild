@@ -3,8 +3,8 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 
-Update=2021.10.30
-Version=V4.4
+Update=2021.11.04
+Version=V4.4.1
 
 Second_Menu() {
 	Project=$1
@@ -287,24 +287,24 @@ Advanced_Options() {
 		;;
 		1)
 			clear
-			$(which sudo) apt-get -y update
-			$(which sudo) apt-get -y upgrade
+			$(command -v sudo) apt-get -y update
+			$(command -v sudo) apt-get -y upgrade
 			Enter
 		;;
 		2)
 			clear
-			$(which sudo) apt-get -y update
+			$(command -v sudo) apt-get -y update
 			local i=1;while [[ $i -le 3 ]];do
 				clear
 				ECHO X "开始第 $i 次安装..."
 				sleep 2
-				$(which sudo) apt-get -y install ${Dependency} 
-				$(which sudo) apt-get -y install ${Extra_Dependency}
+				$(command -v sudo) apt-get -y install ${Dependency} 
+				$(command -v sudo) apt-get -y install ${Extra_Dependency}
 				i=$(($i + 1))
 				sleep 1
 			done
 			unset i
-			$(which sudo) apt-get clean
+			$(command -v sudo) apt-get clean
 			Enter
 		;;
 		3)
@@ -312,22 +312,34 @@ Advanced_Options() {
 		;;
 		4)
 			echo
-			$(which sudo) ntpdate ntp1.aliyun.com
-			$(which sudo) hwclock --systohc
+			$(command -v sudo) ntpdate ntp1.aliyun.com
+			$(command -v sudo) hwclock --systohc
 			sleep 2
 		;;
 		5)
 			echo
-			read -p '请输入快速启动的指令:' FastOpen	
-			if [ -f ~/.bashrc ]
+			read -p '请输入快速启动的指令:' FastOpen
+			for i in $(echo ~/.bashrc /etc/profile);do
+				if [[ -r $i ]]
+				then
+					ECHO B "\n写入到文件: [$i] ..."
+					$(command -v sudo) sed -i "/AutoBuild.sh/d" ~/.bashrc
+					$(command -v sudo) echo "alias ${FastOpen}='${Home}/AutoBuild.sh'" >> ~/.bashrc
+					if [[ $? == 0 ]]
+					then
+						FastOpen_result=true
+					else
+						continue
+					fi
+					break
+				fi
+			done
+			if [[ ${FastOpen_result} == true ]]
 			then
-				sed -i "/AutoBuild.sh/d" ~/.bashrc 2> /dev/null
-				echo "alias ${FastOpen}='${Home}/AutoBuild.sh'" >> ~/.bashrc
+				ECHO Y "\n创建成功!下次登录在终端输入 ${FastOpen} 即可启动 AutoBuild."
 			else
-				$(which sudo) sed -i "/AutoBuild.sh/d" /etc/profile 2> /dev/null
-				$(which sudo) echo "alias ${FastOpen}='${Home}/AutoBuild.sh'" >> /etc/profile
+				ECHO R "\n创建失败!请检查相关权限设置!"
 			fi
-			ECHO Y "\n创建成功!下次登录在终端输入 ${FastOpen} 即可启动 AutoBuild."
 			sleep 3
 		;;
 		6)
@@ -1199,7 +1211,7 @@ Module_SourcesList() {
 		x)
 			if [[ -f ${BAK_FILE} ]]
 			then
-				$(which sudo) mv ${BAK_FILE} /etc/apt/sources.list
+				$(command -v sudo) mv ${BAK_FILE} /etc/apt/sources.list
 				ECHO Y "\n[默认源] 恢复成功!"
 			else
 				ECHO R "\n未找到备份: [${BAK_FILE}],恢复失败!"
@@ -1220,13 +1232,13 @@ Module_SourcesList() {
 				fi
 				if [[ -f /etc/apt/sources.list && ! -f ${BAK_FILE} ]]
 				then
-					$(which sudo) cp -a /etc/apt/sources.list ${BAK_FILE}
-					$(which sudo) chmod 777 ${BAK_FILE}
+					$(command -v sudo) cp -a /etc/apt/sources.list ${BAK_FILE}
+					$(command -v sudo) chmod 777 ${BAK_FILE}
 					ECHO Y "\n当前系统源已自动备份到 '${BAK_FILE}'"
 				fi
-				$(which sudo) cp ${Source_Template} /etc/apt/sources.list
-				$(which sudo) sed -i "s?ServerUrl?${Server_Url}?g" /etc/apt/sources.list
-				$(which sudo) sed -i "s?Codename?${Code_Name}?g" /etc/apt/sources.list
+				$(command -v sudo) cp ${Source_Template} /etc/apt/sources.list
+				$(command -v sudo) sed -i "s?ServerUrl?${Server_Url}?g" /etc/apt/sources.list
+				$(command -v sudo) sed -i "s?Codename?${Code_Name}?g" /etc/apt/sources.list
 				ECHO Y "\n系统源已切换到: [${Server_Name}]"
 				sleep 2
 			fi
