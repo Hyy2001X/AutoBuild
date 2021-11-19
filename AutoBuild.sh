@@ -3,8 +3,8 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 
-Update=2021.11.04
-Version=V4.4.1
+Update=2021.11.19
+Version=V4.4.2
 
 Second_Menu() {
 	Project=$1
@@ -289,21 +289,36 @@ Advanced_Options() {
 			clear
 			$(command -v sudo) apt-get -y update
 			$(command -v sudo) apt-get -y upgrade
+			$(command -v sudo) apt-get -y clean
 			Enter
 		;;
 		2)
+			echo
+			read -p "是否启用单个软件包安装?[Y/n]:" if_Single
 			clear
 			$(command -v sudo) apt-get -y update
 			local i=1;while [[ $i -le 3 ]];do
 				clear
-				ECHO X "开始第 $i 次安装..."
+				ECHO X "开始第 $i 次安装...\n"
 				sleep 2
-				$(command -v sudo) apt-get -y install ${Dependency} 
-				$(command -v sudo) apt-get -y install ${Extra_Dependency}
+				if [[ ${if_Single} == [Yy] ]]
+				then
+					for X in "${Dependency[@]} ${Extra_Dependency[@]}";do
+						$(command -v sudo) apt-get -y install ${X} > /dev/null 2>&1
+						if [[ $? == 0 ]]
+						then
+							ECHO Y "已成功安装: ${X}"
+						else
+							ECHO R "未成功安装: ${X}"
+						fi
+					done
+				else
+					$(command -v sudo) apt-get -y install "${Dependency[@]} ${Extra_Dependency[@]}"
+				fi
 				i=$(($i + 1))
 				sleep 1
 			done
-			unset i
+			unset i X
 			$(command -v sudo) apt-get clean
 			Enter
 		;;
@@ -1688,8 +1703,8 @@ Backup_List=(
 
 Project_List=(Lede Openwrt Lienol ImmortalWrt)
 
-Dependency="build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync"
-Extra_Dependency="ntpdate httping ssh lm-sensors net-tools expect inetutils-ping"
+Dependency=(build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync)
+Extra_Dependency=(ntpdate httping ssh lm-sensors net-tools expect inetutils-ping)
 
 for X in $(echo ${Path_Depends[@]});do
 	[[ ! -d ${Home}/${X} ]] && mkdir -p ${Home}/${X} 2> /dev/null
