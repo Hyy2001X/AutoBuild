@@ -3,8 +3,8 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 
-Update=2021.11.19
-Version=V4.4.2
+Update=2022.3.20
+Version=V4.4.3
 
 Second_Menu() {
 	Project=$1
@@ -1206,7 +1206,7 @@ Module_SourcesList() {
 		clear
 		ECHO X "替换系统下载源\n"
 		ECHO "操作系统${Yellow}: [${OS_ID}:${OS_Version}]"
-		ECHO "当前系统源${Yellow}: [$(awk '{print $2}' /etc/apt/sources.list | sed -r 's/htt[ps]+:\/\/(.*)\/ubuntu\//\1/' | awk 'NR==1')]\n"
+		ECHO "当前系统源${Yellow}: [$(grep -v '#' /etc/apt/sources.list | awk '{print $2}' | sed -r 's/htt[ps]+:\/\/(.*)\/ubuntu\//\1/' | awk 'NR==1')]\n"
 		if [[ -f ${Mirror} ]]
 		then
 			local i=1;for Mirror_Name in $(cat ${Mirror} | awk '{print $1}');do
