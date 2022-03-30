@@ -1548,6 +1548,11 @@ GET_System_Info() {
 }
 
 NETWORK_CHECK() {
+	if [[ -z $(command -v ping) ]]
+	then
+		echo 0
+		return 0
+	fi
 	ping $1 -c 1 -W 3 > /dev/null 2>&1
 	[[ $? == 0 ]] && echo 0 || echo 1
 }
