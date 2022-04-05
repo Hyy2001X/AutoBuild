@@ -3,8 +3,8 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 
-Update=2022.3.20
-Version=V4.4.3
+Update=2022.04.05
+Version=V4.4.5
 
 Second_Menu() {
 	Project=$1
@@ -1708,7 +1708,7 @@ Backup_List=(
 
 Project_List=(Lede Openwrt Lienol ImmortalWrt)
 
-Dependency=(build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync)
+Dependency=(build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc-s1 libc6-dev-i386 subversion flex uglifyjs git gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync)
 Extra_Dependency=(ntpdate httping ssh lm-sensors net-tools expect inetutils-ping)
 
 for X in $(echo ${Path_Depends[@]});do
