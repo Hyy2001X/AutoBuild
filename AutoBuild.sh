@@ -303,7 +303,7 @@ Advanced_Options() {
 				sleep 2
 				if [[ ${if_Single} == [Yy] ]]
 				then
-					for X in "${Dependency[@]} ${Extra_Dependency[@]}";do
+					for X in ${Dependency[@]} ${Extra_Dependency[@]};do
 						$(command -v sudo) apt-get -y install ${X} > /dev/null 2>&1
 						if [[ $? == 0 ]]
 						then
@@ -313,7 +313,8 @@ Advanced_Options() {
 						fi
 					done
 				else
-					$(command -v sudo) apt-get -y install "${Dependency[@]} ${Extra_Dependency[@]}"
+					$(command -v sudo) apt-get -y install ${Dependency[@]}
+					$(command -v sudo) apt-get -y install ${Extra_Dependency[@]}
 				fi
 				i=$(($i + 1))
 				sleep 1
