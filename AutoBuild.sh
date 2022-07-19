@@ -334,6 +334,7 @@ Advanced_Options() {
 		;;
 		5)
 			echo
+			read -p '请输入快速启动的指令:' FastOpen
 			_SHELL=$(basename $(echo $SHELL))
 			for i in $(echo ~/.${_SHELL}rc /etc/profile);do
 				if [[ -r $i ]]
