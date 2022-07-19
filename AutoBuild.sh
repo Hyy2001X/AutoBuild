@@ -3,8 +3,8 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 
-Update=2022.04.05
-Version=V4.4.5
+Update=2022.07.19
+Version=V4.4.6
 
 Second_Menu() {
 	Project=$1
@@ -334,8 +334,8 @@ Advanced_Options() {
 		;;
 		5)
 			echo
-			read -p '请输入快速启动的指令:' FastOpen
-			for i in $(echo ~/.bashrc /etc/profile);do
+			_SHELL=$(basename $(echo $SHELL))
+			for i in $(echo ~/.${_SHELL}rc /etc/profile);do
 				if [[ -r $i ]]
 				then
 					ECHO B "\n写入到文件: [$i] ..."
