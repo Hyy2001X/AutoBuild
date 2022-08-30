@@ -4,7 +4,7 @@
 # Github	https://github.com/Hyy2001X/AutoBuild
 
 Update=2022.08.30
-Version=V4.4.7
+Version=V4.4.8
 
 Second_Menu() {
 	Project=$1
@@ -67,8 +67,8 @@ Project_Options() {
 		echo "2. 强制更新源代码"
 		echo "3. 空间清理"
 		echo "4. 下载 dl 库"
-		echo "5. View commits"
-		echo "6. Revert commits"
+		echo "5. 查看 commits"
+		echo "6. 回退 commits"
 		ECHO X "\nm. 主菜单"
 		echo "q. 返回"
 		GET_Choose Choose
@@ -369,9 +369,7 @@ Space_Cleaner() {
 		echo "2. 执行 [make dirclean]"
 		echo "3. 执行 [make distclean]"
 		echo "4. 清理 [临时文件/编译缓存]"
-		echo "5. 清理 [更新日志]"
-		echo "6. 清理 [编译日志]"
-		ECHO G "7. 删除 [$1] 源码"
+		ECHO G "x. 彻底删除 [$1]"
 		echo "q. 返回"
 		GET_Choose Choose
 		cd $2
@@ -395,9 +393,9 @@ Space_Cleaner() {
 			rm -r tmp
 			ECHO Y "\n[临时文件/编译缓存] 删除成功!"
 		;;
-		5)
-			ECHO X "\n正在删除 [$1] 源码, 请稍后 ..."
-			rm -r "$2"
+		x)
+			ECHO X "\n正在彻底删除 [$1], 请稍后 ..."
+			rm -rf "$2"
 			AutoBuild_Second
 		;;
 		esac
@@ -1233,13 +1231,12 @@ AutoBuild_Second() {
 	clear
 		cd ${Home}
 		ECHO X "${AutoBuild_Title}\n"
-		ECHO X "项目名称		[项目状态]\n"
+		ECHO X "[项目名称]		  [状态]	   [项目地址]\n"
 		for ((i=0;i<=${#Project_List[@]};i++));do
 			e=$(($i + 1))
-			[[ -n ${Project_List[i]} ]] && Project_Details ${e} ${Project_List[i]}
-		done
-		unset e i
-		ECHO G "\nx. 更新所有源代码"
+			[[ ${Project_List[i]} ]] && Project_Details ${e} ${Project_List[i]} $(cat ${Home}/Depends/Projects/${Project_List[i]} | awk '{print $1}')
+		done ; unset e i
+		ECHO G "\nx. 更新所有项目"
 		ECHO X "m. 主菜单\n"
 		read -p '请从上方选择一个项目:' Choose
 		[[ ${Choose} =~ [0-9] ]] && Choose=$((${Choose} - 1))
@@ -1264,9 +1261,9 @@ AutoBuild_Second() {
 Project_Details() {
 	if [[ -f ${Home}/Projects/$2/Makefile ]]
 	then
-		printf "%s. %-20s ${Yellow}%-19s${Grey}\n${White}" $1 $2 [已检测到]
+		printf "%s. %-22s ${Yellow}%-19s${Grey}%-19s\n${White}" $1 $2 [正常] $3
 	else
-		printf "%s. %-20s ${Red}%-19s${Grey}\n${White}" $1 $2 [未检测到]
+		printf "%s. %-22s ${Red}%-19s${Grey}%-19s\n${White}" $1 $2 [异常] $3
 	fi
 }
 
