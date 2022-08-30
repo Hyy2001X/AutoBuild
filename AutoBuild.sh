@@ -3,13 +3,13 @@
 # Author	Hyy2001
 # Github	https://github.com/Hyy2001X/AutoBuild
 
-Update=2022.07.19
-Version=V4.4.6
+Update=2022.08.30
+Version=V4.4.7
 
 Second_Menu() {
 	Project=$1
 	Build_Path=${Home}/Projects/$1
-	[[ ! -s ${Build_Path}/Makefile ]] && Sources_Download
+	[[ ! -s ${Build_Path}/Makefile ]] && Source_Clone ${Project} ${Build_Path}
 
 	while :
 	do
@@ -21,10 +21,6 @@ Second_Menu() {
 			Version=$(egrep -o "R[0-9]+\.[0-9]+\.[0-9]+" package/lean/default-settings/files/zzz-default-settings 2> /dev/null)
 			[[ -n ${Version} ]] && ECHO "源码版本: ${Version}"
 			unset Version
-			if [[ -s ${Home}/Configs/${Project}_Recently_Updated ]]
-			then
-				ECHO "最近更新: $(cat ${Home}/Configs/${Project}_Recently_Updated)"
-			fi
 		else
 			return
 		fi
@@ -48,10 +44,10 @@ Second_Menu() {
 			Sources_Update common ${Project}
 		;;
 		2)
-			Menuconfig $(pwd)
+			Menuconfig ${Project} ${Build_Path}
 		;;
 		3)
-			BackupServices
+			Backups
 		;;
 		4)
 			Module_Builder
@@ -69,11 +65,10 @@ Project_Options() {
 		ECHO X "源码高级选项\n"
 		echo "1. 下载源代码"
 		echo "2. 强制更新源代码"
-		ECHO Y "3. 添加主题包"
-		ECHO X "4. 添加软件包"
-		echo "5. 空间清理"
-		echo "6. 下载公共源码库"
-		echo "7. 源代码更新日志"
+		echo "3. 空间清理"
+		echo "4. 下载 dl 库"
+		echo "5. View commits"
+		echo "6. Revert commits"
 		ECHO X "\nm. 主菜单"
 		echo "q. 返回"
 		GET_Choose Choose
@@ -85,28 +80,30 @@ Project_Options() {
 			AutoBuild_Core
 		;;
 		1)
-			Sources_Download
+			Source_Clone ${Project} ${Build_Path}
 		;;
 		2)
 			Sources_Update force ${Project}
 		;;
 		3)
-			ExtraThemes
+			Space_Cleaner ${Project} ${Build_Path}
 		;;
 		4)
-			ExtraPackages
+			Make_Download ${Project} ${Build_Path}
 		;;
 		5)
-			Space_Cleaner
-		;;
-		6)
-			Make_Download
-		;;
-		7)
 			clear
 			if [[ -d .git ]]
 			then
-				git log -20 --graph --all --branches --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%cr)%C(reset) %C(bold green)(%ai)%C(reset) %C(white)%s'
+				git log -30 --graph --all --branches --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%cr)%C(reset) %C(bold green)(%ai)%C(reset) %C(white)%s'
+			fi
+		;;
+		6)
+			if [[ -d .git ]]
+			then
+				echo
+				read -p '请输入回退到的 Commit ish:' reset_commit
+				git reset --hard ${revert_commit} || ECHO R "\n回退失败!"
 				Enter
 			fi
 		;;
@@ -114,7 +111,7 @@ Project_Options() {
 	done
 }
 
-BackupServices() {
+Backups() {
 	while :
 	do
 		clear
@@ -167,18 +164,19 @@ BackupServices() {
 			done
 		;;
 		2)
-			if [[ -n $(ls -A ${Home}/Backups/Configs) ]]
+			if [[ $(ls -A ${Home}/Backups/Configs) ]]
 			then
-				while :;do
+				while :
+				do
 					clear
 					ECHO X "恢复 [.config]\n"
 					cd ${Home}/Backups/Configs
-					ls -A | cat > ${Cache_Path}/Config.List
+					ls -A1 | cat > ${Cache_Path}/Config.List
 					ConfigList_File=${Cache_Path}/Config.List
 					Max_ConfigList_Line=$(sed -n '$=' ${ConfigList_File})
 					for ((i=1;i<=${Max_ConfigList_Line};i++));
 					do
-						ConfigFile_Name=$(sed -n ${i}p $ConfigList_File)
+						ConfigFile_Name=$(sed -n ${i}p ${ConfigList_File})
 						echo -e "${i}. ${Yellow}${ConfigFile_Name}${White}"
 					done
 					echo -e "\nq.返回"
@@ -192,10 +190,10 @@ BackupServices() {
 						then
 							if [[ ! ${Choose} == 0 ]] 2> /dev/null
 							then
-								ConfigFile=$(sed -n ${Choose}p $ConfigList_File)
+								ConfigFile=$(sed -n ${Choose}p ${ConfigList_File})
 								if [[ -f ${ConfigFile} ]]
 								then
-									ConfigFile_Dir="${Home}/Backups/Configs/$ConfigFile"
+									ConfigFile_Dir="${Home}/Backups/Configs/${ConfigFile}"
 									cp "${ConfigFile_Dir}" ${Build_Path}/.config
 									echo "${ConfigFile}" > ${Home}/Configs/${Project}_Recently_Config
 									ECHO Y "\n配置文件 [$ConfigFile] 恢复成功!"
@@ -271,10 +269,9 @@ Advanced_Options() {
 		ECHO "1. 更新系统软件包"
 		ECHO X "2. 安装编译环境"
 		echo "3. SSH 服务"
-		echo "4. 同步网络时间"
-		echo "5. 快捷指令启动"
-		echo "6. 系统信息"
-		echo "7. 系统下载源"
+		echo "4. 快捷指令启动"
+		echo "5. 系统信息"
+		echo "6. 系统下载源"
 		ECHO "\nx. 更新脚本"
 		ECHO X "q. 主菜单"
 		GET_Choose Choose
@@ -328,12 +325,6 @@ Advanced_Options() {
 		;;
 		4)
 			echo
-			$(command -v sudo) ntpdate ntp1.aliyun.com
-			$(command -v sudo) hwclock --systohc
-			sleep 2
-		;;
-		5)
-			echo
 			read -p '请输入快速启动的指令:' FastOpen
 			_SHELL=$(basename $(echo $SHELL))
 			for i in $(echo ~/.${_SHELL}rc /etc/profile);do
@@ -353,16 +344,16 @@ Advanced_Options() {
 			done
 			if [[ ${FastOpen_result} == true ]]
 			then
-				ECHO Y "\n创建成功!下次登录在终端输入 ${FastOpen} 即可启动 AutoBuild."
+				ECHO Y "\n创建成功! 下次登录在终端输入 ${FastOpen} 即可启动 AutoBuild."
 			else
-				ECHO R "\n创建失败!请检查相关权限设置!"
+				ECHO R "\n创建失败! 请检查相关权限设置!"
 			fi
 			sleep 3
 		;;
-		6)
+		5)
 			Module_Systeminfo
 		;;
-		7)
+		6)
 			Module_SourcesList
 		;;
 		esac
@@ -373,50 +364,40 @@ Space_Cleaner() {
 	while :
 	do
 		clear
-		ECHO X "空间清理\n"
+		ECHO X "空间清理 [$1] [$2]\n"
 		echo "1. 执行 [make clean]"
 		echo "2. 执行 [make dirclean]"
 		echo "3. 执行 [make distclean]"
 		echo "4. 清理 [临时文件/编译缓存]"
 		echo "5. 清理 [更新日志]"
 		echo "6. 清理 [编译日志]"
-		ECHO G "7. 删除 [${Project}] 源码"
+		ECHO G "7. 删除 [$1] 源码"
 		echo "q. 返回"
 		GET_Choose Choose
-		cd ${Build_Path}
+		cd $2
 		case ${Choose} in
 		q)
 			break
 		;;
 		1)
-			ECHO X "\n正在执行 [make clean],请稍后 ..."
+			ECHO X "\n正在执行 [make clean], 请稍后 ..."
 			make clean > /dev/null 2>&1
 		;;
 		2)
-			ECHO X "\n正在执行 [make dirclean],请稍后 ..."
+			ECHO X "\n正在执行 [make dirclean], 请稍后 ..."
 			make dirclean > /dev/null 2>&1
 		;;
 		3)
-			ECHO X "\n正在执行 [make distclean],请稍后 ..."
+			ECHO X "\n正在执行 [make distclean], 请稍后 ..."
 			make distclean > /dev/null 2>&1
 		;;
 		4)
-			rm -rf ${Build_Path}/tmp
+			rm -r tmp
 			ECHO Y "\n[临时文件/编译缓存] 删除成功!"
 		;;
 		5)
-			rm -f ${Home}/Log/SourceUpdate_${Project}_*
-			ECHO Y "\n[更新日志] 删除成功!"
-		;;
-		6)
-			rm -f ${Home}/Log/BuildOpenWrt_${Project}_*
-			ECHO Y "\n[编译日志] 删除成功!"
-		;;
-		7)
-			ECHO X "\n正在删除 [${Project}] 源码,请稍后 ..."
-			rm -rf ${Build_Path}/*
-			rm -f ${Home}/Configs/${Project}_Recently_*
-			rm -f ${Home}/Log/*_${Project}_*
+			ECHO X "\n正在删除 [$1] 源码, 请稍后 ..."
+			rm -r "$2"
 			AutoBuild_Second
 		;;
 		esac
@@ -428,13 +409,13 @@ Module_Updater() {
 	if [[ $(NETWORK_CHECK 223.5.5.5) == 0 ]]
 	then
 		clear
-		ECHO X "正在更新 [AutoBuild] 程序,请稍后 ...\n"
-		if [[ -z $(ls -A ${Home}/Backups/AutoBuild-Update) ]]
+		ECHO X "正在更新 [AutoBuild] 程序, 请稍后 ...\n"
+		if [[ ! $(ls -A ${Home}/Backups/AutoBuild-Update 2> /dev/null) ]]
 		then
 			git clone https://github.com/Hyy2001X/AutoBuild ${Home}/Backups/AutoBuild-Update
 		fi
 		cd ${Home}/Backups/AutoBuild-Update
-		Update_Logfile=${Home}/Log/AutoBuild_Update_$(date +%Y%m%d_%H:%M).log
+		Update_Logfile=${Home}/Log/Update_AutoBuild_$(date +%Y%m%d-%H%M).log
 		git fetch --all | tee -a ${Update_Logfile}
 		git reset --hard origin/master | tee -a ${Update_Logfile} || Update_Failed=1
 		git pull 2>&1 | tee ${Update_Logfile} || Update_Failed=1
@@ -462,63 +443,66 @@ Module_Updater() {
 }
 
 Make_Download() {
-	if [[ ! -s ${Build_Path}/.config ]]
+	if [[ ! -f $2/.config ]]
 	then
-		ECHO R "\n未检测到 [.config],无法执行 [make download]!"
+		ECHO R "\n未检测到 [.config], 无法执行 [make download]!"
 		sleep 2
+		return
 	fi
 	if [[ $(NETWORK_CHECK 223.5.5.5) == 1 ]]
 	then
 		ECHO R "\n网络连接错误,执行失败!"
 		sleep 2
+		return
 	fi
 	clear
-	cd ${Build_Path}
+	cd $2
 	ECHO X "开始执行 [make download] ...\n"
-	dl_Logfile=${Home}/Log/dl_${Project}_$(date +%Y%m%d_%H:%M).log
-	if [[ -n $(ls -A dl) ]]
+	dl_Logfile=${Home}/Log/dl_${1}_$(date +%Y%m%d_%H%M).log
+	if [[ $(ls -A dl 2> /dev/null) ]]
 	then
 		mv dl/* ${Home}/Backups/dl 2> /dev/null
-		rm -rf dl
+		rm -r dl 2> /dev/null
 	fi
-	ln -s ${Home}/Backups/dl ${Build_Path}/dl 2> /dev/null
+	ln -sf ${Home}/Backups/dl $2/dl 2> /dev/null
 	make -j${CPU_Threads} download V=s 2>&1 | tee -a ${dl_Logfile}
 	find dl -size -1024c -exec rm -f {} \;
-	ln -s ${Home}/Backups/dl ${Build_Path}/dl 2> /dev/null
+	ln -sf ${Home}/Backups/dl $2/dl 2> /dev/null
 	Enter
 }
 
 Menuconfig() {
-	cd $1
+	cd $2
 	echo
 	read -p "是否删除旧配置文件?[Y/n]:" Choose
 	clear
-	ECHO B "Loading ${Project} Configuration..."
+	ECHO B "Loading $1 Configuration ..."
 	case ${Choose} in
 	[Yy])
-		rm -rf .config*
+		rm -r .config* 2> /dev/null
 	;;
 	esac
 	make menuconfig
 	Enter
 }
 
-Sources_Download() {
+Source_Clone() {
 	while :;do
-		if [[ -s ${Build_Path}/Makefile ]]
+		if [[ -s $2/Makefile ]]
 		then
-			ECHO Y "\n已检测到 [${Project}]源代码,当前分支:[$(GET_Branch ${Build_Path})]"
-			sleep 3
+			ECHO Y "\n已检测到 [$1]源代码, 当前分支:[$(GET_Branch $2)]"
+			sleep 2
 			return
 		fi
 		clear
-		Github_File=${Home}/Depends/Projects/${Project}
+		Github_File=${Home}/Depends/Projects/$1
 		Github_URL=$(egrep "http|https|git@" ${Github_File} | awk 'NR==1')
-		ECHO X "[${Project}] 源码下载: 分支选择\n"
+		ECHO X "[$1] 源码下载: 分支选择\n"
 		ECHO G "仓库地址: ${Github_URL}\n"
 		ECHO "请从下方选择一个分支:\n"
 		Github_Branch_Array=($(egrep -v "http|https|git@" ${Github_File}))
-		local i=0;while :;do
+		local i=0 ; while :
+		do
 			echo "$(($i + 1)). ${Github_Branch_Array[$i]}"
 			i=$(($i + 1))
 			[[ $i == ${#Github_Branch_Array[@]} ]] && break
@@ -546,17 +530,19 @@ Sources_Download() {
 				Github_Branch=${Github_Branch_Array[$((${Choose_Branch} - 1))]}
 				ECHO B "下载地址: ${Yellow}${Github_URL}"
 				ECHO B "远程分支: ${Yellow}${Github_Branch}\n"
-				rm -rf ${Build_Path}
-				ECHO X "开始克隆 [${Project}] ...\n"
-				git clone -b ${Github_Branch} ${Github_URL} ${Build_Path}
+				rm -r "$2" 2> /dev/null
+				ECHO X "开始克隆 [$1] 到 '$2' ...\n"
+				Clone_Logfile=${Home}/Log/Clone_${1}_$(date +%Y%m%d-%H%M).log
+				echo "${Github_URL}:${Github_Branch}" > ${Clone_Logfile}
+				git clone -b ${Github_Branch} ${Github_URL} $2 2>&1 | tee -a ${Clone_Logfile}
 				if [[ $? == 0 ]]
 				then
-					ln -s ${Home}/Backups/dl ${Build_Path}/dl
-					ECHO Y "\n[${Project}] 源码下载成功!"
+					ln -s ${Home}/Backups/dl $2/dl
+					ECHO Y "\n[$1] 源码下载成功!"
 					Enter
-					Second_Menu ${Project}
+					Second_Menu $1
 				else
-					ECHO R "\n[${Project}] 源码下载失败!"
+					ECHO R "\n[$1] 源码下载失败!"
 					Enter
 				fi
 			fi
@@ -574,7 +560,7 @@ Module_Builder() {
 	fi
 	if [[ ! -f ${Build_Path}/.config ]]
 	then
-		ECHO R "\n未检测到设备配置文件,请先执行 [make menuconfig]"
+		ECHO R "\n未检测到设备配置文件, 请先执行 [make menuconfig]"
 		sleep 3
 		return 1
 	fi
@@ -608,16 +594,6 @@ Module_Builder() {
 		[[ $(du .config | awk '{print $1}') -lt 100 ]] && {
 			DIFF_CONFIG=1
 		} || DIFF_CONFIG=0
-		case "${TARGET_BOARD}" in
-		ramips | reltek | ipq40xx | ath79 | ipq807x)
-			Firmware_Format=bin
-		;;
-		rockchip | x86)
-			[[ $(cat .config) =~ CONFIG_TARGET_IMAGES_GZIP=y ]] && {
-				Firmware_Format=img.gz || Firmware_Format=img
-			}
-		;;
-		esac
 		TARGET_SUBTARGET=$(awk -F '[="]+' '/TARGET_SUBTARGET/{print $2}' .config)
 		TARGET_ARCH_PACKAGES=$(awk -F '[="]+' '/TARGET_ARCH_PACKAGES/{print $2}' .config)
 		clear
@@ -637,10 +613,10 @@ Module_Builder() {
 				echo -e "CPU 型号:${Yellow} ${TARGET_SUBTARGET}${White}"
 				echo -e "软件架构:${Yellow} ${TARGET_ARCH_PACKAGES}${White}"
 			else
-				ECHO R "[Diff Config] 请先执行 make defconfig !"
+				ECHO R "[diff config], 请先执行 [make defconfig]"
 			fi
 		else
-			ECHO R "警告:未检测到配置文件,部分操作将不可用!"
+			ECHO R "警告:未检测到配置文件, 部分操作将不可用!"
 		fi
 		echo -e "${Yellow}\n1. make -j1 V=s"
 		echo "2. make -j2 V=s"
@@ -650,12 +626,6 @@ Module_Builder() {
 		echo "6. make defconfig"
 		ECHO X "7. 高级选项"
 		echo "q. 返回"
-		if [[ -f ${Home}/Configs/${Project}_Recently_Compiled ]]
-		then
-			Recently_Compiled=$(awk 'NR==1' ${Home}/Configs/${Project}_Recently_Compiled)
-			Recently_Compiled_Stat=$(awk 'NR==2' ${Home}/Configs/${Project}_Recently_Compiled)
-			echo -e "\n${Yellow}最近编译时间: ${Blue}[${Recently_Compiled}${Recently_Compiled_Stat}]${White}"
-		fi
 		GET_Choose Choose_1
 		case ${Choose_1} in
 		q)
@@ -674,11 +644,11 @@ Module_Builder() {
 			Compile_Threads="make -j${CPU_Threads} V=s"
 		;;
 		5)
-			Menuconfig $(pwd)
+			Menuconfig ${Project} ${Build_Path}
 		;;
 		6)
 			echo
-			ECHO X "正在执行 [make defconfig],请稍后 ..."
+			ECHO X "正在执行 [make defconfig], 请稍后 ..."
 			make defconfig
 		;;
 		7)
@@ -689,36 +659,35 @@ Module_Builder() {
 				echo "2. 执行 [make download]"
 				echo "3. 分离 [.config] > defconfig"
 				echo "4. 删除 [.config]"
-				echo "5. 更多空间清理"
+				echo "5. 空间清理"
 				echo -e "\nq. 返回"
 				ECHO X "m. 主菜单"
 				GET_Choose Choose
 				case ${Choose} in
 				1)
 					clear
-					ECHO X "正在执行 [make kernel_menuconfig],请稍后 ..."
+					ECHO X "正在执行 [make kernel_menuconfig], 请稍后 ..."
 					make kernel_menuconfig
 				;;
 				2)
-					Make_Download
+					Make_Download ${Project} ${Build_Path}
 				;;
 				3)
-					if [ -f .config ]
+					if [[ -f .config ]]
 					then
-						./scripts/diffconfig.sh > ${Home}/Backups/Configs/diffconfig_${Project}_$(date +%Y%m%d-%H%M%S)
-						ECHO Y "\n新配置文件已保存到: 'Backups/Configs/diffconfig_${Project}_$(date +%Y%m%d-%H:%M:%S)'"
+						diff_config="diffconfig_${Project}_$(date +%Y%m%d-%H%M%S)"
+						./scripts/diffconfig.sh > ${Home}/Backups/Configs/${diff_config}
+						ECHO Y "\n新配置文件已保存到: 'Backups/Configs/${diff_config}'"
 					else
-						ECHO R "\n未检测到 [.config]文件!"
+						ECHO R "\n未检测到 [.config] 配置文件!"
 					fi
 					sleep 2
 				;;
 				4)
 					rm -f ${Build_Path}/.config*
-					ECHO Y "\n[配置文件] 删除成功!"
-					sleep 2
 				;;
 				5)
-					Space_Cleaner
+					Space_Cleaner ${Project} ${Build_Path}
 				;;
 				q)
 					break
@@ -733,37 +702,37 @@ Module_Builder() {
 		case ${Choose_1} in
 		1 | 2 | 3 | 4)
 			clear
-			case "${TARGET_BOARD}" in
-			x86)
-				AutoBuild_Firmware='AutoBuild-${Openwrt_Reponame}-${TARGET_PROFILE}-${CURRENT_Version}-${FW_Boot_Type}-$(GET_SHA256 $1).${Firmware_Format_Defined}'
-			;;
-			*)
-				AutoBuild_Firmware='AutoBuild-${Openwrt_Reponame}-${TARGET_PROFILE}-${CURRENT_Version}-$(GET_SHA256 $1).${Firmware_Format_Defined}'
-			;;
-			esac
 			Firmware_Path="${Build_Path}/bin/targets/${TARGET_BOARD}/${TARGET_SUBTARGET}"
 			Packages_Path=${Home}/Packages
-			rm -rf ${Firmware_Path}
+			rm -r ${Firmware_Path} 2> /dev/null
 			ECHO Y "执行指令: [${Compile_Threads}]\n"
-			ECHO X "开始编译: [${TARGET_PROFILE}] ..."
-			Compile_Date=$(date +%Y%m%d-%H:%M)
+			Build_Logfile=${Home}/Log/Build_${Project}_$(date +%Y%m%d-%H%M).log
 			Compile_Started=$(date +"%Y-%m-%d %H:%M:%S")
-			echo "${Compile_Started}" > ${Home}/Configs/${Project}_Recently_Compiled
-			${Compile_Threads} 2>&1 | tee ${Home}/Log/BuildOpenWrt_${Project}_${Compile_Date}.log
+			${Compile_Threads} 2>&1 | tee ${Build_Logfile}
 			if [[ $? != 0 ]]
 			then
 				ECHO R "\n编译失败!"
 				Enter
 				continue
 			fi
-			mkdir -p ${Home}/Packages/${TARGET_ARCH_PACKAGES}
-			mkdir -p "${Packages_Path}/${TARGET_ARCH_PACKAGES}/Kernel Modules"
+			echo
+			E="${Home}/Firmware/${TARGET_PROFILE}/$(date +%Y%m%d-%H%M)"
+			mkdir -p $E
+			List_Firmware ${Firmware_Path} | while read f
+			do
+				ECHO Y "检测到: $f"
+				cp -a ${Firmware_Path}/$f $E
+			done
+			cp -a ${Firmware_Path}/config.buildinfo $E/config
+			touch ${E}/"${Project} ${Openwrt_Branch}"
 			echo
 			ECHO X "备份当前 dl 库到 '${Home}/Backups/dl' ..."
 			awk "BEGIN { cmd=\"cp -a ${Build_Path}/dl/* ${Home}/Backups/dl\"; print "n" | cmd; }" > /dev/null 2>&1
-			ECHO X "备份软件包到 '${Home}/Packages' ...\n"
-			rm -rf ${Cache_Path}/Packages && mkdir -p ${Cache_Path}/Packages
-			mv -f $(find ${Build_Path}/bin -type f -name "*.ipk") ${Cache_Path}/Packages > /dev/null 2>&1
+			ECHO X "备份软件包到 '${Home}/Packages' ..."
+			mkdir -p ${Home}/Packages/${TARGET_ARCH_PACKAGES}
+			mkdir -p "${Packages_Path}/${TARGET_ARCH_PACKAGES}/Kernel Modules"
+			rm -r ${Cache_Path}/Packages && mkdir -p ${Cache_Path}/Packages
+			cp -a $(find ${Build_Path}/bin -type f -name "*.ipk") ${Cache_Path}/Packages > /dev/null 2>&1
 			mv -f $(find ${Cache_Path}/Packages -type f -name "kmod-*.ipk") "${Packages_Path}/${TARGET_ARCH_PACKAGES}/Kernel Modules" > /dev/null 2>&1
 			mv -f $(find ${Cache_Path}/Packages -type f -name "*_${TARGET_ARCH_PACKAGES}.ipk") ${Packages_Path}/${TARGET_ARCH_PACKAGES} > /dev/null 2>&1
 			mv -f $(find ${Cache_Path}/Packages -type f -name "luci-app-*.ipk") ${Packages_Path}/luci-app-common > /dev/null 2>&1
@@ -772,78 +741,17 @@ Module_Builder() {
 			mv -f $(find ${Cache_Path}/Packages -type f -name "*.ipk") ${Packages_Path} > /dev/null 2>&1
 			mv -f $(find ${Build_Path}/bin/targets/${TARGET_BOARD}/${TARGET_SUBTARGET} -type f -name "kmod-*.ipk") "${Packages_Path}/${TARGET_ARCH_PACKAGES}/Kernel Modules" > /dev/null 2>&1
 			mv -f $(find ${Build_Path}/bin/targets/${TARGET_BOARD}/${TARGET_SUBTARGET} -type f -name "*.ipk") ${Packages_Path}/${TARGET_ARCH_PACKAGES} > /dev/null 2>&1
-			cd ${Firmware_Path}
-			SHA256_File="${Firmware_Path}/sha256sums"
-			case "${TARGET_BOARD}" in
-			x86)
-				Process_Firmware $(List_Format)
-			;;
-			*)
-				Process_Firmware ${Firmware_Format}
-			;;
-			esac
-			mkdir -p ${Home}/Firmware/${TARGET_PROFILE}
-			[[ $(ls) =~ 'AutoBuild-' ]] && mv -f AutoBuild-* ${Home}/Firmware/${TARGET_PROFILE}
 			Enter
 		;;
 		esac
 	done
 }
 
-GET_SHA256() {
-	List_REGEX | grep "$1" | cut -c1-5
-}
-
-Process_Firmware() {
-	while [[ $1 ]];do
-		Rename_Firmware $1 $(List_Firmware $1)
-		shift
-	done
-}
-
-Rename_Firmware() {
-	Firmware_Format_Defined=$1
-	shift
-	while [[ $1 ]];do
-		case "${TARGET_BOARD}" in
-		x86)
-			[[ $1 =~ efi ]] && {
-				FW_Boot_Type=UEFI
-			} || {
-				FW_Boot_Type=BIOS
-			}
-		;;
-		esac
-		eval AutoBuild_Firmware=${AutoBuild_Firmware}
-		[[ -f $1 ]] && {
-			echo -e "${Yellow}固件名称: ${AutoBuild_Firmware}"
-			cp -a $1 ${AutoBuild_Firmware}
-		}
-		shift
-	done
-}
-
 List_Firmware() {
-	[[ -z $* ]] && {
-		List_REGEX | while read X;do
-			echo $X | cut -d "*" -f2
-		done
-	} || {
-		while [[ $1 ]];do
-			for X in $(echo $(List_REGEX));do
-				[[ $X == *$1 ]] && echo "$X" | cut -d "*" -f2
-			done
-			shift
-		done
-	}
-}
-
-List_Format() {
-	echo "$(List_REGEX | cut -d "*" -f2 | cut -d "." -f2-3)" | sort | uniq
-}
-
-List_REGEX() {
-	egrep -v "packages|buildinfo|sha256sums|manifest|kernel|rootfs|factory" ${SHA256_File} | tr -s '\n'
+	ls -1 $1 2> /dev/null | egrep -v "packages|buildinfo|sha256sums|manifest" | while read i
+	do
+		echo $i
+	done
 }
 
 GET_Branch() {
@@ -857,275 +765,7 @@ Compile_Stopped() {
 	Start_Seconds=$(date -d "$Compile_Started" +%s)
 	End_Seconds=$(date -d "$Compile_Ended" +%s)
 	let Compile_Cost=($End_Seconds-$Start_Seconds)/60
-	ECHO Y "\n$Compile_Started --> $Compile_Ended 编译用时:$Compile_Cost分钟"
-}
-
-ExtraPackages() {
-	ExtraPackages_mkdir
-	while :
-	do
-		cd ${ExtraPackages_Path}
-		clear
-		ECHO X "Extra Packages"
-		echo "1. SmartDNS"
-		echo "2. AdGuard Home"
-		echo "3. OpenClash"
-		echo "4. Clash"
-		echo "5. OpenAppFilter"
-		echo "6. Passwall"
-		echo "7. MentoHust"
-		echo "8. [微信推送] ServerChan "
-		echo "9. [端口转发] Socat"
-		echo "10. [Hello World] luci-app-vssr"
-		echo "11. [Argon 配置] luci-app-argon-config"
-		echo "12. iPerf3 服务器"
-		echo "13. NPS 客户端"
-		echo -e "\nq. 返回\n"
-		read -p '请从上方选择一个软件包:' Choose
-		case ${Choose} in
-		q)
-			break
-		;;
-		1)
-			PKG_NAME=smartdns
-			PKG_URL=https://github.com/kenzok8/openwrt-packages/trunk/smartdns
-			ExtraPackages_svn
-			PKG_NAME=luci-app-smartdns
-			if [[ ${Project} == Lede ]]
-			then
-				PKG_URL="-b lede https://github.com/pymumu/luci-app-smartdns"
-			else
-				PKG_URL="https://github.com/pymumu/luci-app-smartdns"
-			fi
-			ExtraPackages_git
-			rm -rf ${Build_Path}/tmp
-		;;
-		2)
-			PKG_NAME=luci-app-adguardhome
-			PKG_URL=https://github.com/Hyy2001X/AutoBuild-Packages/trunk/luci-app-adguardhome
-			ExtraPackages_svn
-		;;
-		3)
-			SRC_NAME=OpenClash
-			SRC_URL=https://github.com/vernesong/OpenClash/trunk/luci-app-openclash
-			ExtraPackages_svn
-		;;
-		4)
-			PKG_NAME=luci-app-clash
-			PKG_URL=https://github.com/frainzy1477/luci-app-clash
-			ExtraPackages_git
-		;;
-		5)
-			PKG_NAME=OpenAppFilter
-			PKG_URL=https://github.com/Lienol/openwrt-OpenAppFilter
-			ExtraPackages_git
-		;;
-		6)
-			PKG_NAME=luci-app-passwall
-			PKG_URL=https://github.com/xiaorouji/openwrt-passwall
-			ExtraPackages_git
-		;;
-		7)
-			PKG_NAME=luci-app-mentohust
-			PKG_URL=https://github.com/immortalwrt/luci/branches/openwrt-18.06/applications/luci-app-mentohust
-			ExtraPackages_svn
-			PKG_NAME=mentohust
-			PKG_URL=https://github.com/immortalwrt/packages/branches/openwrt-18.06/net/mentohust
-			ExtraPackages_svn
-		;;
-		8)
-			PKG_NAME=luci-app-serverchan
-			PKG_URL=https://github.com/tty228/luci-app-serverchan
-			ExtraPackages_git
-		;;
-		9)
-			PKG_NAME=luci-app-socat
-			PKG_URL=https://github.com/Lienol/openwrt-package/trunk/luci-app-socat
-			ExtraPackages_svn
-		;;
-		10)
-			PKG_NAME=luci-app-vssr
-			PKG_URL=https://github.com/jerrykuku/luci-app-vssr
-			ExtraPackages_git
-		;;
-		11)
-			PKG_NAME=luci-app-argon-config
-			PKG_URL=https://github.com/jerrykuku/luci-app-argon-config
-			ExtraPackages_git
-		;;
-		12)
-			PKG_NAME=luci-app-iperf3-server
-			PKG_URL=https://github.com/Hyy2001X/AutoBuild-Packages/trunk/luci-app-iperf3-server
-			ExtraPackages_svn
-		;;
-		13)
-			PKG_NAME=luci-app-npc
-			PKG_URL=https://github.com/Hyy2001X/AutoBuild-Packages/trunk/luci-app-npc
-			ExtraPackages_svn
-		;;
-		esac
-	done
-}
-
-ExtraThemes() {
-	ExtraPackages_mkdir
-	while :
-	do
-		clear
-		ECHO X "添加第三方主题包\n"
-		if [[ -f ${PKG_Path}/lean/luci-theme-argon/Makefile ]]
-		then
-			Theme_Version="$(cat ${PKG_Path}/lean/luci-theme-argon/Makefile | grep 'PKG_VERSION' | cut -c14-20)"
-			echo -e "1. ${Yellow}luci-theme-argon [${Theme_Version}]${White}"
-		else
-			echo "1. luci-theme-argon"
-		fi
-		cd ${ExtraPackages_Path}
-		ExtraThemesList_File=${Home}/Depends/Themes.list
-		List_MaxLine=$(sed -n '$=' $ExtraThemesList_File)
-		rm -f ${Cache_Path}/Checked_Themes > /dev/null 2>&1
-		for ((i=1;i<=${List_MaxLine};i++));
-			do
-				Theme=$(sed -n ${i}p $ExtraThemesList_File | awk '{print $2}')
-				if [[ -f ${ExtraPackages_Path}/${Theme}/Makefile ]]
-				then
-					if [[ $(cat ${ExtraPackages_Path}/${Theme}/Makefile) =~ PKG_VERSION ]]
-					then
-						GET_Version="$(cat ${ExtraPackages_Path}/${Theme}/Makefile | grep 'PKG_VERSION' | cut -c14-20)"
-						Theme_Version=" [${GET_Version}]"
-						if [[ $(cat ${ExtraPackages_Path}/${Theme}/Makefile) =~ PKG_RELEASE ]]
-						then
-							GET_Release="$(cat ${ExtraPackages_Path}/${Theme}/Makefile | grep 'PKG_RELEASE' | cut -c14-20)"
-							Theme_Version=" [${GET_Version}-${GET_Release}]"
-						fi
-						echo -e "$(($i + 1)). ${Yellow}${Theme}${Theme_Version}${White}"
-					else
-						echo -e "$(($i + 1)). ${Yellow}${Theme}${White}"
-					fi
-					echo "${Theme}" >> ${Cache_Path}/Checked_Themes
-				else
-					echo "$(($i + 1)). ${Theme}"
-				fi
-		done
-		ECHO X "\na. 添加所有主题包"
-		ECHO "u. 更新已安装的主题包"
-		echo -e "q. 返回\n"
-		read -p '请从上方选择一个主题包:' Choose
-		case ${Choose} in
-		a)
-			clear
-			for ((i=1;i<=${List_MaxLine};i++));
-			do
-				URL_TYPE=$(sed -n ${i}p $ExtraThemesList_File | awk '{print $1}')
-				PKG_NAME=$(sed -n ${i}p $ExtraThemesList_File | awk '{print $2}')
-				PKG_URL=$(sed -n ${i}p $ExtraThemesList_File | awk '{print $3}')
-				case ${URL_TYPE} in
-				git)
-					ExtraPackages_git
-				;;
-				svn)
-					ExtraPackages_svn
-				esac
-			done
-			Enter
-		;;
-		u)
-			if [[ -f ${Cache_Path}/Checked_Themes ]]
-			then
-				clear
-				cat ${Cache_Path}/Checked_Themes | while read Theme
-				do
-					ECHO X "正在更新 ${Theme} ..."
-					cd ./${Theme}
-					svn update > /dev/null 2>&1
-					git pull > /dev/null 2>&1
-					cd ..
-				done
-				Enter
-			else
-				ECHO R "\n未安装任何主题包!"
-				sleep 2
-			fi
-		;;
-		q)
-			break
-		;;
-		1)
-			PKG_NAME=luci-theme-argon
-			if [[ ${Project} == Lede ]]
-			then
-				if [[ -d ${PKG_Path}/lean/luci-theme-argon ]]
-				then
-					rm -rf ${PKG_Path}/lean/luci-theme-argon
-				fi
-				PKG_URL=" -b 18.06 https://github.com/jerrykuku/luci-theme-argon"
-				ExtraPackages_git
-				mv ${ExtraPackages_Path}/luci-theme-argon ${PKG_Path}/lean/luci-theme-argon
-			else
-				PKG_URL="https://github.com/jerrykuku/luci-theme-argon"
-				ExtraPackages_git
-			fi
-		;;
-		*)
-			if [[ ${Choose} -gt 0 ]] > /dev/null 2>&1
-			then
-				if [[ $((${Choose} - 1)) -le ${List_MaxLine} ]] > /dev/null 2>&1
-				then
-					Choose=$((${Choose} - 1))
-					URL_TYPE=$(sed -n ${Choose}p $ExtraThemesList_File | awk '{print $1}')
-					PKG_NAME=$(sed -n ${Choose}p $ExtraThemesList_File | awk '{print $2}')
-					PKG_URL=$(sed -n ${Choose}p $ExtraThemesList_File | awk '{print $3}')
-					case ${URL_TYPE} in
-					git)
-						ExtraPackages_git
-					;;
-					svn)
-						ExtraPackages_svn
-					;;
-					*)
-						ECHO R "\n[第 ${Choose} 行：${URL_TYPE}] 格式错误!请检查 '/Depends/ExtraThemes_List' ..."
-						sleep 3
-					esac
-				else
-					ECHO R "\n输入错误,请输入正确的数字!"
-					sleep 2
-				fi
-			else
-				ECHO R "\n输入错误,请输入正确的数字!"
-				sleep 2
-			fi
-		esac
-	done
-}
-
-ExtraPackages_git() {
-	[[ -d ${ExtraPackages_Path}/${PKG_NAME} ]] && rm -rf ${ExtraPackages_Path}/${PKG_NAME}
-	git clone ${PKG_URL} ${PKG_NAME} > /dev/null 2>&1
-	if [[ -f ${ExtraPackages_Path}/${PKG_NAME}/Makefile || -f ${ExtraPackages_Path}/${PKG_NAME}/README.md || -n $(ls -A ${ExtraPackages_Path}/${PKG_NAME}) ]]
-	then
-		ECHO Y "\n已添加 ${PKG_NAME}"
-	else
-		ECHO R "\n未添加 ${PKG_NAME}"
-	fi
-	sleep 2
-}
-
-ExtraPackages_svn() {
-	[[ -d ${ExtraPackages_Path}/${PKG_NAME} ]] && rm -rf ${ExtraPackages_Path}/${PKG_NAME}
-	svn checkout ${PKG_URL} ${PKG_NAME} > /dev/null 2>&1
-	if [[ -f ${ExtraPackages_Path}/${PKG_NAME}/Makefile || -f ${ExtraPackages_Path}/${PKG_NAME}/README.md || -n $(ls -A ${ExtraPackages_Path}/${PKG_NAME}) ]]
-	then
-		ECHO Y "\n已添加 ${PKG_NAME}"
-	else
-		ECHO R "\n未添加 ${PKG_NAME}"
-	fi
-	sleep 2
-}
-
-ExtraPackages_mkdir() {
-	PKG_Path=${Build_Path}/package
-	mkdir -p ${PKG_Path}/ExtraPackages
-	ExtraPackages_Path=${PKG_Path}/ExtraPackages
+	ECHO Y "\n$Compile_Started --> $Compile_Ended 编译用时: ${Compile_Cost} 分钟"
 }
 
 Module_Network_Test() {
@@ -1188,14 +828,14 @@ Module_SourcesList() {
 
 	if [[ ${Short_OS} != Ubuntu ]]
 	then
-		ECHO R "\n暂不支持此操作系统,当前支持的操作系统: [Ubuntu]"
+		ECHO R "\n暂不支持此操作系统!"
 		sleep 2 && return 1
 	else
 		OS_ID=$(awk -F '[="]+' '/DISTRIB_ID/{print $2}' /etc/lsb-release)
 		OS_Version=$(awk -F '[="]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
 		if [[ ${Short_OS} != Ubuntu ]]
 		then
-			ECHO R "\n暂不支持此操作系统,当前支持的操作系统: [Ubuntu]"
+			ECHO R "\n暂不支持此操作系统!"
 			sleep 2 && return 1
 		fi
 		if [[ ! $(cat ${Codename} | awk '{print $1}') =~ ${OS_Version} ]]
@@ -1231,7 +871,7 @@ Module_SourcesList() {
 				$(command -v sudo) mv ${BAK_FILE} /etc/apt/sources.list
 				ECHO Y "\n[默认源] 恢复成功!"
 			else
-				ECHO R "\n未找到备份: [${BAK_FILE}],恢复失败!"
+				ECHO R "\n未找到备份: [${BAK_FILE}], 恢复失败!"
 			fi
 			sleep 2
 		;;
@@ -1243,7 +883,7 @@ Module_SourcesList() {
 				Code_Name=$(grep "${OS_Version}" ${Codename} | awk '{print $2}')
 				if [[ -z ${Server_Url} || -z ${Server_Name} || -z ${Code_Name} ]]
 				then
-					ECHO R "\n参数获取失败,请尝试更新 [AutoBuild] 后重试!"
+					ECHO R "\n参数获取失败, 请尝试更新 [AutoBuild] 后重试!"
 					sleep 2
 					continue
 				fi
@@ -1571,7 +1211,7 @@ AutoBuild_Core() {
 		GET_Choose Choose
 		case ${Choose} in
 		q | exit)
-			rm -rf ${Cache_Path}/* 2> /dev/null
+			rm -r "${Cache_Path}/*" 2> /dev/null
 			exit
 		;;
 		1)
@@ -1608,12 +1248,13 @@ AutoBuild_Second() {
 			AutoBuild_Core
 		;;
 		x)
-			for X in $(echo ${Project_List[@]});do
+			for X in ${Project_List[@]}
+			do
 				Sources_Update common ${X}
-			done
+			done ; unset X
 		;;
 		[0-9])
-			[[ -n ${Project_List[${Choose}]} ]] && \
+			[[ ${Project_List[${Choose}]} ]] && \
 				Second_Menu ${Project_List[${Choose}]}
 		;;
 		esac
@@ -1630,37 +1271,34 @@ Project_Details() {
 }
 
 Sources_Update() {
-	if [[ ! -s ${Build_Path}/Makefile ]]
+	if [[ ! -f ${Home}/Projects/$2/Makefile ]]
 	then
-		ECHO R "\n未检测到[${Project}]源码,更新失败!"
-		sleep 2
 		return
 	fi
 	if [[ $(NETWORK_CHECK 223.5.5.5) == 1 ]]
 	then
-		ECHO R "\n网络连接错误,更新失败!"
+		ECHO R "\n网络连接错误, 更新失败!"
 		sleep 2
 		return
 	fi
 	clear
-	Update_Logfile=${Home}/Log/SourceUpdate_${Project}_$(date +%Y%m%d_%H:%M).log
+	Update_Logfile=${Home}/Log/Update_${2}_$(date +%Y%m%d-%H%M).log
 	cd ${Home}/Projects/$2
 	case $1 in
 	force)
-		ECHO X "开始强制更新[${Project}],请稍后 ...\n"
+		ECHO X "开始强制更新[$2], 请稍后 ...\n"
 		git fetch --all | tee -a ${Update_Logfile}
 		git reset --hard origin/$(GET_Branch ${Build_Path}) | tee -a ${Update_Logfile}
 	;;
 	common)
-		ECHO X "开始更新[${Project}],请稍后 ...\n"
+		ECHO X "开始更新[$2], 请稍后 ...\n"
 	;;
 	esac
-	echo "$(date +%Y-%m-%d_%H:%M)" > ${Home}/Configs/${Project}_Recently_Updated
 	git pull 2>&1 | tee ${Update_Logfile}
 	./scripts/feeds update -a 2>&1 | tee -a ${Update_Logfile}
 	./scripts/feeds install -a 2>&1 | tee -a ${Update_Logfile}
-	ECHO Y "\n[${Project}] 源码文件更新结束!"
-	sleep 3
+	ECHO Y "\n[$2] 源码文件更新结束!"
+	sleep 2
 }
 
 Home=$(cd $(dirname $0); pwd)
@@ -1708,15 +1346,26 @@ Backup_List=(
 	rules.mk
 )
 
-Project_List=(Lede Openwrt Lienol ImmortalWrt)
+Project_List=($(ls -1 ${Home}/Depends/Projects 2> /dev/null | sort | uniq))
 
-Dependency=(build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc-s1 libc6-dev-i386 subversion flex uglifyjs git gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget curl swig rsync)
+Dependency=(
+	build-essential asciidoc binutils 
+	bzip2 gawk gettext git 
+	libncurses5-dev libz-dev patch python3 
+	python2.7 unzip zlib1g-dev lib32gcc-s1 
+	libc6-dev-i386 subversion flex uglifyjs git 
+	gcc-multilib p7zip p7zip-full msmtp libssl-dev 
+	texinfo libglib2.0-dev xmlto qemu-utils upx 
+	libelf-dev autoconf automake libtool autopoint 
+	device-tree-compiler g++-multilib antlr3 gperf 
+	wget curl swig rsync busybox
+)
 Extra_Dependency=(ntpdate httping ssh lm-sensors net-tools expect inetutils-ping)
 
-for X in $(echo ${Path_Depends[@]});do
+for X in ${Path_Depends[@]}
+do
 	[[ ! -d ${Home}/${X} ]] && mkdir -p ${Home}/${X} 2> /dev/null
-done
-unset X Path_Depends
+done ; unset X Path_Depends
 
 GET_System_Info 1
 AutoBuild_Title="AutoBuild Core ${Version}-${Update} [${Short_OS}] [${LOGNAME}]"
